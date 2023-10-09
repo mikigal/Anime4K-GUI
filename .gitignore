@@ -1,0 +1,5 @@
+.idea/
+build/
+resources/ffmpeg/ffmpeg.exe
+resources/ffmpeg/ffprobe.exe
+Anime4K-GUI.syso
