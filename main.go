@@ -9,7 +9,7 @@ import (
 	"syscall"
 )
 
-const version = "1.0"
+const version = "1.0.1"
 
 var (
 
@@ -119,8 +119,11 @@ func startProcessing() {
 		g.Update()
 
 		outputPath := buildOutputPath(anime, outputFormat)
-		cmd := exec.Command(".\\ffmpeg\\ffmpeg.exe",
-			buildUpscalingParams(anime, resolution, shadersMode, compressionPreset, outputPath)...)
+		ffmpegParams := buildUpscalingParams(anime, resolution, shadersMode, compressionPreset, outputPath)
+		logMessage("FFMPEG params: ffmpeg.exe "+strings.Join(ffmpegParams, " "), false)
+		g.Update()
+
+		cmd := exec.Command(".\\ffmpeg\\ffmpeg.exe", ffmpegParams...)
 		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 
 		stderr, err := cmd.StderrPipe()
