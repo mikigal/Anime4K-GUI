@@ -19,7 +19,7 @@ var (
 		{1280, 720, true},
 		{1920, 1080, true},
 		{2560, 1440, true},
-		{3840, 2150, true},
+		{3840, 2160, true},
 	}
 
 	shadersModes = []ShadersMode{
