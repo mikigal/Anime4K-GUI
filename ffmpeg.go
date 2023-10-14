@@ -24,6 +24,9 @@ func handleUpscalingLogs(stderr io.ReadCloser) string {
 		}
 
 		if !strings.HasPrefix(line, "frame=") {
+			trim := strings.Replace(line, "\r", "", -1)
+			trim = strings.Replace(trim, "\n", "", -1)
+			logDebug(trim, false)
 			ffmpegLogs += line
 		}
 
