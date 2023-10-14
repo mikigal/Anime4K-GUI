@@ -4,6 +4,7 @@ import (
 	"fmt"
 	g "github.com/AllenDang/giu"
 	"log"
+	"os"
 	"time"
 )
 
@@ -22,6 +23,12 @@ func formatMillis(millis int64) string {
 	}
 
 	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
+}
+
+func logDebug(message string, additionalLineBefore bool) {
+	if debug {
+		logMessage("[Debug] "+message, additionalLineBefore)
+	}
 }
 
 func logMessage(message string, additionalLineBefore bool) {
@@ -57,6 +64,17 @@ func calcFinished() int {
 	}
 
 	return i
+}
+
+func checkDebugParam() {
+	if len(os.Args) != 0 {
+		for _, arg := range os.Args {
+			if arg == "--debug" {
+				debug = true
+				break
+			}
+		}
+	}
 }
 
 func check(err error) {

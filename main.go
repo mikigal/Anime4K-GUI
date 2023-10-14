@@ -9,7 +9,7 @@ import (
 	"syscall"
 )
 
-const version = "1.0.2"
+const version = "1.0.3"
 
 var (
 
@@ -45,6 +45,7 @@ var (
 	selectedCompressionPreset   int32 = 2
 	selectedOutputFormat        int32
 	disableHardwareAcceleration bool
+	debug                       bool
 
 	// UI variables
 	currentSpeed  = "Speed:"
@@ -72,10 +73,11 @@ var (
 )
 
 func main() {
+	checkDebugParam()
 	searchHardwareAcceleration()
 	go monitorSensors()
 
-	window := g.NewMasterWindow("Anime4K-GUI", 1600, 935, g.MasterWindowFlagsNotResizable)
+	window := g.NewMasterWindow("Anime4K-GUI", 1600, 950, g.MasterWindowFlagsNotResizable)
 	window.SetDropCallback(handleDrop)
 	window.Run(loop)
 }
@@ -108,6 +110,11 @@ func startProcessing() {
 
 	logMessage("Started upscaling! Upscaled videos will be saved in original directory, with _upscaled suffix in files name", false)
 
+	logDebug("Hardware acceleration param: "+hwaccelParam, false)
+	logDebug("Hardware acceleration value: "+hwaccelValue, false)
+	logDebug("CV value: "+cvValue, false)
+	g.Update()
+
 	for index, anime := range animeList {
 		if animeList[index].Status == Finished {
 			continue
@@ -120,7 +127,25 @@ func startProcessing() {
 
 		outputPath := buildOutputPath(anime, outputFormat)
 		ffmpegParams := buildUpscalingParams(anime, resolution, shadersMode, compressionPreset, outputPath)
-		logMessage("FFMPEG params: ffmpeg.exe "+strings.Join(ffmpegParams, " "), false)
+
+		workingDirectory, err := os.Getwd()
+		if err != nil {
+			animeList[index].Status = Error
+			buttonLabel = "Start"
+			processing = false
+			g.Update()
+			handleSoftError("Getting working directory error:", err.Error())
+			return
+		}
+
+		logDebug("Working directory: "+workingDirectory, false)
+		logDebug("Input path: "+anime.Path, false)
+		logDebug("Output path: "+outputPath, false)
+		logDebug("Target resolution: "+resolution.Format(), false)
+		logDebug("Shaders: "+shadersMode.Path, false)
+		logDebug("Compression preset (ffmpeg name): "+compressionPreset.FfmpegName, false)
+		logDebug("Output format: "+outputFormat, false)
+		logDebug("FFMPEG command: .\\ffmpeg.exe\\ffmpeg.exe "+strings.Join(ffmpegParams, " "), false)
 		g.Update()
 
 		cmd := exec.Command(".\\ffmpeg\\ffmpeg.exe", ffmpegParams...)

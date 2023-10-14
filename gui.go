@@ -28,7 +28,7 @@ func loop() {
 	}
 
 	g.SingleWindow().Layout(
-		g.SplitLayout(g.DirectionVertical, 500,
+		g.SplitLayout(g.DirectionVertical, 515,
 			g.SplitLayout(g.DirectionHorizontal, 1200,
 				g.Layout{
 					g.Table().Flags(g.TableFlagsResizable).Rows(buildTableRows()...).Columns(buildTableColumns()...),
@@ -57,11 +57,14 @@ func loop() {
 
 					g.Checkbox("Disable hardware acceleration", &disableHardwareAcceleration),
 					g.Tooltip("Should be used only for bad performance or compatibility issues"),
+
+					g.Checkbox("Debug mode", &debug),
+					g.Tooltip("Show more detailed logs, useful for troubleshooting and debugging"),
+
 					g.Label(""),
 
 					g.Button(buttonLabel).OnClick(handleButton).Size(360, 30),
 
-					g.Label(""),
 					g.Label(""),
 					g.Label("GPU Usage: " + gpuUsage),
 					g.Label("VRAM Usage: " + vramUsage),

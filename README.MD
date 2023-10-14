@@ -60,6 +60,7 @@ Follow these steps to use the Anime4K-GUI:
      **Higher level will cause worse quality**
    - Output format: Format for the output file - MP4 has best support on most devices.
    - Disable hardware acceleration: check it **ONLY** if you have performance or compatibility issues.
+   - Debug mode: show more detailed logs, useful for troubleshooting and debugging
 
 4. **Upscale the Video**
    - Click the "Start" button to begin the upscaling process.
@@ -69,6 +70,7 @@ Follow these steps to use the Anime4K-GUI:
 ## Troubleshooting
 
 If you encounter issues while using the application, please consult the [Issues](https://github.com/your_username/your_project/issues) section on the GitHub repository to check for solutions or report problems. <br> 
+To get most debug logs run application with `--debug` parameter (mainly for hardware acceleration logs), and enable `Debug Mode` in settings (mainly for upscaling logs). <br>
 Issues regarding low output quality will be instantly closed. Problems like that are related to the original Anime4K shaders - I can recommend trying other Shaders mode settings. <br> 
 Due to limited access to hardware, most tests were done with NVIDIA graphics cards; compatibility with other GPUs may be worse. If you have compatibility problems with your GPU, please create an issue with application logs and your computer's specifications.
 

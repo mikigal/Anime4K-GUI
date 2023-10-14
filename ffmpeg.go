@@ -103,6 +103,9 @@ func searchHardwareAcceleration() {
 
 	for index, gpu := range gpus.GraphicsCards {
 		vendor := strings.ToLower(gpu.DeviceInfo.Vendor.Name)
+
+		logDebug(fmt.Sprintf("GPU ID: %d, Vendor: %s", index, vendor), false)
+
 		if strings.Contains(vendor, "nvidia") {
 			nvidia = true
 		} else if strings.Contains(vendor, "amd") || strings.Contains(vendor, "advanced micro devices") {
@@ -116,10 +119,12 @@ func searchHardwareAcceleration() {
 
 	if (nvidia && intel) || (amd && intel) {
 		intel = false
+		logDebug("Ignoring Intel iGPU, detected NVIDIA/AMD dGPU)", false)
 	}
 
 	if nvidia && amd { // AMD is iGPU
 		amd = false
+		logDebug("Ignoring AMD iGPU, detected NVIDIA dGPU", false)
 	}
 
 	if nvidia {
@@ -141,6 +146,5 @@ func searchHardwareAcceleration() {
 		// Something weird happened
 		cvValue = ""
 		logMessage("There's no available GPU acceleration, application may not work correctly! Please verify your GPU drivers or report bug on GitHub", false)
-
 	}
 }
