@@ -17,8 +17,11 @@ var (
 	resolutions = []Resolution{
 		{1024, 768, false},
 		{1280, 720, true},
+		{1440, 1080, false},
 		{1920, 1080, true},
+		{1920, 1440, false},
 		{2560, 1440, true},
+		{2880, 2160, false},
 		{3840, 2160, true},
 	}
 
