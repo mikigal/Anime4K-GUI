@@ -45,13 +45,13 @@ var (
 	outputFormats = []string{"MP4", "AVI", "MKV"}
 
 	// Pointers for UI
-	selectedResolution                  int32 = 5
-	selectedShadersMode                 int32
-	selectedCompressionPreset           int32 = 2
-	selectedOutputFormat                int32
-	disableHardwareAcceleration         bool
-	disableHardwareAccelerationEncoding bool
-	debug                               bool
+	selectedResolution        int32 = 5
+	selectedShadersMode       int32
+	selectedCompressionPreset int32 = 2
+	selectedOutputFormat      int32
+	compatibilityMode         bool
+	disableGpuEncoding        bool
+	debug                     bool
 
 	// UI variables
 	currentSpeed  = "Speed:"

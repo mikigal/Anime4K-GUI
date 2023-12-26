@@ -59,7 +59,7 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode Shader
 		"-y",
 	}
 
-	if hwaccelValue != "" && !disableHardwareAcceleration {
+	if hwaccelValue != "" && !compatibilityMode {
 		params = append(params, hwaccelParam, hwaccelValue)
 
 		// Additional NVIDIA stuff
@@ -74,7 +74,11 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode Shader
 		"-vf", fmt.Sprintf("format=yuv420p,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,hwdownload,format=yuv420p", resolution.Width, resolution.Height, shadersMode.Path),
 	)
 
-	if cvValue != "" && !disableHardwareAcceleration && !disableHardwareAccelerationEncoding {
+	if disableGpuEncoding {
+		cvValue = "libx264"
+	}
+
+	if cvValue != "" && !compatibilityMode {
 		params = append(params, "-c:v", cvValue)
 	}
 
@@ -149,9 +153,10 @@ func searchHardwareAcceleration() {
 	} else {
 		// Something weird happened
 		cvValue = ""
+		compatibilityMode = true
 		logMessage("There's no available GPU acceleration, application may not work correctly! Please verify your GPU drivers or report bug on GitHub", false)
 	}
-	if disableHardwareAccelerationEncoding {
-		logMessage("You have disabled GPU encoding, so we're running with H.264 on your CPU", false)
+	if disableGpuEncoding {
+		logMessage("You have disabled GPU encoding, so we're running with libx264 on your CPU", false)
 	}
 }

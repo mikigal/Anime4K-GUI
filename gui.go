@@ -29,7 +29,7 @@ func loop() {
 	}
 
 	g.SingleWindow().Layout(
-		g.SplitLayout(g.DirectionVertical, 515,
+		g.SplitLayout(g.DirectionVertical, 530,
 			g.SplitLayout(g.DirectionHorizontal, 1200,
 				g.Layout{
 					g.Table().Flags(g.TableFlagsResizable).Rows(buildTableRows()...).Columns(buildTableColumns()...),
@@ -56,11 +56,11 @@ func loop() {
 					g.Combo("", outputFormats[selectedOutputFormat], outputFormats, &selectedOutputFormat).Size(400),
 					g.Label(""),
 
-					g.Checkbox("Disable hardware acceleration", &disableHardwareAcceleration),
-					g.Tooltip("Should be used only for bad performance or compatibility issues"),
+					g.Checkbox("Compatibility mode", &compatibilityMode),
+					g.Tooltip("Should be used only for bad performance or compatibility issues, disables all GPU based features"),
 
-					g.Checkbox("Disable hardware accelerated encoding (NVENC / OpenCL)", &disableHardwareAccelerationEncoding),
-					g.Tooltip("Can be used to encode with H.264"),
+					g.Checkbox("Disable GPU accelerated encoding", &disableGpuEncoding),
+					g.Tooltip("Forces encoding with libx264 (CPU based)"),
 
 					g.Checkbox("Debug mode", &debug),
 					g.Tooltip("Show more detailed logs, useful for troubleshooting and debugging"),
@@ -83,7 +83,7 @@ func loop() {
 			),
 			g.Layout{
 				g.Label("Logs"),
-				g.InputTextMultiline(&logs).Flags(g.InputTextFlagsReadOnly).Size(1600, 337),
+				g.InputTextMultiline(&logs).Flags(g.InputTextFlagsReadOnly).Size(1600, 322),
 				g.SplitLayout(g.DirectionHorizontal, 1330,
 					g.SplitLayout(g.DirectionHorizontal, 80,
 						g.Label("Progress: "),
