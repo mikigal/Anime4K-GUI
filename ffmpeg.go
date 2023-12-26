@@ -3,10 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	g "github.com/AllenDang/giu"
-	"github.com/jaypipes/ghw"
 	"io"
 	"strings"
+
+	g "github.com/AllenDang/giu"
+	"github.com/jaypipes/ghw"
 )
 
 func handleUpscalingLogs(stderr io.ReadCloser) string {
@@ -73,7 +74,7 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode Shader
 		"-vf", fmt.Sprintf("format=yuv420p,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,hwdownload,format=yuv420p", resolution.Width, resolution.Height, shadersMode.Path),
 	)
 
-	if cvValue != "" && !disableHardwareAcceleration {
+	if cvValue != "" && !disableHardwareAcceleration && !disableHardwareAccelerationEncoding {
 		params = append(params, "-c:v", cvValue)
 	}
 
@@ -149,5 +150,8 @@ func searchHardwareAcceleration() {
 		// Something weird happened
 		cvValue = ""
 		logMessage("There's no available GPU acceleration, application may not work correctly! Please verify your GPU drivers or report bug on GitHub", false)
+	}
+	if disableHardwareAccelerationEncoding {
+		logMessage("You have disabled GPU encoding, so we're running with H.264 on your CPU", false)
 	}
 }
