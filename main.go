@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	g "github.com/AllenDang/giu"
 	"os"
 	"os/exec"
 	"strings"
 	"syscall"
+
+	g "github.com/AllenDang/giu"
 )
 
 const version = "1.0.4"
@@ -44,12 +45,13 @@ var (
 	outputFormats = []string{"MP4", "AVI", "MKV"}
 
 	// Pointers for UI
-	selectedResolution          int32 = 5
-	selectedShadersMode         int32
-	selectedCompressionPreset   int32 = 2
-	selectedOutputFormat        int32
-	disableHardwareAcceleration bool
-	debug                       bool
+	selectedResolution                  int32 = 5
+	selectedShadersMode                 int32
+	selectedCompressionPreset           int32 = 2
+	selectedOutputFormat                int32
+	disableHardwareAcceleration         bool
+	disableHardwareAccelerationEncoding bool
+	debug                               bool
 
 	// UI variables
 	currentSpeed  = "Speed:"

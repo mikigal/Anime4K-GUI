@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	g "github.com/AllenDang/giu"
-	"github.com/AllenDang/imgui-go"
-	"gopkg.in/vansante/go-ffprobe.v2"
 	"os"
 	"strings"
 	"time"
+
+	g "github.com/AllenDang/giu"
+	"github.com/AllenDang/imgui-go"
+	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
 func loop() {
@@ -57,6 +58,9 @@ func loop() {
 
 					g.Checkbox("Disable hardware acceleration", &disableHardwareAcceleration),
 					g.Tooltip("Should be used only for bad performance or compatibility issues"),
+
+					g.Checkbox("Disable hardware accelerated encoding (NVENC / OpenCL)", &disableHardwareAccelerationEncoding),
+					g.Tooltip("Can be used to encode with H.264"),
 
 					g.Checkbox("Debug mode", &debug),
 					g.Tooltip("Show more detailed logs, useful for troubleshooting and debugging"),
