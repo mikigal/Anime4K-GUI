@@ -10,7 +10,7 @@ import (
 	g "github.com/AllenDang/giu"
 )
 
-const version = "1.0.6"
+const version = "1.0.7"
 
 var (
 
