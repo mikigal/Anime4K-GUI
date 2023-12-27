@@ -28,6 +28,11 @@ func loop() {
 		compressionNames[index] = compression.Name
 	}
 
+	availableEncodersNames := make([]string, len(availableEncoders))
+	for index, encoder := range availableEncoders {
+		availableEncodersNames[index] = encoder.Name
+	}
+
 	g.SingleWindow().Layout(
 		g.SplitLayout(g.DirectionVertical, 530,
 			g.SplitLayout(g.DirectionHorizontal, 1200,
@@ -48,6 +53,14 @@ func loop() {
 					g.Tooltip("Check the project's GitHub page if you're not sure what to choose"),
 					g.Label(""),
 
+					g.Label("Encoder"),
+					g.Tooltip("Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n" +
+						"AV1 is compatible only with RTX 4000+ and RX 6500XT+"),
+					g.Combo("", availableEncoders[selectedEncoder].Name, availableEncodersNames, &selectedEncoder).Size(400),
+					g.Tooltip("Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n" +
+						"GPU based AV1 is compatible only with RTX 4000+ and RX 6500XT+"),
+					g.Label(""),
+
 					g.Label("Compression level"),
 					g.Combo("", compressionNames[selectedCompressionPreset], compressionNames, &selectedCompressionPreset).Size(400),
 					g.Label(""),
@@ -58,9 +71,6 @@ func loop() {
 
 					g.Checkbox("Compatibility mode", &compatibilityMode),
 					g.Tooltip("Should be used only for bad performance or compatibility issues, disables all GPU based features"),
-
-					g.Checkbox("Disable GPU accelerated encoding", &disableGpuEncoding),
-					g.Tooltip("Forces encoding with libx264 (CPU based)"),
 
 					g.Checkbox("Debug mode", &debug),
 					g.Tooltip("Show more detailed logs, useful for troubleshooting and debugging"),

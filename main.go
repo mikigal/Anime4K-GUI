@@ -39,8 +39,28 @@ var (
 	compressionPresets = []CompressionPreset{
 		{"High (Worst quality, smaller output file)", "fast"},
 		{"Medium", "medium"},
-		{"Low (Recommended, best quality, bigger output file)", "slow"},
+		{"Low (Best quality, bigger output file)", "slow"},
+		{"Default (Let's FFMPEG decide, mainly for compatibility issues)", ""},
 	}
+
+	allEncoders = []Encoder{
+		{"H.264 (CPU)", "libx264", "cpu"},
+		{"H.264 NVENC (NVIDIA)", "h264_nvenc", "nvidia"},
+		{"H.264 AMF (AMD)", "h264_amf", "advanced micro devices"},
+		{"H.264 QSV (Intel)", "h264_qsv", "intel"},
+
+		{"H.265 (CPU)", "libx265", "cpu"},
+		{"H.265 NVENC (NVIDIA)", "hevc_nvenc", "nvidia"},
+		{"H.265 AMF (AMD)", "hevc_amf", "advanced micro devices"},
+		{"H.265 QSV (Intel)", "hevc_qsv", "intel"},
+
+		{"AV1 (CPU)", "libsvtav1", "cpu"},
+		{"AV1 NVENC (NVIDIA)", "av1_nvenc", "nvidia"},
+		{"AV1 AMF (AMD)", "av1_amf", "advanced micro devices"},
+		{"AV1 QSV (Intel)", "av1_qsv", "intel"},
+	}
+
+	availableEncoders = make([]Encoder, 0)
 
 	outputFormats = []string{"MP4", "AVI", "MKV"}
 
@@ -49,8 +69,8 @@ var (
 	selectedShadersMode       int32
 	selectedCompressionPreset int32 = 2
 	selectedOutputFormat      int32
+	selectedEncoder           int32
 	compatibilityMode         bool
-	disableGpuEncoding        bool
 	debug                     bool
 
 	// UI variables

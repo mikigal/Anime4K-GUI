@@ -22,6 +22,12 @@ type ShadersMode struct {
 	Path string
 }
 
+type Encoder struct {
+	Name        string
+	FfmpegValue string
+	Vendor      string
+}
+
 type Resolution struct {
 	Width     int
 	Height    int

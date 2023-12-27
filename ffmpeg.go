@@ -54,6 +54,7 @@ func handleUpscalingLogs(stderr io.ReadCloser) string {
 }
 
 func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode ShadersMode, compressionPreset CompressionPreset, outputPath string) []string {
+	cvValue = availableEncoders[selectedEncoder].FfmpegValue
 	params := []string{
 		"-hide_banner",
 		"-y",
@@ -74,19 +75,15 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode Shader
 		"-vf", fmt.Sprintf("format=yuv420p,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,hwdownload,format=yuv420p", resolution.Width, resolution.Height, shadersMode.Path),
 	)
 
-	if disableGpuEncoding {
-		cvValue = "libx264"
-	}
-
-	if cvValue != "" && !compatibilityMode {
+	if !compatibilityMode {
 		params = append(params, "-c:v", cvValue)
 	}
 
-	params = append(params,
-		"-preset", compressionPreset.FfmpegName,
-		outputPath,
-	)
+	if compressionPreset.FfmpegName != "" && cvValue != "libsvtav1" && !compatibilityMode {
+		params = append(params, "-preset", compressionPreset.FfmpegName)
+	}
 
+	params = append(params, outputPath)
 	return params
 }
 
@@ -138,25 +135,40 @@ func searchHardwareAcceleration() {
 	if nvidia {
 		hwaccelParam = "-hwaccel_device"
 		hwaccelValue = "cuda"
-		cvValue = "h264_nvenc"
+		addEncoders("nvidia")
+
 		logMessage("Available GPU acceleration: CUDA + NVENC", false)
 	} else if amd {
 		hwaccelParam = "-hwaccel_device"
 		hwaccelValue = "opencl"
-		cvValue = "h264_amf"
+		addEncoders("advanced micro devices")
+
 		logMessage("Available GPU acceleration: AMF", false)
 	} else if intel {
 		hwaccelParam = "-hwaccel"
 		hwaccelValue = "vulkan"
-		cvValue = "h264_qsv"
+		addEncoders("intel")
+
 		logMessage("Available GPU acceleration: QSV", false)
 	} else {
-		// Something weird happened
-		cvValue = ""
 		compatibilityMode = true
+		addEncoders("cpu")
+
 		logMessage("There's no available GPU acceleration, application may not work correctly! Please verify your GPU drivers or report bug on GitHub", false)
 	}
-	if disableGpuEncoding {
-		logMessage("You have disabled GPU encoding, so we're running with libx264 on your CPU", false)
+
+	for index, encoder := range availableEncoders {
+		if encoder.Vendor != "cpu" {
+			selectedEncoder = int32(index)
+			break
+		}
+	}
+}
+
+func addEncoders(vendor string) {
+	for _, encoder := range allEncoders {
+		if encoder.Vendor == vendor || encoder.Vendor == "cpu" {
+			availableEncoders = append(availableEncoders, encoder)
+		}
 	}
 }
