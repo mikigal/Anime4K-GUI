@@ -12,6 +12,8 @@ import (
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
+var arial = g.AddFont("Arial", 35)
+
 func loop(window *g.MasterWindow) {
 	resolutionsNames := make([]string, len(resolutions))
 	for index, res := range resolutions {
@@ -34,10 +36,15 @@ func loop(window *g.MasterWindow) {
 	}
 
 	g.SingleWindow().Layout(
-		g.SplitLayout(g.DirectionVertical, 530,
+		g.SplitLayout(g.DirectionVertical, 580,
 			g.SplitLayout(g.DirectionHorizontal, 1200,
 				g.Layout{
 					g.Table().Flags(g.TableFlagsResizable).Rows(buildTableRows()...).Columns(buildTableColumns()...),
+					g.Custom(func() {
+						if len(animeList) == 0 {
+							g.Label("\n\n\n\n\n\n\n                                              Drag n' Drop your anime here").Font(arial).Build()
+						}
+					}),
 				},
 				g.Layout{
 					g.Label("Settings"),
@@ -91,7 +98,7 @@ func loop(window *g.MasterWindow) {
 			),
 			g.Layout{
 				g.Label("Logs"),
-				g.InputTextMultiline(&logs).Flags(g.InputTextFlagsReadOnly).Size(1600, 322),
+				g.InputTextMultiline(&logs).Flags(g.InputTextFlagsReadOnly).Size(1600, 270),
 				g.SplitLayout(g.DirectionHorizontal, 1330,
 					g.SplitLayout(g.DirectionHorizontal, 120,
 						g.Label("Progress: "+totalProgress),
