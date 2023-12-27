@@ -12,8 +12,6 @@ import (
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
-var arial = g.AddFont("Arial", 35)
-
 func loop(window *g.MasterWindow) {
 	resolutionsNames := make([]string, len(resolutions))
 	for index, res := range resolutions {
@@ -42,7 +40,7 @@ func loop(window *g.MasterWindow) {
 					g.Table().Flags(g.TableFlagsResizable).Rows(buildTableRows()...).Columns(buildTableColumns()...),
 					g.Custom(func() {
 						if len(animeList) == 0 {
-							g.Label("\n\n\n\n\n\n\n                                              Drag n' Drop your anime here").Font(arial).Build()
+							g.Label("\n\n\n\n\n\n\n                                              Drag n' Drop your anime here").Font(g.AddFont("Arial", 35)).Build()
 						}
 					}),
 				},
