@@ -5,11 +5,37 @@ import (
 	g "github.com/AllenDang/giu"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
 func formatMegabytes(bytes int64) string {
 	return fmt.Sprintf("%d MB", bytes/(1024*1024))
+}
+
+func durationToMillis(durationStr string) int64 {
+	parts := strings.Split(durationStr, ":")
+
+	hours, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0
+	}
+
+	minutes, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0
+	}
+
+	seconds, err := strconv.Atoi(parts[2])
+	if err != nil {
+		return 0
+	}
+
+	duration := time.Duration(hours)*time.Hour + time.Duration(minutes)*time.Minute + time.Duration(seconds)*time.Second
+	milliseconds := duration.Milliseconds()
+
+	return milliseconds
 }
 
 func formatMillis(millis int64) string {

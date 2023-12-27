@@ -79,9 +79,10 @@ var (
 	currentTime   = "Time:"
 	progress      float32
 	progressLabel string
+	totalProgress string
 	buttonLabel   = "Start"
 	logs          = "Version: Anime4K-GUI (" + version + ")\n" +
-		"Authors: mikigal (whole app), Ethan (FFMPEG stuff)\n" +
+		"Authors: mikigal (whole app + FFMPEG tweaks), Ethan (core FFMPEG stuff)\n" +
 		"Special thanks to bloc97 for Anime4K shaders\n" +
 		"Drag n' drop your video files into this window (supported extensions: mp4, avi, mkv)\n\n"
 	gpuTemperature string
@@ -96,7 +97,7 @@ var (
 	// FFMPEG params
 	hwaccelParam string
 	hwaccelValue string
-	cvValue      string
+	videoCodec   string
 )
 
 func main() {
@@ -131,6 +132,8 @@ func startProcessing() {
 		}
 	}
 
+	progress = 0
+	progressLabel = ""
 	buttonLabel = "Cancel"
 	processing = true
 	updateUI()
@@ -139,7 +142,7 @@ func startProcessing() {
 
 	logDebug("Hardware acceleration param: "+hwaccelParam, false)
 	logDebug("Hardware acceleration value: "+hwaccelValue, false)
-	logDebug("CV value: "+cvValue, false)
+	logDebug("CV value: "+videoCodec, false)
 	g.Update()
 
 	for index, anime := range animeList {
@@ -200,7 +203,7 @@ func startProcessing() {
 			return
 		}
 
-		ffmpegLogs := handleUpscalingLogs(stderr)
+		ffmpegLogs := handleUpscalingLogs(stderr, anime)
 
 		err = cmd.Wait()
 		if err != nil {

@@ -70,7 +70,7 @@ func loop() {
 					g.Label(""),
 
 					g.Checkbox("Compatibility mode", &compatibilityMode),
-					g.Tooltip("Should be used only for bad performance or compatibility issues, disables all GPU based features"),
+					g.Tooltip("Should be used only for compatibility troubleshooting, disables most of features"),
 
 					g.Checkbox("Debug mode", &debug),
 					g.Tooltip("Show more detailed logs, useful for troubleshooting and debugging"),
@@ -83,11 +83,9 @@ func loop() {
 					g.Label("GPU Usage: " + gpuUsage),
 					g.Label("VRAM Usage: " + vramUsage),
 					g.Custom(func() {
-						if hwaccelValue != "cuda" {
-							return
+						if hwaccelValue == "cuda" {
+							g.Label("GPU Temperature: " + gpuTemperature).Build()
 						}
-
-						g.Label("GPU Temperature: " + gpuTemperature).Build()
 					}),
 				},
 			),
@@ -96,7 +94,8 @@ func loop() {
 				g.InputTextMultiline(&logs).Flags(g.InputTextFlagsReadOnly).Size(1600, 322),
 				g.SplitLayout(g.DirectionHorizontal, 1330,
 					g.SplitLayout(g.DirectionHorizontal, 80,
-						g.Label("Progress: "),
+						// TODO: Fix progress label in UI
+						g.Label("Progress: "+totalProgress),
 						g.ProgressBar(progress).Overlay(progressLabel).Size(1230, 20),
 					),
 					g.SplitLayout(g.DirectionHorizontal, 110,
@@ -156,7 +155,7 @@ LOOP:
 		}
 
 		animeList = append(animeList, anime)
-		progressLabel = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
+		totalProgress = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
 		logMessage("Added file "+path, false)
 	}
 }
@@ -172,8 +171,7 @@ func handleButton() {
 func updateUI() {
 	currentSpeed = "Speed:"
 	currentTime = "Time:"
-	progress = float32(calcFinished()) / float32(len(animeList))
-	progressLabel = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
+	totalProgress = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
 	g.Update()
 }
 

@@ -10,7 +10,7 @@ import (
 	"github.com/jaypipes/ghw"
 )
 
-func handleUpscalingLogs(stderr io.ReadCloser) string {
+func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 	scanner := bufio.NewScanner(stderr)
 	scanner.Split(bufio.ScanRunes)
 
@@ -44,6 +44,17 @@ func handleUpscalingLogs(stderr io.ReadCloser) string {
 		if strings.Contains(line, "time=") {
 			value := strings.Split(strings.Split(strings.Split(line, "time=")[1], " ")[0], ".")[0]
 			currentTime = fmt.Sprintf("Time: %s", value)
+			millis := durationToMillis(value)
+			progress = float32(millis) / float32(anime.Length)
+
+			rounded := int(progress * 100)
+			if rounded == 99 {
+				progress = 1
+				progressLabel = "100%"
+			} else {
+				progressLabel = fmt.Sprintf("%d%%", rounded)
+			}
+
 			g.Update()
 		}
 
@@ -54,12 +65,13 @@ func handleUpscalingLogs(stderr io.ReadCloser) string {
 }
 
 func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode ShadersMode, compressionPreset CompressionPreset, outputPath string) []string {
-	cvValue = availableEncoders[selectedEncoder].FfmpegValue
+	videoCodec = availableEncoders[selectedEncoder].FfmpegValue
 	params := []string{
 		"-hide_banner",
 		"-y",
 	}
 
+	// Hardware acceleration
 	if hwaccelValue != "" && !compatibilityMode {
 		params = append(params, hwaccelParam, hwaccelValue)
 
@@ -75,11 +87,20 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode Shader
 		"-vf", fmt.Sprintf("format=yuv420p,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,hwdownload,format=yuv420p", resolution.Width, resolution.Height, shadersMode.Path),
 	)
 
+	// Copy all audio streams without re-encoding
+	// Force re-encoding subtitles with mov_text codec
+	// Map all streams
+	params = append(params, "-c:a", "copy",
+		"-c:s", "mov_text",
+		"-map", "0")
+
+	// Apply selected video encoder
 	if !compatibilityMode {
-		params = append(params, "-c:v", cvValue)
+		params = append(params, "-c:v", videoCodec)
 	}
 
-	if compressionPreset.FfmpegName != "" && cvValue != "libsvtav1" && !compatibilityMode {
+	// Preset for encoder, libsvtav1 does not support it, empty string is for auto
+	if compressionPreset.FfmpegName != "" && videoCodec != "libsvtav1" && !compatibilityMode {
 		params = append(params, "-preset", compressionPreset.FfmpegName)
 	}
 
