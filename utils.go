@@ -52,7 +52,7 @@ func formatMillis(millis int64) string {
 }
 
 func logDebug(message string, additionalLineBefore bool) {
-	if debug {
+	if settings.DebugMode {
 		logMessage("[Debug] "+message, additionalLineBefore)
 	}
 }
@@ -96,7 +96,7 @@ func checkDebugParam() {
 	if len(os.Args) != 0 {
 		for _, arg := range os.Args {
 			if arg == "--debug" {
-				debug = true
+				settings.DebugMode = true
 				break
 			}
 		}

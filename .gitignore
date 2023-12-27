@@ -2,4 +2,6 @@
 build/
 resources/ffmpeg/ffmpeg.exe
 resources/ffmpeg/ffprobe.exe
+resources/settings.json
 Anime4K-GUI.syso
+settings.json

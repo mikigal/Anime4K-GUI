@@ -65,14 +65,14 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 }
 
 func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode ShadersMode, compressionPreset CompressionPreset, outputPath string) []string {
-	videoCodec = availableEncoders[selectedEncoder].FfmpegValue
+	videoCodec = availableEncoders[settings.Encoder].FfmpegValue
 	params := []string{
 		"-hide_banner",
 		"-y",
 	}
 
 	// Hardware acceleration
-	if hwaccelValue != "" && !compatibilityMode {
+	if hwaccelValue != "" && !settings.CompatibilityMode {
 		params = append(params, hwaccelParam, hwaccelValue)
 
 		// Additional NVIDIA stuff
@@ -95,12 +95,12 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode Shader
 		"-map", "0")
 
 	// Apply selected video encoder
-	if !compatibilityMode {
+	if !settings.CompatibilityMode {
 		params = append(params, "-c:v", videoCodec)
 	}
 
 	// Preset for encoder, libsvtav1 does not support it, empty string is for auto
-	if compressionPreset.FfmpegName != "" && videoCodec != "libsvtav1" && !compatibilityMode {
+	if compressionPreset.FfmpegName != "" && videoCodec != "libsvtav1" && !settings.CompatibilityMode {
 		params = append(params, "-preset", compressionPreset.FfmpegName)
 	}
 
@@ -172,7 +172,7 @@ func searchHardwareAcceleration() {
 
 		logMessage("Available GPU acceleration: QSV", false)
 	} else {
-		compatibilityMode = true
+		settings.CompatibilityMode = true
 		addEncoders("cpu")
 
 		logMessage("There's no available GPU acceleration, application may not work correctly! Please verify your GPU drivers or report bug on GitHub", false)
@@ -180,7 +180,7 @@ func searchHardwareAcceleration() {
 
 	for index, encoder := range availableEncoders {
 		if encoder.Vendor != "cpu" {
-			selectedEncoder = int32(index)
+			settings.Encoder = int32(index)
 			break
 		}
 	}

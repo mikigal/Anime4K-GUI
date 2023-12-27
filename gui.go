@@ -12,7 +12,7 @@ import (
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
-func loop() {
+func loop(window *g.MasterWindow) {
 	resolutionsNames := make([]string, len(resolutions))
 	for index, res := range resolutions {
 		resolutionsNames[index] = res.Format()
@@ -44,35 +44,35 @@ func loop() {
 					g.Label(""),
 
 					g.Label("Target resolution"),
-					g.Combo("", resolutionsNames[selectedResolution], resolutionsNames, &selectedResolution).Size(400),
+					g.Combo("", resolutionsNames[settings.Resolution], resolutionsNames, &settings.Resolution).Size(400),
 					g.Label(""),
 
 					g.Label("Shaders mode"),
 					g.Tooltip("Check the project's GitHub page if you're not sure what to choose"),
-					g.Combo("", shadersModes[selectedShadersMode].Name, shadersNames, &selectedShadersMode).Size(400),
+					g.Combo("", shadersModes[settings.ShadersMode].Name, shadersNames, &settings.ShadersMode).Size(400),
 					g.Tooltip("Check the project's GitHub page if you're not sure what to choose"),
 					g.Label(""),
 
 					g.Label("Encoder"),
 					g.Tooltip("Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n" +
 						"AV1 is compatible only with RTX 4000+ and RX 6500XT+"),
-					g.Combo("", availableEncoders[selectedEncoder].Name, availableEncodersNames, &selectedEncoder).Size(400),
+					g.Combo("", availableEncoders[settings.Encoder].Name, availableEncodersNames, &settings.Encoder).Size(400),
 					g.Tooltip("Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n" +
 						"GPU based AV1 is compatible only with RTX 4000+ and RX 6500XT+"),
 					g.Label(""),
 
 					g.Label("Compression level"),
-					g.Combo("", compressionNames[selectedCompressionPreset], compressionNames, &selectedCompressionPreset).Size(400),
+					g.Combo("", compressionNames[settings.CompressionPreset], compressionNames, &settings.CompressionPreset).Size(400),
 					g.Label(""),
 
 					g.Label("Output format"),
-					g.Combo("", outputFormats[selectedOutputFormat], outputFormats, &selectedOutputFormat).Size(400),
+					g.Combo("", outputFormats[settings.OutputFormat], outputFormats, &settings.OutputFormat).Size(400),
 					g.Label(""),
 
-					g.Checkbox("Compatibility mode", &compatibilityMode),
+					g.Checkbox("Compatibility mode", &settings.CompatibilityMode),
 					g.Tooltip("Should be used only for compatibility troubleshooting, disables most of features"),
 
-					g.Checkbox("Debug mode", &debug),
+					g.Checkbox("Debug mode", &settings.DebugMode),
 					g.Tooltip("Show more detailed logs, useful for troubleshooting and debugging"),
 
 					g.Label(""),
@@ -106,6 +106,10 @@ func loop() {
 			},
 		),
 	)
+
+	x, y := window.GetPos()
+	settings.PositionX = x
+	settings.PositionY = y
 }
 
 func handleDrop(files []string) {

@@ -65,14 +65,16 @@ var (
 
 	outputFormats = []string{"MP4", "AVI", "MKV"}
 
-	// Pointers for UI
-	selectedResolution        int32 = 5
-	selectedShadersMode       int32
-	selectedCompressionPreset int32 = 2
-	selectedOutputFormat      int32
-	selectedEncoder           int32
-	compatibilityMode         bool
-	debug                     bool
+	settings = Settings{
+		Resolution:        5,
+		ShadersMode:       0,
+		CompressionPreset: 2,
+		Encoder:           0,
+		OutputFormat:      0,
+		CompatibilityMode: false,
+		DebugMode:         false,
+		Version:           version,
+	}
 
 	// UI variables
 	currentSpeed  = "Speed:"
@@ -104,10 +106,17 @@ func main() {
 	checkDebugParam()
 	searchHardwareAcceleration()
 	go monitorSensors()
+	loaded := loadSettings()
 
 	window := g.NewMasterWindow("Anime4K-GUI", 1600, 950, g.MasterWindowFlagsNotResizable)
+	if loaded {
+		window.SetPos(settings.PositionX, settings.PositionY)
+	}
+
 	window.SetDropCallback(handleDrop)
-	window.Run(loop)
+	window.Run(func() { loop(window) })
+
+	saveSettings()
 }
 
 func startProcessing() {
@@ -115,10 +124,10 @@ func startProcessing() {
 		return
 	}
 
-	resolution := resolutions[selectedResolution]
-	shadersMode := shadersModes[selectedShadersMode]
-	compressionPreset := compressionPresets[selectedCompressionPreset]
-	outputFormat := strings.ToLower(outputFormats[selectedOutputFormat])
+	resolution := resolutions[settings.Resolution]
+	shadersMode := shadersModes[settings.ShadersMode]
+	compressionPreset := compressionPresets[settings.CompressionPreset]
+	outputFormat := strings.ToLower(outputFormats[settings.OutputFormat])
 
 	if len(animeList) == 0 {
 		logMessage("There's no videos on list, can not start. Drag files into this window to add video", false)
