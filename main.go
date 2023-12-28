@@ -66,7 +66,7 @@ var (
 	outputFormats = []string{"MP4", "AVI", "MKV"}
 
 	settings = Settings{
-		UseSavedPosition:  false,
+		UseSavedPosition:  true,
 		Resolution:        5,
 		ShadersMode:       0,
 		CompressionPreset: 2,
