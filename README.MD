@@ -60,8 +60,9 @@ Follow these steps to use the Anime4K-GUI:
      **Please read Anime4K [documentation](https://github.com/bloc97/Anime4K/blob/master/md/GLSL_Instructions_Advanced.md#modes) before use.**
    - Compression level: Compression level of the output file. If you don't care about the output file size, always keep this setting to Low. <br>
      **Higher level will cause worse quality**
-   - Encoder: Encoder used for encoding output file. If you have low-end graphics card CPU-based encoders may be faster. In theory AV1 is best pick if you care mostly about video quality. <br>
-     **AV1 with GPU acceleration is compatible only RTX4000/RX 6500XT and newer GPUs**
+   - Encoder: Encoder used for encoding output file. If you have low-end graphics card CPU-based encoders may be faster. <br>
+     **AV1 is best pick as it provides the best quality.** <br>
+     **AV1 with GPU acceleration is compatible only RTX4000/RX 6500XT and newer GPUs Even CPU-based is as fast as H264 with GPU acceleration**
    - Output format: Format for the output file - MP4 has best support on most devices.
    - Compatibility mode: check it only if you have  compatibility issues.
    - Debug mode: show more detailed logs, useful for troubleshooting and debugging
