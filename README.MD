@@ -1,7 +1,7 @@
 # Anime4K-GUI
 
-This application is designed to enhance the resolution of anime videos using the [Anime4K](https://github.com/bloc97/Anime4K) shaders by bloc97, with the ability to save the upscaled version to disk. 
-It offers a straightforward and user-friendly graphical interface, eliminating the need for command-line interactions. 
+This application is designed to enhance the resolution of anime videos using the [Anime4K](https://github.com/bloc97/Anime4K) shaders by bloc97, with the ability to save the upscaled version to disk.
+It offers a straightforward and user-friendly graphical interface, eliminating the need for command-line interactions.
 Under the hood, the application leverages the power of FFMPEG to handle video processing seamlessly. <br>
 
 **Unlike the original Anime4K project, this application allows you to save the enhanced anime as higher-quality video files rather than real-time preview.**
@@ -21,9 +21,11 @@ Under the hood, the application leverages the power of FFMPEG to handle video pr
 - Anime upscaling using the Anime4K shaders.
 - Saving upscaled videos to disk rather than real-time preview.
 - User-friendly graphical interface for easy operation; no command-line usage is required.
-- Support for various video formats: MP4, AVI, and MKV (both input and output).
+- Support for most popular video encoders: H.264, H.265, AV1 (CPU based or GPU accelerated)
 - Hardware acceleration with NVIDIA (CUDA + NVENC), AMD (OpenCL + AMF), and Intel (QSV) graphics cards.
-- Tracking of GPU information (best support for NVIDIA).
+- Compatibility with multiple audio and subtitles streams
+- Support for various video formats: MP4, AVI, and MKV (both input and output).
+- Tracking of GPU statistics (best support for NVIDIA).
 - Quick and hassle-free installation.
 
 ## System Requirements
@@ -31,11 +33,11 @@ Under the hood, the application leverages the power of FFMPEG to handle video pr
 Before installing and running the application, ensure that your system meets the following requirements:
 
 - Windows 10 or later, 64-bit (While the application may function on older versions, it is neither tested nor officially supported).
-- A powerful GPU such as a GTX 970 or AMD equivalent, or newer models. For older hardware, the application will still function, but upscaling may require significantly more time.
+- A powerful GPU such as a GTX 970/AMD equivalent, or newer models. For older hardware, the application will still function, but upscaling may require significantly more time.
 - Knowledge about various Anime4K shaders modes - please read [documentation](https://github.com/bloc97/Anime4K/blob/master/md/GLSL_Instructions_Advanced.md#modes). This will allow you to get better results of upscaling.
 
 Currently, NVIDIA graphics cards should be most stable as most tests were did with it. <br>
-Intel Arc series won't be supported due to drivers instability and limited access to GPUs. <br>
+Intel Arc in theory should work but can not be tested due to limited access to hardware. <br>
 If you have compatibility problems please create an issue with application logs and your computer's specification. <br>
 <br>
 In the future we plan to add support for Linux and macOS (Intel and Apple Silicon).
@@ -54,12 +56,14 @@ Follow these steps to use the Anime4K-GUI:
 
 3. **Select Upscaling Settings**
    - Target settings: Output file resolution - keep in mind to select a resolution with an aspect ratio corresponding with input files. Keep in mind that some 4:3 anime may be saved in a 16:9 ratio with included black bars.
-   - Shaders mode: Shaders used for upscaling. Each has some positive and negative effects and should be used in different cases. <br> 
+   - Shaders mode: Shaders used for upscaling. Each has some positive and negative effects and should be used in different cases. <br>
      **Please read Anime4K [documentation](https://github.com/bloc97/Anime4K/blob/master/md/GLSL_Instructions_Advanced.md#modes) before use.**
    - Compression level: Compression level of the output file. If you don't care about the output file size, always keep this setting to Low. <br>
      **Higher level will cause worse quality**
+   - Encoder: Encoder used for encoding output file. If you have low-end graphics card CPU-based encoders may be faster. In theory AV1 is best pick if you care mostly about video quality.
+     **AV1 with GPU acceleration is compatible only RTX4000/RX 6500XT and newer GPUs**
    - Output format: Format for the output file - MP4 has best support on most devices.
-   - Disable hardware acceleration: check it **ONLY** if you have performance or compatibility issues.
+   - Compatibility mode: check it only if you have  compatibility issues.
    - Debug mode: show more detailed logs, useful for troubleshooting and debugging
 
 4. **Upscale the Video**
@@ -69,10 +73,11 @@ Follow these steps to use the Anime4K-GUI:
 
 ## Troubleshooting
 
-If you encounter issues while using the application, please consult the [Issues](https://github.com/your_username/your_project/issues) section on the GitHub repository to check for solutions or report problems. <br> 
-To get most debug logs run application with `--debug` parameter (mainly for hardware acceleration logs), and enable `Debug Mode` in settings (mainly for upscaling logs). <br>
-Issues regarding low output quality will be instantly closed. Problems like that are related to the original Anime4K shaders - I can recommend trying other Shaders mode settings. <br> 
-Due to limited access to hardware, most tests were done with NVIDIA graphics cards; compatibility with other GPUs may be worse. If you have compatibility problems with your GPU, please create an issue with application logs and your computer's specifications.
+If you encounter issues while using the application, please consult the [Issues](https://github.com/mikigal/Anime4K-GUI/issues) section on the GitHub repository to check for solutions or report problems. <br>
+To get more detailed logs run application with `--debug` parameter or enable `Debug Mode` in settings. <br>
+Firstly try using CPU-based encoding. For some reason GPU acceleration may not work corretly with your graphics card. Due to limited access to hardware, most tests were done with NVIDIA graphics cards; compatibility with other GPUs may be worse. If you have compatibility problems with your GPU, please create an issue with application logs and your computer's specifications. <br>
+Issues regarding low output quality will be **instantly** closed. Problems like that are related to the original Anime4K shaders - I can recommend trying other shaders mode settings. <br>
+
 
 ## FFMPEG Distribution
 
