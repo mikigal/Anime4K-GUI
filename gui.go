@@ -175,7 +175,6 @@ func handleButton() {
 
 func updateUI() {
 	currentSpeed = "Speed:"
-	currentTime = "Time:"
 	totalProgress = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
 	g.Update()
 }

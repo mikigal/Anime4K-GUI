@@ -6,6 +6,7 @@ import (
 )
 
 type Settings struct {
+	UseSavedPosition  bool   `json:"use_saved_position"`
 	PositionX         int    `json:"position_x"`
 	PositionY         int    `json:"position_y"`
 	Resolution        int32  `json:"resolution"`

@@ -77,7 +77,6 @@ func handleSoftError(message string, logs string) {
 	}
 
 	currentSpeed = "Speed:"
-	currentTime = "Time:"
 	g.Update()
 }
 

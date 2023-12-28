@@ -43,7 +43,6 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 
 		if strings.Contains(line, "time=") {
 			value := strings.Split(strings.Split(strings.Split(line, "time=")[1], " ")[0], ".")[0]
-			currentTime = fmt.Sprintf("Time: %s", value)
 			millis := durationToMillis(value)
 			progress = float32(millis) / float32(anime.Length)
 

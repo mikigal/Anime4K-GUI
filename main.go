@@ -66,6 +66,7 @@ var (
 	outputFormats = []string{"MP4", "AVI", "MKV"}
 
 	settings = Settings{
+		UseSavedPosition:  false,
 		Resolution:        5,
 		ShadersMode:       0,
 		CompressionPreset: 2,
@@ -78,7 +79,6 @@ var (
 
 	// UI variables
 	currentSpeed  = "Speed:"
-	currentTime   = "Time:"
 	progress      float32
 	progressLabel string
 	totalProgress string
@@ -109,7 +109,7 @@ func main() {
 	loaded := loadSettings()
 
 	window := g.NewMasterWindow("Anime4K-GUI", 1600, 950, g.MasterWindowFlagsNotResizable)
-	if loaded {
+	if loaded && settings.UseSavedPosition {
 		window.SetPos(settings.PositionX, settings.PositionY)
 	}
 
