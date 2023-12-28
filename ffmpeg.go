@@ -63,44 +63,31 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 	return ffmpegLogs
 }
 
-func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode ShadersMode, compressionPreset CompressionPreset, outputPath string) []string {
+func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode ShadersMode, outputPath string) []string {
 	videoCodec = availableEncoders[settings.Encoder].FfmpegValue
+
 	params := []string{
-		"-hide_banner",
-		"-y",
-	}
+		"-hide_banner", // Hide banner with FFMPEG version
+		"-y",           // Override output file
 
-	// Hardware acceleration
-	if hwaccelValue != "" && !settings.CompatibilityMode {
-		params = append(params, hwaccelParam, hwaccelValue)
-
-		// Additional NVIDIA stuff
-		if hwaccelValue == "cuda" {
-			params = append(params, "-hwaccel_output_format", "cuda")
-		}
-	}
-
-	params = append(params,
-		"-i", fmt.Sprintf("%s", anime.Path),
+		"-i", fmt.Sprintf("%s", anime.Path), // Path to input file
 		"-init_hw_device", "vulkan",
 		"-vf", fmt.Sprintf("format=yuv420p,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,hwdownload,format=yuv420p", resolution.Width, resolution.Height, shadersMode.Path),
-	)
 
-	// Copy all audio streams without re-encoding
-	// Force re-encoding subtitles with mov_text codec
-	// Map all streams
-	params = append(params, "-c:a", "copy",
-		"-c:s", "mov_text",
-		"-map", "0")
-
-	// Apply selected video encoder
-	if !settings.CompatibilityMode {
-		params = append(params, "-c:v", videoCodec)
+		"-c:a", "copy", // Copy all audio streams without re-encoding
+		"-c:s", "mov_text", // Force re-encoding subtitles with mov_text codec for compatibility reasons
+		"-map", "0", // Map all streams
+		"-crf", "0", // Set Constant Rate Factor (CRF) to 0 for better video quality
 	}
 
-	// Preset for encoder, libsvtav1 does not support it, empty string is for auto
-	if compressionPreset.FfmpegName != "" && videoCodec != "libsvtav1" && !settings.CompatibilityMode {
-		params = append(params, "-preset", compressionPreset.FfmpegName)
+	if !settings.CompatibilityMode {
+		params = append(params, hwaccelParams...)   // Apply selected video encoder and hardware acceleration parameters
+		params = append(params, "-c:v", videoCodec) // Apply selected video codec
+
+		// Preset for encoder, supported only by H264/H265
+		if videoCodec != "libsvtav1" {
+			params = append(params, "-preset", "slow")
+		}
 	}
 
 	params = append(params, outputPath)
@@ -153,20 +140,17 @@ func searchHardwareAcceleration() {
 	}
 
 	if nvidia {
-		hwaccelParam = "-hwaccel_device"
-		hwaccelValue = "cuda"
+		hwaccelParams = append(hwaccelParams, "-hwaccel_device", "cuda", "-hwaccel_output_format", "cuda")
 		addEncoders("nvidia")
 
 		logMessage("Available GPU acceleration: CUDA + NVENC", false)
 	} else if amd {
-		hwaccelParam = "-hwaccel_device"
-		hwaccelValue = "opencl"
+		hwaccelParams = append(hwaccelParams, "hwaccel_device", "opencl")
 		addEncoders("advanced micro devices")
 
 		logMessage("Available GPU acceleration: AMF", false)
 	} else if intel {
-		hwaccelParam = "-hwaccel"
-		hwaccelValue = "vulkan"
+		hwaccelParams = append(hwaccelParams, "-hwaccel", "vulkan")
 		addEncoders("intel")
 
 		logMessage("Available GPU acceleration: QSV", false)

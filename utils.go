@@ -51,6 +51,10 @@ func formatMillis(millis int64) string {
 	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
 }
 
+func isNvidia() bool {
+	return len(hwaccelParams) >= 2 && hwaccelParams[1] == "cuda"
+}
+
 func logDebug(message string, additionalLineBefore bool) {
 	if settings.DebugMode {
 		logMessage("[Debug] "+message, additionalLineBefore)

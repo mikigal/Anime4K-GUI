@@ -11,7 +11,6 @@ type Settings struct {
 	PositionY         int    `json:"position_y"`
 	Resolution        int32  `json:"resolution"`
 	ShadersMode       int32  `json:"shaders_mode"`
-	CompressionPreset int32  `json:"compression_preset"`
 	Encoder           int32  `json:"encoder"`
 	OutputFormat      int32  `json:"output_format"`
 	CompatibilityMode bool   `json:"compatibility_mode"`

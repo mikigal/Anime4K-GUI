@@ -58,7 +58,7 @@ func readGenericInfo(query string) string {
 func updateSensorsData() {
 	gpuUsage = readGpuUsage()
 	vramUsage = readVramUsage()
-	if hwaccelValue == "cuda" {
+	if isNvidia() {
 		gpuTemperature = readNvidiaTemperature()
 	}
 }

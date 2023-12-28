@@ -10,7 +10,7 @@ import (
 	g "github.com/AllenDang/giu"
 )
 
-const version = "1.0.7"
+const version = "1.0.8"
 
 var (
 
@@ -35,13 +35,6 @@ var (
 		{"Mode C", "shaders/Anime4K_ModeC.glsl"},
 		{"Mode C+A", "shaders/Anime4K_ModeC+A.glsl"},
 		{"FSRCNNX", "shaders/FSRCNNX_x2_16-0-4-1.glsl"},
-	}
-
-	compressionPresets = []CompressionPreset{
-		{"High (Worst quality, smaller output file)", "fast"},
-		{"Medium", "medium"},
-		{"Low (Best quality, bigger output file)", "slow"},
-		{"Default (Let's FFMPEG decide, mainly for compatibility issues)", ""},
 	}
 
 	allEncoders = []Encoder{
@@ -69,7 +62,6 @@ var (
 		UseSavedPosition:  true,
 		Resolution:        5,
 		ShadersMode:       0,
-		CompressionPreset: 2,
 		Encoder:           0,
 		OutputFormat:      0,
 		CompatibilityMode: false,
@@ -97,9 +89,8 @@ var (
 	cancelled  = false
 
 	// FFMPEG params
-	hwaccelParam string
-	hwaccelValue string
-	videoCodec   string
+	hwaccelParams []string
+	videoCodec    string
 )
 
 func main() {
@@ -126,7 +117,6 @@ func startProcessing() {
 
 	resolution := resolutions[settings.Resolution]
 	shadersMode := shadersModes[settings.ShadersMode]
-	compressionPreset := compressionPresets[settings.CompressionPreset]
 	outputFormat := strings.ToLower(outputFormats[settings.OutputFormat])
 
 	if len(animeList) == 0 {
@@ -149,8 +139,6 @@ func startProcessing() {
 
 	logMessage("Started upscaling! Upscaled videos will be saved in original directory, with _upscaled suffix in files name", false)
 
-	logDebug("Hardware acceleration param: "+hwaccelParam, false)
-	logDebug("Hardware acceleration value: "+hwaccelValue, false)
 	logDebug("CV value: "+videoCodec, false)
 	g.Update()
 
@@ -165,7 +153,7 @@ func startProcessing() {
 		g.Update()
 
 		outputPath := buildOutputPath(anime, outputFormat)
-		ffmpegParams := buildUpscalingParams(anime, resolution, shadersMode, compressionPreset, outputPath)
+		ffmpegParams := buildUpscalingParams(anime, resolution, shadersMode, outputPath)
 
 		workingDirectory, err := os.Getwd()
 		if err != nil {
@@ -182,7 +170,6 @@ func startProcessing() {
 		logDebug("Output path: "+outputPath, false)
 		logDebug("Target resolution: "+resolution.Format(), false)
 		logDebug("Shaders: "+shadersMode.Path, false)
-		logDebug("Compression preset (ffmpeg name): "+compressionPreset.FfmpegName, false)
 		logDebug("Output format: "+outputFormat, false)
 		logDebug("FFMPEG command: .\\ffmpeg.exe\\ffmpeg.exe "+strings.Join(ffmpegParams, " "), false)
 		g.Update()

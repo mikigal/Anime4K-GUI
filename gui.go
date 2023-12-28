@@ -23,11 +23,6 @@ func loop(window *g.MasterWindow) {
 		shadersNames[index] = shaders.Name
 	}
 
-	compressionNames := make([]string, len(compressionPresets))
-	for index, compression := range compressionPresets {
-		compressionNames[index] = compression.Name
-	}
-
 	availableEncodersNames := make([]string, len(availableEncoders))
 	for index, encoder := range availableEncoders {
 		availableEncodersNames[index] = encoder.Name
@@ -66,10 +61,6 @@ func loop(window *g.MasterWindow) {
 						"GPU based AV1 is compatible only with RTX 4000+ and RX 6500XT+"),
 					g.Label(""),
 
-					g.Label("Compression level"),
-					g.Combo("", compressionNames[settings.CompressionPreset], compressionNames, &settings.CompressionPreset).Size(400),
-					g.Label(""),
-
 					g.Label("Output format"),
 					g.Combo("", outputFormats[settings.OutputFormat], outputFormats, &settings.OutputFormat).Size(400),
 					g.Label(""),
@@ -88,7 +79,7 @@ func loop(window *g.MasterWindow) {
 					g.Label("GPU Usage: " + gpuUsage),
 					g.Label("VRAM Usage: " + vramUsage),
 					g.Custom(func() {
-						if hwaccelValue == "cuda" {
+						if isNvidia() {
 							g.Label("GPU Temperature: " + gpuTemperature).Build()
 						}
 					}),
@@ -97,7 +88,7 @@ func loop(window *g.MasterWindow) {
 			g.Layout{
 				g.Label("Logs"),
 				g.InputTextMultiline(&logs).Flags(g.InputTextFlagsReadOnly).Size(1600, 270),
-				g.SplitLayout(g.DirectionHorizontal, 1330,
+				g.SplitLayout(g.DirectionHorizontal, 1370,
 					g.SplitLayout(g.DirectionHorizontal, 120,
 						g.Label("Progress: "+totalProgress),
 						g.ProgressBar(progress).Overlay(progressLabel).Size(1230, 20),
