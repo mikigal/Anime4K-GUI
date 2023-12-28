@@ -60,7 +60,7 @@ Follow these steps to use the Anime4K-GUI:
      **Please read Anime4K [documentation](https://github.com/bloc97/Anime4K/blob/master/md/GLSL_Instructions_Advanced.md#modes) before use.**
    - Compression level: Compression level of the output file. If you don't care about the output file size, always keep this setting to Low. <br>
      **Higher level will cause worse quality**
-   - Encoder: Encoder used for encoding output file. If you have low-end graphics card CPU-based encoders may be faster. In theory AV1 is best pick if you care mostly about video quality.
+   - Encoder: Encoder used for encoding output file. If you have low-end graphics card CPU-based encoders may be faster. In theory AV1 is best pick if you care mostly about video quality. <br>
      **AV1 with GPU acceleration is compatible only RTX4000/RX 6500XT and newer GPUs**
    - Output format: Format for the output file - MP4 has best support on most devices.
    - Compatibility mode: check it only if you have  compatibility issues.
@@ -75,7 +75,7 @@ Follow these steps to use the Anime4K-GUI:
 
 If you encounter issues while using the application, please consult the [Issues](https://github.com/mikigal/Anime4K-GUI/issues) section on the GitHub repository to check for solutions or report problems. <br>
 To get more detailed logs run application with `--debug` parameter or enable `Debug Mode` in settings. <br>
-Firstly try using CPU-based encoding. For some reason GPU acceleration may not work corretly with your graphics card. Due to limited access to hardware, most tests were done with NVIDIA graphics cards; compatibility with other GPUs may be worse. If you have compatibility problems with your GPU, please create an issue with application logs and your computer's specifications. <br>
+Firstly try using CPU-based encoding. For some reason GPU acceleration may not work correctly with your graphics card. Due to limited access to hardware, most tests were done with NVIDIA graphics cards; compatibility with other GPUs may be worse. If you have compatibility problems with your GPU, please create an issue with application logs and your computer's specifications. <br>
 Issues regarding low output quality will be **instantly** closed. Problems like that are related to the original Anime4K shaders - I can recommend trying other shaders mode settings. <br>
 
 
