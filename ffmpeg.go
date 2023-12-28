@@ -69,7 +69,13 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode Shader
 	params := []string{
 		"-hide_banner", // Hide banner with FFMPEG version
 		"-y",           // Override output file
+	}
 
+	if !settings.CompatibilityMode {
+		params = append(params, hwaccelParams...) // Apply selected video encoder and hardware acceleration parameters
+	}
+
+	params = append(params,
 		"-i", fmt.Sprintf("%s", anime.Path), // Path to input file
 		"-init_hw_device", "vulkan",
 		"-vf", fmt.Sprintf("format=yuv420p,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,hwdownload,format=yuv420p", resolution.Width, resolution.Height, shadersMode.Path),
@@ -78,10 +84,9 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode Shader
 		"-c:s", "mov_text", // Force re-encoding subtitles with mov_text codec for compatibility reasons
 		"-map", "0", // Map all streams
 		"-crf", "0", // Set Constant Rate Factor (CRF) to 0 for better video quality
-	}
+	)
 
 	if !settings.CompatibilityMode {
-		params = append(params, hwaccelParams...)   // Apply selected video encoder and hardware acceleration parameters
 		params = append(params, "-c:v", videoCodec) // Apply selected video codec
 
 		// Preset for encoder, supported only by H264/H265
