@@ -143,7 +143,7 @@ func searchHardwareAcceleration() {
 
 		logMessage("Available GPU acceleration: CUDA + NVENC", false)
 	} else if amd {
-		hwaccelParams = append(hwaccelParams, "hwaccel_device", "opencl")
+		hwaccelParams = append(hwaccelParams, "-hwaccel_device", "opencl")
 		addEncoders("advanced micro devices")
 
 		logMessage("Available GPU acceleration: AMF", false)
