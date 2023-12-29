@@ -11,7 +11,7 @@ import (
 	g "github.com/AllenDang/giu"
 )
 
-const version = "1.0.8"
+const version = "1.0.8-hotfix1"
 
 var (
 

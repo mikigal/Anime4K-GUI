@@ -83,7 +83,6 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 		"-c:a", "copy", // Copy all audio streams without re-encoding
 		"-c:s", "mov_text", // Force re-encoding subtitles with mov_text codec for compatibility reasons
 		"-map", "0", // Map all streams
-		"-crf", "0", // Set Constant Rate Factor (CRF) to 0 for better video quality
 	)
 
 	if !settings.CompatibilityMode {
