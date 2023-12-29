@@ -18,9 +18,9 @@ func loop(window *g.MasterWindow) {
 		resolutionsNames[index] = res.Format()
 	}
 
-	shadersNames := make([]string, len(shadersModes))
-	for index, shaders := range shadersModes {
-		shadersNames[index] = shaders.Name
+	shadersNames := make([]string, len(shaders))
+	for index, shader := range shaders {
+		shadersNames[index] = shader.Name
 	}
 
 	availableEncodersNames := make([]string, len(availableEncoders))
@@ -49,7 +49,7 @@ func loop(window *g.MasterWindow) {
 
 					g.Label("Shaders mode"),
 					g.Tooltip("Check the project's GitHub page if you're not sure what to choose"),
-					g.Combo("", shadersModes[settings.ShadersMode].Name, shadersNames, &settings.ShadersMode).Size(400),
+					g.Combo("", shaders[settings.Shaders].Name, shadersNames, &settings.Shaders).Size(400),
 					g.Tooltip("Check the project's GitHub page if you're not sure what to choose"),
 					g.Label(""),
 
@@ -74,15 +74,6 @@ func loop(window *g.MasterWindow) {
 					g.Label(""),
 
 					g.Button(buttonLabel).OnClick(handleButton).Size(360, 30),
-
-					g.Label(""),
-					g.Label("GPU Usage: " + gpuUsage),
-					g.Label("VRAM Usage: " + vramUsage),
-					g.Custom(func() {
-						if isNvidia() {
-							g.Label("GPU Temperature: " + gpuTemperature).Build()
-						}
-					}),
 				},
 			),
 			g.Layout{
@@ -168,13 +159,6 @@ func updateUI() {
 	currentSpeed = "Speed:"
 	totalProgress = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
 	g.Update()
-}
-
-func removeAnime(index int) {
-	anime := animeList[index]
-	animeList = append(animeList[:index], animeList[index+1:]...)
-	updateUI()
-	logMessage(fmt.Sprintf("Removed %s from queue", anime.Name), false)
 }
 
 func buildTableRows() []*g.TableRowWidget {

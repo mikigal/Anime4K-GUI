@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -27,13 +28,13 @@ var (
 		{3840, 2160, true},
 	}
 
-	shadersModes = []ShadersMode{
-		{"Mode A", "shaders/Anime4K_ModeA.glsl"},
-		{"Mode A+A", "shaders/Anime4K_ModeA+A.glsl"},
-		{"Mode B", "shaders/Anime4K_ModeB.glsl"},
-		{"Mode B+B", "shaders/Anime4K_ModeB+B.glsl"},
-		{"Mode C", "shaders/Anime4K_ModeC.glsl"},
-		{"Mode C+A", "shaders/Anime4K_ModeC+A.glsl"},
+	shaders = []Shader{
+		{"Anime4K Mode A", "shaders/Anime4K_ModeA.glsl"},
+		{"Anime4K Mode A+A", "shaders/Anime4K_ModeA+A.glsl"},
+		{"Anime4K Mode B", "shaders/Anime4K_ModeB.glsl"},
+		{"Anime4K Mode B+B", "shaders/Anime4K_ModeB+B.glsl"},
+		{"Anime4K Mode C", "shaders/Anime4K_ModeC.glsl"},
+		{"Anime4K Mode C+A", "shaders/Anime4K_ModeC+A.glsl"},
 		{"FSRCNNX", "shaders/FSRCNNX_x2_16-0-4-1.glsl"},
 	}
 
@@ -61,7 +62,7 @@ var (
 	settings = Settings{
 		UseSavedPosition:  true,
 		Resolution:        5,
-		ShadersMode:       0,
+		Shaders:           0,
 		Encoder:           0,
 		OutputFormat:      0,
 		CompatibilityMode: false,
@@ -96,7 +97,6 @@ var (
 func main() {
 	checkDebugParam()
 	searchHardwareAcceleration()
-	go monitorSensors()
 	loaded := loadSettings()
 
 	window := g.NewMasterWindow("Anime4K-GUI", 1600, 950, g.MasterWindowFlagsNotResizable)
@@ -116,7 +116,7 @@ func startProcessing() {
 	}
 
 	resolution := resolutions[settings.Resolution]
-	shadersMode := shadersModes[settings.ShadersMode]
+	shader := shaders[settings.Shaders]
 	outputFormat := strings.ToLower(outputFormats[settings.OutputFormat])
 
 	if len(animeList) == 0 {
@@ -152,8 +152,8 @@ func startProcessing() {
 		animeList[index].Status = Processing
 		g.Update()
 
-		outputPath := buildOutputPath(anime, outputFormat)
-		ffmpegParams := buildUpscalingParams(anime, resolution, shadersMode, outputPath)
+		outputPath := fmt.Sprintf("%s_upscaled.%s", strings.TrimSuffix(anime.Path, filepath.Ext(anime.Path)), strings.ToLower(outputFormat))
+		ffmpegParams := buildUpscalingParams(anime, resolution, shader, outputPath)
 
 		workingDirectory, err := os.Getwd()
 		if err != nil {
@@ -169,7 +169,7 @@ func startProcessing() {
 		logDebug("Input path: "+anime.Path, false)
 		logDebug("Output path: "+outputPath, false)
 		logDebug("Target resolution: "+resolution.Format(), false)
-		logDebug("Shaders: "+shadersMode.Path, false)
+		logDebug("Shaders: "+shader.Path, false)
 		logDebug("Output format: "+outputFormat, false)
 		logDebug("FFMPEG command: .\\ffmpeg.exe\\ffmpeg.exe "+strings.Join(ffmpegParams, " "), false)
 		g.Update()

@@ -10,7 +10,7 @@ type Settings struct {
 	PositionX         int    `json:"position_x"`
 	PositionY         int    `json:"position_y"`
 	Resolution        int32  `json:"resolution"`
-	ShadersMode       int32  `json:"shaders_mode"`
+	Shaders           int32  `json:"shaders"`
 	Encoder           int32  `json:"encoder"`
 	OutputFormat      int32  `json:"output_format"`
 	CompatibilityMode bool   `json:"compatibility_mode"`

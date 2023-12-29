@@ -12,12 +12,7 @@ type Anime struct {
 	Status AnimeStatus
 }
 
-type CompressionPreset struct {
-	Name       string
-	FfmpegName string
-}
-
-type ShadersMode struct {
+type Shader struct {
 	Name string
 	Path string
 }
@@ -50,4 +45,19 @@ func (res *Resolution) Format() string {
 	}
 
 	return fmt.Sprintf("%dx%d", res.Width, res.Height)
+}
+
+func removeAnime(index int) {
+	anime := animeList[index]
+	animeList = append(animeList[:index], animeList[index+1:]...)
+	updateUI()
+	logMessage(fmt.Sprintf("Removed %s from queue", anime.Name), false)
+}
+
+func addEncoders(vendor string) {
+	for _, encoder := range allEncoders {
+		if encoder.Vendor == vendor || encoder.Vendor == "cpu" {
+			availableEncoders = append(availableEncoders, encoder)
+		}
+	}
 }

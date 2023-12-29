@@ -63,7 +63,7 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 	return ffmpegLogs
 }
 
-func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode ShadersMode, outputPath string) []string {
+func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, outputPath string) []string {
 	videoCodec = availableEncoders[settings.Encoder].FfmpegValue
 
 	params := []string{
@@ -78,7 +78,7 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode Shader
 	params = append(params,
 		"-i", fmt.Sprintf("%s", anime.Path), // Path to input file
 		"-init_hw_device", "vulkan",
-		"-vf", fmt.Sprintf("format=yuv420p,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,hwdownload,format=yuv420p", resolution.Width, resolution.Height, shadersMode.Path),
+		"-vf", fmt.Sprintf("format=yuv420p,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,hwdownload,format=yuv420p", resolution.Width, resolution.Height, shader.Path),
 
 		"-c:a", "copy", // Copy all audio streams without re-encoding
 		"-c:s", "mov_text", // Force re-encoding subtitles with mov_text codec for compatibility reasons
@@ -97,12 +97,6 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shadersMode Shader
 
 	params = append(params, outputPath)
 	return params
-}
-
-func buildOutputPath(anime Anime, outputFormat string) string {
-	dotSplit := strings.Split(anime.Path, ".")
-	extension := dotSplit[len(dotSplit)-1]
-	return strings.Replace(anime.Path, "."+extension, "_upscaled."+outputFormat, -1)
 }
 
 func searchHardwareAcceleration() {
@@ -170,14 +164,6 @@ func searchHardwareAcceleration() {
 		if encoder.Vendor != "cpu" {
 			settings.Encoder = int32(index)
 			break
-		}
-	}
-}
-
-func addEncoders(vendor string) {
-	for _, encoder := range allEncoders {
-		if encoder.Vendor == vendor || encoder.Vendor == "cpu" {
-			availableEncoders = append(availableEncoders, encoder)
 		}
 	}
 }
