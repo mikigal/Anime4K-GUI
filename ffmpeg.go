@@ -15,6 +15,7 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 	scanner := bufio.NewScanner(stderr)
 	scanner.Split(bufio.ScanRunes)
 
+	progressLine := "frame=    0 fps=0.0 q=0.0 size=       0kB time=N/A bitrate=N/A speed=N/A"
 	ffmpegLogs := ""
 	line := ""
 	for scanner.Scan() {
@@ -60,6 +61,10 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 				eta = fmt.Sprintf("ETA: %s", formatMillis(int64(etaMillis)))
 			}
 		}
+
+		ffmpegLogs = strings.Replace(ffmpegLogs, progressLine, line, -1)
+		logs = strings.Replace(logs, progressLine, line, -1)
+		progressLine = line
 
 		line = ""
 		g.Update()
