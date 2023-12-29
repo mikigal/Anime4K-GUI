@@ -72,6 +72,7 @@ var (
 
 	// UI variables
 	currentSpeed  = "Speed:"
+	eta           = "ETA:"
 	progress      float32
 	progressLabel string
 	totalProgress string
@@ -80,9 +81,6 @@ var (
 		"Authors: mikigal (whole app + FFMPEG tweaks), Ethan (core FFMPEG stuff)\n" +
 		"Special thanks to bloc97 for Anime4K shaders\n" +
 		"Drag n' drop your video files into this window (supported extensions: mp4, avi, mkv)\n\n"
-	gpuTemperature string
-	gpuUsage       string
-	vramUsage      string
 
 	// Internals
 	animeList  = make([]Anime, 0)
@@ -135,7 +133,7 @@ func startProcessing() {
 	progressLabel = ""
 	buttonLabel = "Cancel"
 	processing = true
-	updateUI()
+	resetUI()
 
 	logMessage("Started upscaling! Upscaled videos will be saved in original directory, with _upscaled suffix in files name", false)
 
@@ -219,13 +217,13 @@ func startProcessing() {
 		}
 
 		animeList[index].Status = Finished
-		updateUI()
+		resetUI()
 		logMessage(fmt.Sprintf("Finished processing %s", anime.Name), false)
 	}
 
 	buttonLabel = "Start"
 	processing = false
-	updateUI()
+	resetUI()
 	logMessage("Finished upscaling!", false)
 	g.Update()
 }
@@ -254,7 +252,7 @@ func cancelProcessing() {
 
 	processing = false
 	buttonLabel = "Start"
-	updateUI()
+	resetUI()
 	logMessage("Cancelled upscaling!", false)
 	g.Update()
 }

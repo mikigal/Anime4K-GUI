@@ -79,12 +79,15 @@ func loop(window *g.MasterWindow) {
 			g.Layout{
 				g.Label("Logs"),
 				g.InputTextMultiline(&logs).Flags(g.InputTextFlagsReadOnly).Size(1600, 270),
-				g.SplitLayout(g.DirectionHorizontal, 1370,
+				g.SplitLayout(g.DirectionHorizontal, 1310,
 					g.SplitLayout(g.DirectionHorizontal, 120,
 						g.Label("Progress: "+totalProgress),
-						g.ProgressBar(progress).Overlay(progressLabel).Size(1230, 20),
+						g.ProgressBar(progress).Overlay(progressLabel).Size(1170, 20),
 					),
-					g.Label(currentSpeed),
+					g.SplitLayout(g.DirectionHorizontal, 110,
+						g.Label(currentSpeed),
+						g.Label(eta),
+					),
 				),
 			},
 		),
@@ -155,8 +158,9 @@ func handleButton() {
 	}
 }
 
-func updateUI() {
+func resetUI() {
 	currentSpeed = "Speed:"
+	eta = "ETA:"
 	totalProgress = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
 	g.Update()
 }

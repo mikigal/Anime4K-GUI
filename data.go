@@ -50,7 +50,7 @@ func (res *Resolution) Format() string {
 func removeAnime(index int) {
 	anime := animeList[index]
 	animeList = append(animeList[:index], animeList[index+1:]...)
-	updateUI()
+	resetUI()
 	logMessage(fmt.Sprintf("Removed %s from queue", anime.Name), false)
 }
 

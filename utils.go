@@ -81,6 +81,7 @@ func handleSoftError(message string, logs string) {
 	}
 
 	currentSpeed = "Speed:"
+	eta = "ETA:"
 	g.Update()
 }
 

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	g "github.com/AllenDang/giu"
@@ -29,35 +30,40 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 			trim = strings.Replace(trim, "\n", "", -1)
 			logDebug(trim, false)
 			ffmpegLogs += line
+			line = ""
+			continue
 		}
 
-		if strings.Contains(line, "speed=") {
-			value := strings.Split(strings.Split(line, "speed=")[1], " ")[0]
+		// It's line with speed and time
+		speedRaw := strings.Split(strings.Split(line, "speed=")[1], " ")[0]
+		time := strings.Split(strings.Split(strings.Split(line, "time=")[1], " ")[0], ".")[0]
+		millis := durationToMillis(time)
+		progress = float32(millis) / float32(anime.Length)
 
-			// Workaround for disappearing speed
-			if strings.Contains(value, ".") {
-				currentSpeed = fmt.Sprintf("Speed: %s", value)
-				g.Update()
-			}
+		rounded := int(progress * 100)
+		if rounded == 99 {
+			progress = 1
+			progressLabel = "100%"
+		} else {
+			progressLabel = fmt.Sprintf("%d%%", rounded)
 		}
 
-		if strings.Contains(line, "time=") {
-			value := strings.Split(strings.Split(strings.Split(line, "time=")[1], " ")[0], ".")[0]
-			millis := durationToMillis(value)
-			progress = float32(millis) / float32(anime.Length)
+		// Workaround for disappearing speed
+		if strings.Contains(speedRaw, ".") {
+			speedValue, _ := strconv.ParseFloat(strings.Replace(speedRaw, "x", "", -1), 32)
 
-			rounded := int(progress * 100)
-			if rounded == 99 {
-				progress = 1
-				progressLabel = "100%"
-			} else {
-				progressLabel = fmt.Sprintf("%d%%", rounded)
+			currentSpeed = fmt.Sprintf("Speed: %s", speedRaw)
+
+			// Just for safety
+			if speedValue != 0 {
+				etaMillis := float64(anime.Length-millis) / speedValue
+				eta = fmt.Sprintf("ETA: %s", formatMillis(int64(etaMillis)))
 			}
-
-			g.Update()
 		}
 
 		line = ""
+		g.Update()
+
 	}
 
 	return ffmpegLogs
