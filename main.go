@@ -11,7 +11,7 @@ import (
 	g "github.com/AllenDang/giu"
 )
 
-const version = "1.0.9"
+const version = "1.1.0"
 
 var (
 
@@ -64,6 +64,7 @@ var (
 		Resolution:        5,
 		Shaders:           0,
 		Encoder:           0,
+		Bitrate:           0,
 		OutputFormat:      0,
 		CompatibilityMode: false,
 		DebugMode:         false,

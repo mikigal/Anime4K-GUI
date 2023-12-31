@@ -61,6 +61,24 @@ func loop(window *g.MasterWindow) {
 						"GPU based AV1 is compatible only with RTX 4000+ and RX 6500XT+"),
 					g.Label(""),
 
+					g.Label("Bitrate (Kb/s)"),
+					g.Tooltip("Bitrate of output file. \nThe higher the bitrate, the better the quality and the larger the file size. " +
+						"\nDon't set it too high - file will be very big. \n\nCorrect values: 0 (same as input file) or 1000-10000Kb/s \n" +
+						"If you don't know what to enter, leave it as 0. Invalid value may make quality worse"),
+					g.InputInt(&settings.Bitrate).Size(400).OnChange(func() {
+						if settings.Bitrate < 1000 {
+							settings.Bitrate = 0
+						}
+
+						if settings.Bitrate > 20000 {
+							settings.Bitrate = 20000
+						}
+					}),
+					g.Tooltip("Bitrate of output file. \nThe higher the bitrate, the better the quality and the larger the file size. " +
+						"\nDon't set it too high - file will be very big. \n\nCorrect values: 0 (same as input file) or 1000-20000Kb/s \n" +
+						"If you don't know what to enter, leave it as 0"),
+					g.Label(""),
+
 					g.Label("Output format"),
 					g.Combo("", outputFormats[settings.OutputFormat], outputFormats, &settings.OutputFormat).Size(400),
 					g.Label(""),

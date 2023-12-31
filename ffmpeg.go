@@ -96,6 +96,10 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 		"-map", "0", // Map all streams
 	)
 
+	if settings.Bitrate != 0 && !settings.CompatibilityMode {
+		params = append(params, "-b:v", fmt.Sprintf("%dM", int(settings.Bitrate/1000)))
+	}
+
 	if !settings.CompatibilityMode {
 		params = append(params, "-c:v", videoCodec) // Apply selected video codec
 
