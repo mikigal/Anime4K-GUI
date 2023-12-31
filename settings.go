@@ -13,6 +13,7 @@ type Settings struct {
 	Shaders           int32  `json:"shaders"`
 	Encoder           int32  `json:"encoder"`
 	Bitrate           int32  `json:"bitrate"`
+	Crf               int32  `json:"crf"`
 	OutputFormat      int32  `json:"output_format"`
 	CompatibilityMode bool   `json:"compatibility_mode"`
 	DebugMode         bool   `json:"debug_mode"`

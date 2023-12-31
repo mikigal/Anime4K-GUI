@@ -65,18 +65,18 @@ func loop(window *g.MasterWindow) {
 					g.Tooltip("Bitrate of output file. \nThe higher the bitrate, the better the quality and the larger the file size. " +
 						"\nDon't set it too high - file will be very big. \n\nCorrect values: 0 (same as input file) or 1000-10000Kb/s \n" +
 						"If you don't know what to enter, leave it as 0. Invalid value may make quality worse"),
-					g.InputInt(&settings.Bitrate).Size(400).OnChange(func() {
-						if settings.Bitrate < 1000 {
-							settings.Bitrate = 0
-						}
-
-						if settings.Bitrate > 20000 {
-							settings.Bitrate = 20000
-						}
-					}),
+					g.InputInt(&settings.Bitrate).Size(400).OnChange(func() { handleMinMax(&settings.Bitrate, 1000, 0, 20000, 20000) }),
 					g.Tooltip("Bitrate of output file. \nThe higher the bitrate, the better the quality and the larger the file size. " +
-						"\nDon't set it too high - file will be very big. \n\nCorrect values: 0 (same as input file) or 1000-20000Kb/s \n" +
+						"\nDon't set it too high - file will be very big. \n\nCorrect values: 0 (same as input file) or 1000 - 20000Kb/s \n" +
 						"If you don't know what to enter, leave it as 0"),
+					g.Label(""),
+
+					g.Label("Constant Rate Factor (CRF)"),
+					g.Tooltip("Constant Rate Factor parameter encoder. \nDon't set it too high - file will be very big. " +
+						"\n\nCorrect values: 0 - 51 \nIf you don't know what to enter, leave it as 20"),
+					g.InputInt(&settings.Crf).Size(400).OnChange(func() { handleMinMax(&settings.Crf, 0, 0, 51, 51) }),
+					g.Tooltip("Constant Rate Factor parameter encoder. \nDon't set it too high - file will be very big. " +
+						"\n\nCorrect values: 0 - 51 \nIf you don't know what to enter, leave it as 20"),
 					g.Label(""),
 
 					g.Label("Output format"),

@@ -85,6 +85,15 @@ func handleSoftError(message string, logs string) {
 	g.Update()
 }
 
+func handleMinMax(value *int32, minLimit int32, minValue int32, maxLimit int32, maxValue int32) {
+	if *value > maxLimit {
+		*value = maxValue
+	}
+	if *value < minLimit {
+		*value = minValue
+	}
+}
+
 func calcFinished() int {
 	i := 0
 	for _, anime := range animeList {
