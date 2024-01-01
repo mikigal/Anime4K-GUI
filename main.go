@@ -14,6 +14,7 @@ import (
 const version = "1.1.0"
 
 var (
+	supportedInput = []string{".mp4", ".avi", ".mkv"}
 
 	// Available options
 	resolutions = []Resolution{

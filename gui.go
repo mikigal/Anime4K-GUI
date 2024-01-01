@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -11,6 +13,18 @@ import (
 	"github.com/AllenDang/imgui-go"
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
+
+const dragDropLabel = "\n\n\n\n\n\n\n                                              Drag n' Drop your anime here"
+const shadersTooltip = "Check the project's GitHub page if you're not sure what to choose"
+const encoderTooltip = "Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n" +
+	"AV1 is compatible only with RTX 4000+ and RX 6500XT+"
+const bitrateTooltip = "Bitrate of output file. \nThe higher the bitrate, the better the quality and the larger the file size. " +
+	"\nDon't set it too high - file will be very big. \n\nCorrect values: 0 (same as input file) or 1000-10000Kb/s \n" +
+	"If you don't know what to enter, leave it as 0. Invalid value may make quality worse"
+const crfTooltip = "Constant Rate Factor parameter encoder. \nDon't set it too high - file will be very big. " +
+	"\n\nCorrect values: 0 - 51 \nIf you don't know what to enter, leave it as 20"
+const compatibilityModeTooltip = "Should be used only for compatibility troubleshooting, disables most of features"
+const debugModeTooltip = "Show more detailed logs, useful for troubleshooting and debugging"
 
 func loop(window *g.MasterWindow) {
 	resolutionsNames := make([]string, len(resolutions))
@@ -35,7 +49,7 @@ func loop(window *g.MasterWindow) {
 					g.Table().Flags(g.TableFlagsResizable).Rows(buildTableRows()...).Columns(buildTableColumns()...),
 					g.Custom(func() {
 						if len(animeList) == 0 {
-							g.Label("\n\n\n\n\n\n\n                                              Drag n' Drop your anime here").Font(g.AddFont("Arial", 35)).Build()
+							g.Label(dragDropLabel).Font(g.AddFont("Calibri", 35)).Build()
 						}
 					}),
 				},
@@ -47,36 +61,28 @@ func loop(window *g.MasterWindow) {
 					g.Combo("", resolutionsNames[settings.Resolution], resolutionsNames, &settings.Resolution).Size(400),
 					g.Label(""),
 
-					g.Label("Shaders mode"),
-					g.Tooltip("Check the project's GitHub page if you're not sure what to choose"),
+					g.Label("Shaders"),
+					g.Tooltip(shadersTooltip),
 					g.Combo("", shaders[settings.Shaders].Name, shadersNames, &settings.Shaders).Size(400),
-					g.Tooltip("Check the project's GitHub page if you're not sure what to choose"),
+					g.Tooltip(shadersTooltip),
 					g.Label(""),
 
 					g.Label("Encoder"),
-					g.Tooltip("Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n" +
-						"AV1 is compatible only with RTX 4000+ and RX 6500XT+"),
+					g.Tooltip(encoderTooltip),
 					g.Combo("", availableEncoders[settings.Encoder].Name, availableEncodersNames, &settings.Encoder).Size(400),
-					g.Tooltip("Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n" +
-						"GPU based AV1 is compatible only with RTX 4000+ and RX 6500XT+"),
+					g.Tooltip(encoderTooltip),
 					g.Label(""),
 
 					g.Label("Bitrate (Kb/s)"),
-					g.Tooltip("Bitrate of output file. \nThe higher the bitrate, the better the quality and the larger the file size. " +
-						"\nDon't set it too high - file will be very big. \n\nCorrect values: 0 (same as input file) or 1000-10000Kb/s \n" +
-						"If you don't know what to enter, leave it as 0. Invalid value may make quality worse"),
+					g.Tooltip(bitrateTooltip),
 					g.InputInt(&settings.Bitrate).Size(400).OnChange(func() { handleMinMax(&settings.Bitrate, 1000, 0, 20000, 20000) }),
-					g.Tooltip("Bitrate of output file. \nThe higher the bitrate, the better the quality and the larger the file size. " +
-						"\nDon't set it too high - file will be very big. \n\nCorrect values: 0 (same as input file) or 1000 - 20000Kb/s \n" +
-						"If you don't know what to enter, leave it as 0"),
+					g.Tooltip(bitrateTooltip),
 					g.Label(""),
 
 					g.Label("Constant Rate Factor (CRF)"),
-					g.Tooltip("Constant Rate Factor parameter encoder. \nDon't set it too high - file will be very big. " +
-						"\n\nCorrect values: 0 - 51 \nIf you don't know what to enter, leave it as 20"),
+					g.Tooltip(crfTooltip),
 					g.InputInt(&settings.Crf).Size(400).OnChange(func() { handleMinMax(&settings.Crf, 0, 0, 51, 51) }),
-					g.Tooltip("Constant Rate Factor parameter encoder. \nDon't set it too high - file will be very big. " +
-						"\n\nCorrect values: 0 - 51 \nIf you don't know what to enter, leave it as 20"),
+					g.Tooltip(crfTooltip),
 					g.Label(""),
 
 					g.Label("Output format"),
@@ -84,10 +90,10 @@ func loop(window *g.MasterWindow) {
 					g.Label(""),
 
 					g.Checkbox("Compatibility mode", &settings.CompatibilityMode),
-					g.Tooltip("Should be used only for compatibility troubleshooting, disables most of features"),
+					g.Tooltip(compatibilityModeTooltip),
 
 					g.Checkbox("Debug mode", &settings.DebugMode),
-					g.Tooltip("Show more detailed logs, useful for troubleshooting and debugging"),
+					g.Tooltip(debugModeTooltip),
 
 					g.Label(""),
 
@@ -111,9 +117,7 @@ func loop(window *g.MasterWindow) {
 		),
 	)
 
-	x, y := window.GetPos()
-	settings.PositionX = x
-	settings.PositionY = y
+	settings.PositionX, settings.PositionY = window.GetPos()
 }
 
 func handleDrop(files []string) {
@@ -127,8 +131,9 @@ func handleDrop(files []string) {
 
 LOOP:
 	for _, path := range files {
-		if !strings.HasSuffix(path, ".mp4") && !strings.HasSuffix(path, ".avi") && !strings.HasSuffix(path, ".mkv") {
-			logMessage("Invalid input file format (supported: mp4, avi, mkv)! Path: "+path, false)
+		extension := filepath.Ext(path)
+		if !slices.Contains(supportedInput, extension) {
+			logMessage(fmt.Sprintf("Invalid input file format (supported: %s)! Path: %s", strings.Join(supportedInput, ", "), path), false)
 			continue
 		}
 
