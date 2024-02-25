@@ -91,15 +91,12 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 		"-init_hw_device", "vulkan",
 		"-vf", fmt.Sprintf("format=yuv420p,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,hwdownload,format=yuv420p", resolution.Width, resolution.Height, shader.Path),
 
-		"-c:a", "copy", // Copy all audio streams without re-encoding
-		"-c:s", "mov_text", // Force re-encoding subtitles with mov_text codec for compatibility reasons
+		"-c:a", "copy", // Copy all audio streams
+		"-c:s", "copy", // Copy all subtitles streams
+		"-c:d", "copy", // Copy all data streams
 		"-map", "0", // Map all streams,
 		"-crf", fmt.Sprintf("%d", settings.Crf), // Constant Rate Factor (CRF) for encoder
 	)
-
-	if settings.Bitrate != 0 && !settings.CompatibilityMode {
-		params = append(params, "-b:v", fmt.Sprintf("%dM", int(settings.Bitrate/1000)))
-	}
 
 	if !settings.CompatibilityMode {
 		params = append(params, "-c:v", videoCodec) // Apply selected video codec

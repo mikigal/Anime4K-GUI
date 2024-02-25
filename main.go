@@ -65,7 +65,6 @@ var (
 		Resolution:        5,
 		Shaders:           0,
 		Encoder:           0,
-		Bitrate:           0,
 		Crf:               20,
 		OutputFormat:      0,
 		CompatibilityMode: false,

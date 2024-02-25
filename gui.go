@@ -18,9 +18,6 @@ const dragDropLabel = "\n\n\n\n\n\n\n                                           
 const shadersTooltip = "Check the project's GitHub page if you're not sure what to choose"
 const encoderTooltip = "Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n" +
 	"AV1 is compatible only with RTX 4000+ and RX 6500XT+"
-const bitrateTooltip = "Bitrate of output file. \nThe higher the bitrate, the better the quality and the larger the file size. " +
-	"\nDon't set it too high - file will be very big. \n\nCorrect values: 0 (same as input file) or 1000-10000Kb/s \n" +
-	"If you don't know what to enter, leave it as 0. Invalid value may make quality worse"
 const crfTooltip = "Constant Rate Factor parameter encoder. \nDon't set it too high - file will be very big. " +
 	"\n\nCorrect values: 0 - 51 \nIf you don't know what to enter, leave it as 20"
 const compatibilityModeTooltip = "Should be used only for compatibility troubleshooting, disables most of features"
@@ -71,12 +68,6 @@ func loop(window *g.MasterWindow) {
 					g.Tooltip(encoderTooltip),
 					g.Combo("", availableEncoders[settings.Encoder].Name, availableEncodersNames, &settings.Encoder).Size(400),
 					g.Tooltip(encoderTooltip),
-					g.Label(""),
-
-					g.Label("Bitrate (Kb/s)"),
-					g.Tooltip(bitrateTooltip),
-					g.InputInt(&settings.Bitrate).Size(400).OnChange(func() { handleMinMax(&settings.Bitrate, 1000, 0, 20000, 20000) }),
-					g.Tooltip(bitrateTooltip),
 					g.Label(""),
 
 					g.Label("Constant Rate Factor (CRF)"),
