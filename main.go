@@ -66,7 +66,7 @@ var (
 		Shaders:           0,
 		Encoder:           0,
 		Crf:               20,
-		OutputFormat:      0,
+		OutputFormat:      2,
 		CompatibilityMode: false,
 		DebugMode:         false,
 		Version:           version,
