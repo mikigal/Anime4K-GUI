@@ -13,7 +13,7 @@ Under the hood, the application leverages the power of FFMPEG to handle video pr
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [FFMPEG Distribution](#ffmpeg-distribution)
-- [Known issues](#known-issues_
+- [Known issues](#known-issues)
 - [Special Thanks](#special-thanks)
 - [Contribute](#contribute)
 
@@ -82,11 +82,11 @@ Issues regarding low output quality will be **instantly** closed. Problems like 
 
 ## FFMPEG Distribution
 
-Due to GitHub maximum file limit I can not provide FFMPEG's binaries in this repository. If you want to compile projekt by yourself you have to download FFMPEG build [here](https://github.com/BtbN/FFmpeg-Builds) and put `ffmpeg.exe` and `ffprobe.exe` into `resources/ffmpeg` directory
+Due to GitHub maximum file limit I can not provide FFMPEG's binaries in this repository. If you want to compile project by yourself you have to download FFMPEG build [here](https://github.com/BtbN/FFmpeg-Builds) and put `ffmpeg.exe` and `ffprobe.exe` into `resources/ffmpeg` directory
 
 ## Known issues
-1. If your input file contains subtitles streams you must use MKV as output format
-2. For certain files (primarily MKV files with subtitles), the app fails to display progress, ETA, and speed, though upscaling functionality remains operational.
+1. If your input file contains subtitles streams you must use MKV as output format due to other formats limitations
+2. For certain files (primarily MKV files with subtitles), the ffmpeg fails to display progress, ETA, and speed, though upscaling functionality remains operational.
 
 ## Special Thanks
 
