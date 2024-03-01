@@ -24,6 +24,12 @@ const outputFormatTooltip = "If your input file have subtitles stream (mainly in
 const compatibilityModeTooltip = "Should be used only for compatibility troubleshooting, disables most of features"
 const debugModeTooltip = "Show more detailed logs, useful for troubleshooting and debugging"
 
+var mainPos float32 = 580
+var tablePos float32 = 1200
+var bottomBarPos float32 = 1310
+var bottomProgressPos float32 = 120
+var bottomSpeedPos float32 = 110
+
 func loop(window *g.MasterWindow) {
 	resolutionsNames := make([]string, len(resolutions))
 	for index, res := range resolutions {
@@ -41,15 +47,10 @@ func loop(window *g.MasterWindow) {
 	}
 
 	g.SingleWindow().Layout(
-		g.SplitLayout(g.DirectionVertical, 580,
-			g.SplitLayout(g.DirectionHorizontal, 1200,
+		g.SplitLayout(g.DirectionHorizontal, &mainPos,
+			g.SplitLayout(g.DirectionVertical, &tablePos,
 				g.Layout{
 					g.Table().Flags(g.TableFlagsResizable).Rows(buildTableRows()...).Columns(buildTableColumns()...),
-					g.Custom(func() {
-						if len(animeList) == 0 {
-							g.Label(dragDropLabel).Font(g.AddFont("Calibri", 35)).Build()
-						}
-					}),
 				},
 				g.Layout{
 					g.Label("Settings"),
@@ -97,12 +98,12 @@ func loop(window *g.MasterWindow) {
 			g.Layout{
 				g.Label("Logs"),
 				g.InputTextMultiline(&logs).Flags(g.InputTextFlagsReadOnly).Size(1600, 270),
-				g.SplitLayout(g.DirectionHorizontal, 1310,
-					g.SplitLayout(g.DirectionHorizontal, 120,
+				g.SplitLayout(g.DirectionVertical, &bottomBarPos,
+					g.SplitLayout(g.DirectionVertical, &bottomProgressPos,
 						g.Label("Progress: "+totalProgress),
 						g.ProgressBar(progress).Overlay(progressLabel).Size(1170, 20),
 					),
-					g.SplitLayout(g.DirectionHorizontal, 110,
+					g.SplitLayout(g.DirectionVertical, &bottomSpeedPos,
 						g.Label(currentSpeed),
 						g.Label(eta),
 					),
