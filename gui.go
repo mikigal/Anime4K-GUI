@@ -20,6 +20,7 @@ const encoderTooltip = "Codec for encoding output file. In most cases GPU based 
 	"AV1 is compatible only with RTX 4000+ and RX 6500XT+"
 const crfTooltip = "Constant Rate Factor parameter encoder. \nDon't set it too high - file will be very big. " +
 	"\n\nCorrect values: 0 - 51 \nIf you don't know what to enter, leave it as 20"
+const outputFormatTooltip = "If your input file have subtitles stream (mainly in MKV files) you MUST select MKV as output, otherwise ffmpeg will throw error"
 const compatibilityModeTooltip = "Should be used only for compatibility troubleshooting, disables most of features"
 const debugModeTooltip = "Show more detailed logs, useful for troubleshooting and debugging"
 
@@ -77,7 +78,9 @@ func loop(window *g.MasterWindow) {
 					g.Label(""),
 
 					g.Label("Output format"),
+					g.Tooltip(outputFormatTooltip),
 					g.Combo("", outputFormats[settings.OutputFormat], outputFormats, &settings.OutputFormat).Size(400),
+					g.Tooltip(outputFormatTooltip),
 					g.Label(""),
 
 					g.Checkbox("Compatibility mode", &settings.CompatibilityMode),
