@@ -40,20 +40,20 @@ var (
 	}
 
 	allEncoders = []Encoder{
-		{"H.264 (CPU)", "libx264", "cpu"},
-		{"H.264 NVENC (NVIDIA)", "h264_nvenc", "nvidia"},
-		{"H.264 AMF (AMD)", "h264_amf", "advanced micro devices"},
-		{"H.264 QSV (Intel)", "h264_qsv", "intel"},
+		{"H.264 (CPU)", "libx264", "yuv420p", "cpu"},
+		{"H.264 NVENC (NVIDIA)", "h264_nvenc", "yuv420p", "nvidia"},
+		{"H.264 AMF (AMD)", "h264_amf", "yuv420p", "advanced micro devices"},
+		{"H.264 VAAPI (Intel)", "h264_vaapi", "nv12", "intel"},
 
-		{"H.265 (CPU)", "libx265", "cpu"},
-		{"H.265 NVENC (NVIDIA)", "hevc_nvenc", "nvidia"},
-		{"H.265 AMF (AMD)", "hevc_amf", "advanced micro devices"},
-		{"H.265 QSV (Intel)", "hevc_qsv", "intel"},
+		{"H.265 (CPU)", "libx265", "yuv420p", "cpu"},
+		{"H.265 NVENC (NVIDIA)", "hevc_nvenc", "yuv420p", "nvidia"},
+		{"H.265 AMF (AMD)", "hevc_amf", "yuv420p", "advanced micro devices"},
+		{"H.265 VAAPI (Intel)", "hevc_vaapi", "nv12", "intel"},
 
-		{"AV1 (CPU)", "libsvtav1", "cpu"},
-		{"AV1 NVENC (NVIDIA)", "av1_nvenc", "nvidia"},
-		{"AV1 AMF (AMD)", "av1_amf", "advanced micro devices"},
-		{"AV1 QSV (Intel)", "av1_qsv", "intel"},
+		{"AV1 (CPU)", "libsvtav1", "yuv420p", "cpu"},
+		{"AV1 NVENC (NVIDIA)", "av1_nvenc", "yuv420p", "nvidia"},
+		{"AV1 AMF (AMD)", "av1_amf", "yuv420p", "advanced micro devices"},
+		{"AV1 VAAPI (Intel)", "av1_vaapi", "nv12", "intel"},
 	}
 
 	availableEncoders = make([]Encoder, 0)

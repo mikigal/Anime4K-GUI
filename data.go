@@ -20,6 +20,7 @@ type Shader struct {
 type Encoder struct {
 	Name        string
 	FfmpegValue string
+	Format      string
 	Vendor      string
 }
 

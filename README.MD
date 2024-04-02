@@ -23,7 +23,7 @@ Under the hood, the application leverages the power of FFMPEG to handle video pr
 - Saving upscaled videos to disk rather than real-time preview.
 - User-friendly graphical interface for easy operation; no command-line usage is required.
 - Support for most popular video encoders: H.264, H.265, AV1 (CPU based or GPU accelerated)
-- Hardware acceleration with NVIDIA (CUDA + NVENC), AMD (OpenCL + AMF), and Intel (QSV) graphics cards.
+- Hardware acceleration with NVIDIA (CUDA + NVENC), AMD (OpenCL + AMF), and Intel (VAAPI) graphics cards.
 - Compatibility with multiple audio and subtitles streams
 - Support for various video formats: MP4, AVI, and MKV (both input and output).
 - Quick and hassle-free installation.

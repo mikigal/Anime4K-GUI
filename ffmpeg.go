@@ -89,7 +89,8 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 	params = append(params,
 		"-i", fmt.Sprintf("%s", anime.Path), // Path to input file
 		"-init_hw_device", "vulkan",
-		"-vf", fmt.Sprintf("format=yuv420p,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,hwdownload,format=yuv420p", resolution.Width, resolution.Height, shader.Path),
+		"-vf", fmt.Sprintf("format=%s,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,hwdownload,format=yuv420p",
+			availableEncoders[settings.Encoder].Format, resolution.Width, resolution.Height, shader.Path),
 
 		"-c:a", "copy", // Copy all audio streams
 		"-c:s", "copy", // Copy all subtitles streams
@@ -161,7 +162,7 @@ func searchHardwareAcceleration() {
 
 		logMessage("Available GPU acceleration: AMF", false)
 	} else if intel {
-		hwaccelParams = append(hwaccelParams, "-hwaccel", "vulkan")
+		hwaccelParams = append(hwaccelParams, "-hwaccel", "vaapi")
 		addEncoders("intel")
 
 		logMessage("Available GPU acceleration: QSV", false)
