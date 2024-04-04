@@ -162,10 +162,10 @@ func searchHardwareAcceleration() {
 
 		logMessage("Available GPU acceleration: AMF", false)
 	} else if intel {
-		hwaccelParams = append(hwaccelParams, "-hwaccel", "vaapi")
-		addEncoders("intel")
+		settings.CompatibilityMode = true
+		addEncoders("cpu")
 
-		logMessage("Available GPU acceleration: QSV", false)
+		logMessage("Intel GPUs are not supported - application may not work correctly", false)
 	} else {
 		settings.CompatibilityMode = true
 		addEncoders("cpu")

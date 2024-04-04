@@ -23,7 +23,7 @@ Under the hood, the application leverages the power of FFMPEG to handle video pr
 - Saving upscaled videos to disk rather than real-time preview.
 - User-friendly graphical interface for easy operation; no command-line usage is required.
 - Support for most popular video encoders: H.264, H.265, AV1 (CPU based or GPU accelerated)
-- Hardware acceleration with NVIDIA (CUDA + NVENC), AMD (OpenCL + AMF), and Intel (VAAPI) graphics cards.
+- Hardware acceleration with NVIDIA (CUDA + NVENC), AMD (OpenCL + AMF).
 - Compatibility with multiple audio and subtitles streams
 - Support for various video formats: MP4, AVI, and MKV (both input and output).
 - Quick and hassle-free installation.
@@ -37,7 +37,7 @@ Before installing and running the application, ensure that your system meets the
 - Knowledge about various Anime4K shaders modes - please read [documentation](https://github.com/bloc97/Anime4K/blob/master/md/GLSL_Instructions_Advanced.md#modes). This will allow you to get better results of upscaling.
 
 Currently, NVIDIA graphics cards should be most stable as most tests were did with it. <br>
-Intel Arc in theory should work but can not be tested due to limited access to hardware. <br>
+Intel GPUs are not supported <br>
 If you have compatibility problems please create an issue with application logs and your computer's specification. <br>
 <br>
 In the future we plan to add support for Linux and macOS (Intel and Apple Silicon).
