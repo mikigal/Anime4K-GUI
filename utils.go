@@ -62,7 +62,9 @@ func logMessage(message string, additionalLineBefore bool) {
 		logs += "\n"
 	}
 
-	logs += fmt.Sprintf("[%s] %s\n", time.Now().Format("15:04:05"), message)
+	line := fmt.Sprintf("[%s] %s\n", time.Now().Format("15:04:05"), message)
+	logs += line
+	fmt.Print(line)
 	g.Update()
 }
 
