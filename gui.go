@@ -21,7 +21,7 @@ const encoderTooltip = "Codec for encoding output file. In most cases GPU based 
 	"AV1 is compatible only with RTX 4000+ and RX 6500XT+"
 const crfTooltip = "Constant Rate Factor parameter encoder. \nDon't set it too high - file will be very big. " +
 	"\n\nCorrect values: 0 - 51 \nIf you don't know what to enter, leave it as 20"
-const outputFormatTooltip = "If your input file have subtitles stream (mainly in MKV files) you MUST select MKV as output, otherwise ffmpeg will throw error"
+const outputFormatTooltip = "If your input file contains subtitles streams you must use MKV as output format due to other formats limitations"
 const compatibilityModeTooltip = "Should be used only for compatibility troubleshooting, disables most of features"
 const debugModeTooltip = "Show more detailed logs, useful for troubleshooting and debugging"
 
@@ -160,18 +160,18 @@ LOOP:
 		divider, _ := strconv.ParseFloat(frameRateSplit[1], 64)
 
 		anime := Anime{
-			Name:        pathSplit[len(pathSplit)-1],
-			Length:      int64(data.Format.DurationSeconds * 1000),
-			Size:        file.Size(),
-			Width:       videoStream.Width,
-			Height:      videoStream.Height,
-			FrameRate:   base / divider,
-			TotalFrames: int((base / divider) * data.Format.DurationSeconds),
-			Path:        path,
-			Streams:     data.Streams,
-			Status:      NotStarted,
+			Name:               pathSplit[len(pathSplit)-1],
+			Length:             int64(data.Format.DurationSeconds * 1000),
+			Size:               file.Size(),
+			Width:              videoStream.Width,
+			Height:             videoStream.Height,
+			FrameRate:          base / divider,
+			TotalFrames:        int((base / divider) * data.Format.DurationSeconds),
+			HasSubtitlesStream: data.FirstSubtitleStream() != nil,
+			Path:               path,
+			Streams:            data.Streams,
+			Status:             NotStarted,
 		}
-
 		animeList = append(animeList, anime)
 		totalProgress = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
 		logMessage("Added file "+path, false)

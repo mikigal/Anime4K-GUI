@@ -150,6 +150,15 @@ func startProcessing() {
 		animeList[index].Status = Processing
 		g.Update()
 
+		if anime.HasSubtitlesStream && outputFormat != "mkv" {
+			animeList[index].Status = Error
+			buttonLabel = "Start"
+			processing = false
+			logMessage("File "+anime.Name+" contains subtitles stream, output format must be MKV", false)
+			g.Update()
+			return
+		}
+
 		outputPath := fmt.Sprintf("%s_upscaled.%s", strings.TrimSuffix(anime.Path, filepath.Ext(anime.Path)), strings.ToLower(outputFormat))
 		ffmpegParams := buildUpscalingParams(anime, resolution, shader, outputPath)
 
