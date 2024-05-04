@@ -95,8 +95,16 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 		"-c:a", "copy", // Copy all audio streams
 		"-c:s", "copy", // Copy all subtitles streams
 		"-c:d", "copy", // Copy all data streams
-		"-map", "0", // Map all streams,
-		"-crf", fmt.Sprintf("%d", settings.Crf), // Constant Rate Factor (CRF) for encoder
+	)
+
+	for _, stream := range anime.Streams {
+		if stream.CodecName != "mjpeg" {
+			params = append(params, "-map", fmt.Sprintf("0:%d", stream.Index))
+		}
+	}
+
+	params = append(params,
+		"-crf", fmt.Sprintf("%d", settings.Crf), // Constant Rate Factor (CRF) for encoder)
 	)
 
 	if !settings.CompatibilityMode {

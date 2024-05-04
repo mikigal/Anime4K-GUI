@@ -153,13 +153,14 @@ LOOP:
 
 		split := strings.Split(path, string(os.PathSeparator))
 		anime := Anime{
-			Name:   split[len(split)-1],
-			Length: int64(data.Format.DurationSeconds * 1000),
-			Size:   file.Size(),
-			Width:  data.FirstVideoStream().Width,
-			Height: data.FirstVideoStream().Height,
-			Path:   path,
-			Status: NotStarted,
+			Name:    split[len(split)-1],
+			Length:  int64(data.Format.DurationSeconds * 1000),
+			Size:    file.Size(),
+			Width:   data.FirstVideoStream().Width,
+			Height:  data.FirstVideoStream().Height,
+			Path:    path,
+			Streams: data.Streams,
+			Status:  NotStarted,
 		}
 
 		animeList = append(animeList, anime)

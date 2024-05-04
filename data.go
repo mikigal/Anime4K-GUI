@@ -1,15 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"gopkg.in/vansante/go-ffprobe.v2"
+)
 
 type Anime struct {
-	Name   string
-	Length int64
-	Size   int64
-	Width  int
-	Height int
-	Path   string
-	Status AnimeStatus
+	Name    string
+	Length  int64
+	Size    int64
+	Width   int
+	Height  int
+	Streams []*ffprobe.Stream
+	Path    string
+	Status  AnimeStatus
 }
 
 type Shader struct {
