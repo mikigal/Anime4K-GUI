@@ -6,14 +6,16 @@ import (
 )
 
 type Anime struct {
-	Name    string
-	Length  int64
-	Size    int64
-	Width   int
-	Height  int
-	Streams []*ffprobe.Stream
-	Path    string
-	Status  AnimeStatus
+	Name        string
+	Length      int64
+	Size        int64
+	Width       int
+	Height      int
+	FrameRate   float64
+	TotalFrames int
+	Streams     []*ffprobe.Stream
+	Path        string
+	Status      AnimeStatus
 }
 
 type Shader struct {

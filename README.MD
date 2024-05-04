@@ -86,7 +86,6 @@ Due to GitHub maximum file limit I can not provide FFMPEG's binaries in this rep
 
 ## Known issues
 1. If your input file contains subtitles streams you must use MKV as output format due to other formats limitations
-2. For certain files (primarily MKV files with subtitles), the ffmpeg fails to display progress, ETA, and speed, though upscaling functionality remains operational.
 
 ## Special Thanks
 

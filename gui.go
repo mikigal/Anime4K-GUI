@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -151,16 +152,24 @@ LOOP:
 			return
 		}
 
-		split := strings.Split(path, string(os.PathSeparator))
+		videoStream := data.FirstVideoStream()
+		pathSplit := strings.Split(path, string(os.PathSeparator))
+
+		frameRateSplit := strings.Split(videoStream.AvgFrameRate, "/")
+		base, _ := strconv.ParseFloat(frameRateSplit[0], 64)
+		divider, _ := strconv.ParseFloat(frameRateSplit[1], 64)
+
 		anime := Anime{
-			Name:    split[len(split)-1],
-			Length:  int64(data.Format.DurationSeconds * 1000),
-			Size:    file.Size(),
-			Width:   data.FirstVideoStream().Width,
-			Height:  data.FirstVideoStream().Height,
-			Path:    path,
-			Streams: data.Streams,
-			Status:  NotStarted,
+			Name:        pathSplit[len(pathSplit)-1],
+			Length:      int64(data.Format.DurationSeconds * 1000),
+			Size:        file.Size(),
+			Width:       videoStream.Width,
+			Height:      videoStream.Height,
+			FrameRate:   base / divider,
+			TotalFrames: int((base / divider) * data.Format.DurationSeconds),
+			Path:        path,
+			Streams:     data.Streams,
+			Status:      NotStarted,
 		}
 
 		animeList = append(animeList, anime)

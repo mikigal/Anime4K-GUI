@@ -41,6 +41,21 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 		millis := durationToMillis(time)
 		progress = float32(millis) / float32(anime.Length)
 
+		if time == "N/A" { // FFMPEG does not report time, we must estimate it manually
+			split := strings.Split(line, "frame=")
+			if len(split) > 1 { // Just for safety
+				frame, _ := strconv.ParseFloat(strings.ReplaceAll(strings.Split(split[1], "f")[0], " ", ""), 32)
+				progress = float32(frame) / float32(anime.TotalFrames)
+
+				fps, _ := strconv.ParseFloat(strings.ReplaceAll(strings.Split(strings.Split(line, "fps=")[1], "q")[0], " ", ""), 32)
+				currentSpeed = fmt.Sprintf("Speed: %.2fx", fps/anime.FrameRate)
+
+				leftFrames := anime.TotalFrames - int(frame)
+				leftMillis := int64((float32(leftFrames) / float32(fps)) * 1000)
+				eta = fmt.Sprintf("ETA: %s", formatMillis(leftMillis))
+			}
+		}
+
 		rounded := int(progress * 100)
 		if rounded == 99 {
 			progress = 1
