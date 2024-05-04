@@ -82,9 +82,10 @@ var (
 		"Drag n' drop your video files into this window (supported extensions: mp4, avi, mkv)\n\n"
 
 	// Internals
-	animeList  = make([]Anime, 0)
-	processing = false
-	cancelled  = false
+	animeList       = make([]Anime, 0)
+	processing      = false
+	cancelled       = false
+	codecsBlacklist = []string{"mjpeg", "png"}
 
 	// FFMPEG params
 	hwaccelParams []string

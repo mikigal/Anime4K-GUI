@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -113,7 +114,7 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 	)
 
 	for _, stream := range anime.Streams {
-		if stream.CodecName != "mjpeg" {
+		if !slices.Contains(codecsBlacklist, stream.CodecName) {
 			params = append(params, "-map", fmt.Sprintf("0:%d", stream.Index))
 		}
 	}
