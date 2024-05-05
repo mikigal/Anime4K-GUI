@@ -119,3 +119,21 @@ func check(err error) {
 		log.Fatal(err)
 	}
 }
+
+func handleStartUpscalingError(outputPath string, animeIndex int, errorMessage string, err error) {
+	if outputPath != "" {
+		os.Remove(outputPath)
+	}
+
+	animeList[animeIndex].Status = Error
+	gui.ButtonLabel = "Start"
+	processing = false
+	g.Update()
+
+	if err.Error() != "" {
+		handleSoftError(errorMessage, err.Error())
+		return
+	}
+
+	logMessage("File "+animeList[animeIndex].Name+" contains subtitles stream, output format must be MKV", false)
+}

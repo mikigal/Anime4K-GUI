@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -154,11 +155,7 @@ func startProcessing() {
 		g.Update()
 
 		if anime.HasSubtitlesStream && outputFormat != "mkv" {
-			animeList[index].Status = Error
-			gui.ButtonLabel = "Start"
-			processing = false
-			logMessage("File "+anime.Name+" contains subtitles stream, output format must be MKV", false)
-			g.Update()
+			handleStartUpscalingError("", index, "File "+anime.Name+" contains subtitles stream, output format must be MKV", errors.New(""))
 			return
 		}
 
@@ -167,11 +164,7 @@ func startProcessing() {
 
 		workingDirectory, err := os.Getwd()
 		if err != nil {
-			animeList[index].Status = Error
-			gui.ButtonLabel = "Start"
-			processing = false
-			g.Update()
-			handleSoftError("Getting working directory error:", err.Error())
+			handleStartUpscalingError("", index, "Getting working directory error:", err)
 			return
 		}
 
@@ -189,23 +182,13 @@ func startProcessing() {
 
 		stderr, err := cmd.StderrPipe()
 		if err != nil {
-			os.Remove(outputPath)
-			animeList[index].Status = Error
-			gui.ButtonLabel = "Start"
-			processing = false
-			g.Update()
-			handleSoftError("Creating pipe error:", err.Error())
+			handleStartUpscalingError(outputPath, index, "Creating pipe error:", err)
 			return
 		}
 
 		err = cmd.Start()
 		if err != nil {
-			os.Remove(outputPath)
-			animeList[index].Status = Error
-			gui.ButtonLabel = "Start"
-			processing = false
-			g.Update()
-			handleSoftError("Starting ffmpeg process error:", err.Error())
+			handleStartUpscalingError(outputPath, index, "Starting ffmpeg process error:", err)
 			return
 		}
 
@@ -213,17 +196,12 @@ func startProcessing() {
 
 		err = cmd.Wait()
 		if err != nil {
-			os.Remove(outputPath)
 			if cancelled {
 				cancelled = false
 				return
 			}
 
-			animeList[index].Status = Error
-			gui.ButtonLabel = "Start"
-			processing = false
-			g.Update()
-			handleSoftError("FFMPEG Error:", err.Error())
+			handleStartUpscalingError(outputPath, index, "FFMPEG Error:", err)
 			handleSoftError("FFMPEG logs:", ffmpegLogs)
 			return
 		}
