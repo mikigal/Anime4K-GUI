@@ -59,11 +59,11 @@ func logDebug(message string, additionalLineBefore bool) {
 
 func logMessage(message string, additionalLineBefore bool) {
 	if additionalLineBefore {
-		logs += "\n"
+		gui.Logs += "\n"
 	}
 
 	line := fmt.Sprintf("[%s] %s\n", time.Now().Format("15:04:05"), message)
-	logs += line
+	gui.Logs += line
 	fmt.Print(line)
 	g.Update()
 }
@@ -78,8 +78,8 @@ func handleSoftError(message string, logs string) {
 		animeList[i].Status = Error
 	}
 
-	currentSpeed = "Speed:"
-	eta = "ETA:"
+	gui.CurrentSpeed = "Speed:"
+	gui.Eta = "ETA:"
 	g.Update()
 }
 

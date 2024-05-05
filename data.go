@@ -19,6 +19,16 @@ type Anime struct {
 	Status             AnimeStatus
 }
 
+type Gui struct {
+	CurrentSpeed  string
+	Eta           string
+	Progress      float32
+	ProgressLabel string
+	TotalProgress string
+	ButtonLabel   string
+	Logs          string
+}
+
 type Shader struct {
 	Name string
 	Path string

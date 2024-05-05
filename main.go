@@ -54,9 +54,9 @@ var (
 	}
 
 	availableEncoders = make([]Encoder, 0)
+	outputFormats     = []string{"MP4", "AVI", "MKV"}
 
-	outputFormats = []string{"MP4", "AVI", "MKV"}
-
+	// Settings
 	settings = Settings{
 		UseSavedPosition:  true,
 		Resolution:        5,
@@ -69,17 +69,19 @@ var (
 		Version:           version,
 	}
 
-	// UI variables
-	currentSpeed  = "Speed:"
-	eta           = "ETA:"
-	progress      float32
-	progressLabel string
-	totalProgress string
-	buttonLabel   = "Start"
-	logs          = "Version: Anime4K-GUI (" + version + ")\n" +
-		"Authors: mikigal (whole app + FFMPEG tweaks), Ethan (core FFMPEG stuff)\n" +
-		"Special thanks to bloc97 for Anime4K shaders\n" +
-		"Drag n' drop your video files into this window (supported extensions: mp4, avi, mkv)\n\n"
+	// GUI pointers
+	gui = Gui{
+		CurrentSpeed:  "Speed:",
+		Eta:           "ETA:",
+		Progress:      0,
+		ProgressLabel: "",
+		TotalProgress: "",
+		ButtonLabel:   "Start",
+		Logs: "Version: Anime4K-GUI (" + version + ")\n" +
+			"Authors: mikigal (whole app + FFMPEG tweaks), Ethan (core FFMPEG stuff)\n" +
+			"Special thanks to bloc97 for Anime4K shaders\n" +
+			"Drag n' drop your video files into this window (supported extensions: mp4, avi, mkv)\n\n",
+	}
 
 	// Internals
 	animeList       = make([]Anime, 0)
@@ -130,9 +132,9 @@ func startProcessing() {
 		}
 	}
 
-	progress = 0
-	progressLabel = ""
-	buttonLabel = "Cancel"
+	gui.Progress = 0
+	gui.ProgressLabel = ""
+	gui.ButtonLabel = "Cancel"
 	processing = true
 	resetUI()
 
@@ -153,7 +155,7 @@ func startProcessing() {
 
 		if anime.HasSubtitlesStream && outputFormat != "mkv" {
 			animeList[index].Status = Error
-			buttonLabel = "Start"
+			gui.ButtonLabel = "Start"
 			processing = false
 			logMessage("File "+anime.Name+" contains subtitles stream, output format must be MKV", false)
 			g.Update()
@@ -166,7 +168,7 @@ func startProcessing() {
 		workingDirectory, err := os.Getwd()
 		if err != nil {
 			animeList[index].Status = Error
-			buttonLabel = "Start"
+			gui.ButtonLabel = "Start"
 			processing = false
 			g.Update()
 			handleSoftError("Getting working directory error:", err.Error())
@@ -189,7 +191,7 @@ func startProcessing() {
 		if err != nil {
 			os.Remove(outputPath)
 			animeList[index].Status = Error
-			buttonLabel = "Start"
+			gui.ButtonLabel = "Start"
 			processing = false
 			g.Update()
 			handleSoftError("Creating pipe error:", err.Error())
@@ -200,7 +202,7 @@ func startProcessing() {
 		if err != nil {
 			os.Remove(outputPath)
 			animeList[index].Status = Error
-			buttonLabel = "Start"
+			gui.ButtonLabel = "Start"
 			processing = false
 			g.Update()
 			handleSoftError("Starting ffmpeg process error:", err.Error())
@@ -218,7 +220,7 @@ func startProcessing() {
 			}
 
 			animeList[index].Status = Error
-			buttonLabel = "Start"
+			gui.ButtonLabel = "Start"
 			processing = false
 			g.Update()
 			handleSoftError("FFMPEG Error:", err.Error())
@@ -231,7 +233,7 @@ func startProcessing() {
 		logMessage(fmt.Sprintf("Finished processing %s", anime.Name), false)
 	}
 
-	buttonLabel = "Start"
+	gui.ButtonLabel = "Start"
 	processing = false
 	resetUI()
 	logMessage("Finished upscaling!", false)
@@ -261,7 +263,7 @@ func cancelProcessing() {
 	}
 
 	processing = false
-	buttonLabel = "Start"
+	gui.ButtonLabel = "Start"
 	resetUI()
 	logMessage("Cancelled upscaling!", false)
 	g.Update()

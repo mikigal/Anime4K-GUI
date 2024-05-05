@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	g "github.com/AllenDang/giu"
-	"github.com/jaypipes/ghw"
 )
 
 func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
@@ -28,8 +27,8 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 		}
 
 		if !strings.HasPrefix(line, "frame=") {
-			trim := strings.Replace(line, "\r", "", -1)
-			trim = strings.Replace(trim, "\n", "", -1)
+			trim := strings.ReplaceAll(line, "\r", "")
+			trim = strings.ReplaceAll(trim, "\n", "")
 			logDebug(trim, false)
 			ffmpegLogs += line
 			line = ""
@@ -37,49 +36,47 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 		}
 
 		// It's line with speed and time
-		speedRaw := strings.Split(strings.Split(line, "speed=")[1], " ")[0]
-		time := strings.Split(strings.Split(strings.Split(line, "time=")[1], " ")[0], ".")[0]
+		time := strings.Split(readOutputParameter(line, "time", "bitrate"), ".")[0]
 		millis := durationToMillis(time)
-		progress = float32(millis) / float32(anime.Length)
+		gui.Progress = float32(millis) / float32(anime.Length)
 
-		if time == "N/A" { // FFMPEG does not report time, we must estimate it manually
-			split := strings.Split(line, "frame=")
-			if len(split) > 1 { // Just for safety
-				frame, _ := strconv.ParseFloat(strings.ReplaceAll(strings.Split(split[1], "f")[0], " ", ""), 32)
-				progress = float32(frame) / float32(anime.TotalFrames)
+		// FFMPEG may not report time, we must calculate it manually
+		if time == "N/A" && len(strings.Split(line, "frame=")) > 1 {
+			frame, _ := strconv.ParseFloat(readOutputParameter(line, "frame", "fps"), 32)
+			gui.Progress = float32(frame) / float32(anime.TotalFrames)
 
-				fps, _ := strconv.ParseFloat(strings.ReplaceAll(strings.Split(strings.Split(line, "fps=")[1], "q")[0], " ", ""), 32)
-				currentSpeed = fmt.Sprintf("Speed: %.2fx", fps/anime.FrameRate)
+			fps, _ := strconv.ParseFloat(readOutputParameter(line, "fps", "q"), 32)
+			gui.CurrentSpeed = fmt.Sprintf("Speed: %.2fx", fps/anime.FrameRate)
 
-				leftFrames := anime.TotalFrames - int(frame)
-				leftMillis := int64((float32(leftFrames) / float32(fps)) * 1000)
-				eta = fmt.Sprintf("ETA: %s", formatMillis(leftMillis))
-			}
+			leftFrames := anime.TotalFrames - int(frame)
+			leftMillis := int64((float32(leftFrames) / float32(fps)) * 1000)
+			gui.Eta = fmt.Sprintf("ETA: %s", formatMillis(leftMillis))
 		}
 
-		rounded := int(progress * 100)
-		if rounded == 99 {
-			progress = 1
-			progressLabel = "100%"
-		} else {
-			progressLabel = fmt.Sprintf("%d%%", rounded)
-		}
-
-		// Workaround for disappearing speed
+		// Speed
+		speedRaw := strings.ReplaceAll(readOutputParameter(line, "speed", ""), "x", "")
 		if strings.Contains(speedRaw, ".") {
-			speedValue, _ := strconv.ParseFloat(strings.Replace(speedRaw, "x", "", -1), 32)
-
-			currentSpeed = fmt.Sprintf("Speed: %s", speedRaw)
+			gui.CurrentSpeed = fmt.Sprintf("Speed: %s", speedRaw)
+			speedValue, _ := strconv.ParseFloat(speedRaw, 32)
 
 			// Just for safety
 			if speedValue != 0 {
 				etaMillis := float64(anime.Length-millis) / speedValue
-				eta = fmt.Sprintf("ETA: %s", formatMillis(int64(etaMillis)))
+				gui.Eta = fmt.Sprintf("ETA: %s", formatMillis(int64(etaMillis)))
 			}
 		}
 
-		ffmpegLogs = strings.Replace(ffmpegLogs, progressLine, line, -1)
-		logs = strings.Replace(logs, progressLine, line, -1)
+		// Progress bar
+		rounded := int(gui.Progress * 100)
+		if rounded == 99 {
+			gui.Progress = 1
+			gui.ProgressLabel = "100%"
+		} else {
+			gui.ProgressLabel = fmt.Sprintf("%d%%", rounded)
+		}
+
+		ffmpegLogs = strings.ReplaceAll(ffmpegLogs, progressLine, line)
+		gui.Logs = strings.ReplaceAll(gui.Logs, progressLine, line)
 		progressLine = line
 
 		line = ""
@@ -136,71 +133,10 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 	return params
 }
 
-func searchHardwareAcceleration() {
-	nvidia := false
-	amd := false
-	intel := false
-
-	gpus, err := ghw.GPU()
-	if err != nil {
-		handleSoftError("Getting GPU info error", err.Error())
-		return
+func readOutputParameter(line string, parameter string, nextParameter string) string {
+	if nextParameter == "" {
+		return strings.ReplaceAll(strings.Split(line, parameter+"=")[1], " ", "")
 	}
 
-	logMessage(fmt.Sprintf("Detected GPUs (%d): ", len(gpus.GraphicsCards)), false)
-
-	for index, gpu := range gpus.GraphicsCards {
-		vendor := strings.ToLower(gpu.DeviceInfo.Vendor.Name)
-
-		logDebug(fmt.Sprintf("GPU ID: %d, Vendor: %s", index, vendor), false)
-
-		if strings.Contains(vendor, "nvidia") {
-			nvidia = true
-		} else if strings.Contains(vendor, "amd") || strings.Contains(vendor, "advanced micro devices") {
-			amd = true
-		} else if strings.Contains(vendor, "intel") {
-			intel = true
-		}
-
-		logMessage(fmt.Sprintf("  %d. %s", index+1, gpu.DeviceInfo.Product.Name), false)
-	}
-
-	if (nvidia && intel) || (amd && intel) {
-		intel = false
-		logDebug("Ignoring Intel iGPU, detected NVIDIA/AMD dGPU)", false)
-	}
-
-	if nvidia && amd { // AMD is iGPU
-		amd = false
-		logDebug("Ignoring AMD iGPU, detected NVIDIA dGPU", false)
-	}
-
-	if nvidia {
-		hwaccelParams = append(hwaccelParams, "-hwaccel_device", "cuda", "-hwaccel_output_format", "cuda")
-		addEncoders("nvidia")
-
-		logMessage("Available GPU acceleration: CUDA + NVENC", false)
-	} else if amd {
-		hwaccelParams = append(hwaccelParams, "-hwaccel_device", "opencl")
-		addEncoders("advanced micro devices")
-
-		logMessage("Available GPU acceleration: AMF", false)
-	} else if intel {
-		settings.CompatibilityMode = true
-		addEncoders("cpu")
-
-		logMessage("Intel GPUs are not supported - application may not work correctly", false)
-	} else {
-		settings.CompatibilityMode = true
-		addEncoders("cpu")
-
-		logMessage("There's no available GPU acceleration, application may not work correctly! Please verify your GPU drivers or report bug on GitHub", false)
-	}
-
-	for index, encoder := range availableEncoders {
-		if encoder.Vendor != "cpu" {
-			settings.Encoder = int32(index)
-			break
-		}
-	}
+	return strings.ReplaceAll(strings.Split(strings.Split(line, parameter+"=")[1], nextParameter)[0], " ", "")
 }

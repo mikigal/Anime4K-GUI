@@ -93,20 +93,20 @@ func loop(window *g.MasterWindow) {
 
 					g.Label(""),
 
-					g.Button(buttonLabel).OnClick(handleButton).Size(360, 30),
+					g.Button(gui.ButtonLabel).OnClick(handleButton).Size(360, 30),
 				},
 			),
 			g.Layout{
 				g.Label("Logs"),
-				g.InputTextMultiline(&logs).Flags(g.InputTextFlagsReadOnly).Size(1600, 270),
+				g.InputTextMultiline(&gui.Logs).Flags(g.InputTextFlagsReadOnly).Size(1600, 270),
 				g.SplitLayout(g.DirectionVertical, &bottomBarPos,
 					g.SplitLayout(g.DirectionVertical, &bottomProgressPos,
-						g.Label("Progress: "+totalProgress),
-						g.ProgressBar(progress).Overlay(progressLabel).Size(1170, 20),
+						g.Label("Progress: "+gui.TotalProgress),
+						g.ProgressBar(gui.Progress).Overlay(gui.ProgressLabel).Size(1170, 20),
 					),
 					g.SplitLayout(g.DirectionVertical, &bottomSpeedPos,
-						g.Label(currentSpeed),
-						g.Label(eta),
+						g.Label(gui.CurrentSpeed),
+						g.Label(gui.Eta),
 					),
 				),
 			},
@@ -173,7 +173,7 @@ LOOP:
 			Status:             NotStarted,
 		}
 		animeList = append(animeList, anime)
-		totalProgress = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
+		gui.TotalProgress = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
 		logMessage("Added file "+path, false)
 	}
 }
@@ -187,9 +187,9 @@ func handleButton() {
 }
 
 func resetUI() {
-	currentSpeed = "Speed:"
-	eta = "ETA:"
-	totalProgress = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
+	gui.CurrentSpeed = "Speed:"
+	gui.Eta = "ETA:"
+	gui.TotalProgress = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
 	g.Update()
 }
 
