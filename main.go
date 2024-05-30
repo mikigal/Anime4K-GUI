@@ -98,6 +98,7 @@ var (
 func main() {
 	checkDebugParam()
 	loaded := loadSettings()
+	preventSleep()
 
 	window := g.NewMasterWindow("Anime4K-GUI", 1600, 950, g.MasterWindowFlagsNotResizable)
 	searchHardwareAcceleration()
