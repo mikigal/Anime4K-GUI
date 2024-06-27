@@ -6,7 +6,6 @@ import (
 	"time"
 
 	g "github.com/AllenDang/giu"
-	"github.com/AllenDang/imgui-go"
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
@@ -44,6 +43,7 @@ func loop(window *g.MasterWindow) {
 	}
 
 	g.SingleWindow().Layout(
+		g.Label("asda"),
 		g.SplitLayout(g.DirectionHorizontal, &mainPos,
 			g.SplitLayout(g.DirectionVertical, &tablePos,
 				g.Layout{
@@ -54,18 +54,18 @@ func loop(window *g.MasterWindow) {
 					g.Label(""),
 
 					g.Label("Target resolution"),
-					g.Combo("", resolutionsNames[settings.Resolution], resolutionsNames, &settings.Resolution).Size(400),
+					g.Combo("##", resolutionsNames[settings.Resolution], resolutionsNames, &settings.Resolution).Size(400),
 					g.Label(""),
 
 					g.Label("Shaders"),
 					g.Tooltip(shadersTooltip),
-					g.Combo("", shaders[settings.Shaders].Name, shadersNames, &settings.Shaders).Size(400),
+					g.Combo("##", shaders[settings.Shaders].Name, shadersNames, &settings.Shaders).Size(400),
 					g.Tooltip(shadersTooltip),
 					g.Label(""),
 
 					g.Label("Encoder"),
 					g.Tooltip(encoderTooltip),
-					g.Combo("", availableEncoders[settings.Encoder].Name, availableEncodersNames, &settings.Encoder).Size(400),
+					g.Combo("##", availableEncoders[settings.Encoder].Name, availableEncodersNames, &settings.Encoder).Size(400),
 					g.Tooltip(encoderTooltip),
 					g.Label(""),
 
@@ -77,7 +77,7 @@ func loop(window *g.MasterWindow) {
 
 					g.Label("Output format"),
 					g.Tooltip(outputFormatTooltip),
-					g.Combo("", outputFormats[settings.OutputFormat], outputFormats, &settings.OutputFormat).Size(400),
+					g.Combo("##", outputFormats[settings.OutputFormat], outputFormats, &settings.OutputFormat).Size(400),
 					g.Tooltip(outputFormatTooltip),
 					g.Label(""),
 
@@ -163,13 +163,13 @@ func buildTableRows() []*g.TableRowWidget {
 
 func buildTableColumns() []*g.TableColumnWidget {
 	columns := []*g.TableColumnWidget{
-		g.TableColumn("ID").Flags(imgui.TableColumnFlags_WidthFixed).InnerWidthOrWeight(100),
-		g.TableColumn("Title").Flags(imgui.TableColumnFlags_WidthFixed).InnerWidthOrWeight(550),
-		g.TableColumn("Length").Flags(imgui.TableColumnFlags_WidthFixed).InnerWidthOrWeight(100),
-		g.TableColumn("Size").Flags(imgui.TableColumnFlags_WidthFixed).InnerWidthOrWeight(100),
-		g.TableColumn("Resolution").Flags(imgui.TableColumnFlags_WidthFixed).InnerWidthOrWeight(100),
-		g.TableColumn("Status").Flags(imgui.TableColumnFlags_WidthFixed).InnerWidthOrWeight(100),
-		g.TableColumn("Action").Flags(imgui.TableColumnFlags_WidthFixed).InnerWidthOrWeight(100),
+		g.TableColumn("ID").Flags(g.TableColumnFlagsWidthFixed).InnerWidthOrWeight(100),
+		g.TableColumn("Title").Flags(g.TableColumnFlagsWidthFixed).InnerWidthOrWeight(550),
+		g.TableColumn("Length").Flags(g.TableColumnFlagsWidthFixed).InnerWidthOrWeight(100),
+		g.TableColumn("Size").Flags(g.TableColumnFlagsWidthFixed).InnerWidthOrWeight(100),
+		g.TableColumn("Resolution").Flags(g.TableColumnFlagsWidthFixed).InnerWidthOrWeight(100),
+		g.TableColumn("Status").Flags(g.TableColumnFlagsWidthFixed).InnerWidthOrWeight(100),
+		g.TableColumn("Action").Flags(g.TableColumnFlagsWidthFixed).InnerWidthOrWeight(100),
 	}
 
 	return columns
