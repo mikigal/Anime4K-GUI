@@ -170,6 +170,7 @@ LOOP:
 			HasSubtitlesStream: data.FirstSubtitleStream() != nil,
 			Path:               path,
 			Streams:            data.Streams,
+			PixelFormat:        videoStream.PixFmt,
 			Status:             NotStarted,
 		}
 		animeList = append(animeList, anime)

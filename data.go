@@ -15,6 +15,7 @@ type Anime struct {
 	TotalFrames        int
 	HasSubtitlesStream bool
 	Streams            []*ffprobe.Stream
+	PixelFormat        string
 	Path               string
 	Status             AnimeStatus
 }
@@ -37,7 +38,6 @@ type Shader struct {
 type Encoder struct {
 	Name        string
 	FfmpegValue string
-	Format      string
 	Vendor      string
 }
 
