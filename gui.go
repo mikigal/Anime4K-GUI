@@ -13,7 +13,8 @@ import (
 const dragDropLabel = "\n\n\n\n\n\n\n                                              Drag n' Drop your anime here"
 const shadersTooltip = "Check the project's GitHub page if you're not sure what to choose"
 const encoderTooltip = "Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n" +
-	"AV1 is compatible only with RTX 4000+ and RX 6500XT+"
+	"GPU based AV1 is compatible only with RTX 4000+ and RX 6500XT+\n" +
+	"HDR videos are supported only by AV1 codec"
 const crfTooltip = "Constant Rate Factor parameter encoder. \nDon't set it too high - file will be very big. " +
 	"\n\nCorrect values: 0 - 51 \nIf you don't know what to enter, leave it as 20"
 const outputFormatTooltip = "If your input file contains subtitles streams you must use MKV as output format due to other formats limitations"

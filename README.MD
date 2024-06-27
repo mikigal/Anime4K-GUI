@@ -13,7 +13,7 @@ Under the hood, the application leverages the power of FFMPEG to handle video pr
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [FFMPEG Distribution](#ffmpeg-distribution)
-- [Known issues](#known-issues)
+- [Limitations](#limitations)
 - [Special Thanks](#special-thanks)
 - [Contribute](#contribute)
 
@@ -22,6 +22,7 @@ Under the hood, the application leverages the power of FFMPEG to handle video pr
 - Anime upscaling using the Anime4K shaders.
 - Saving upscaled videos to disk rather than real-time preview.
 - User-friendly graphical interface for easy operation; no command-line usage is required.
+- HDR compatibility
 - Support for most popular video encoders: H.264, H.265, AV1 (CPU based or GPU accelerated)
 - Hardware acceleration with NVIDIA (CUDA + NVENC), AMD (OpenCL + AMF).
 - Compatibility with multiple audio and subtitles streams
@@ -84,8 +85,9 @@ Issues regarding low output quality will be **instantly** closed. Problems like 
 
 Due to GitHub maximum file limit I can not provide FFMPEG's binaries in this repository. If you want to compile project by yourself you have to download FFMPEG build [here](https://github.com/BtbN/FFmpeg-Builds) and put `ffmpeg.exe` and `ffprobe.exe` into `resources/ffmpeg` directory
 
-## Known issues
+## Limitations
 1. If your input file contains subtitles streams you must use MKV as output format due to other formats limitations
+2. HDR videos are supported only with AV1 output codec
 
 ## Special Thanks
 
