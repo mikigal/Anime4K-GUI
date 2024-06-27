@@ -3,11 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
-	"slices"
-	"strconv"
-	"strings"
 	"time"
 
 	g "github.com/AllenDang/giu"
@@ -125,57 +120,8 @@ func handleDrop(files []string) {
 	ctx, closeCtx := context.WithTimeout(context.Background(), 5*time.Second)
 	defer closeCtx()
 
-LOOP:
 	for _, path := range files {
-		extension := filepath.Ext(path)
-		if !slices.Contains(supportedInput, extension) {
-			logMessage(fmt.Sprintf("Invalid input file format (supported: %s)! Path: %s", strings.Join(supportedInput, ", "), path), false)
-			continue
-		}
-
-		for _, anime := range animeList {
-			if anime.Path == path {
-				logMessage("File is already added to queue, ignoring it", false)
-				continue LOOP
-			}
-		}
-
-		file, err := os.Stat(path)
-		if err != nil {
-			handleSoftError("Reading file stats error", err.Error())
-			return
-		}
-
-		data, err := ffprobe.ProbeURL(ctx, path)
-		if err != nil {
-			handleSoftError("FFPROBE error", err.Error())
-			return
-		}
-
-		videoStream := data.FirstVideoStream()
-		pathSplit := strings.Split(path, string(os.PathSeparator))
-
-		frameRateSplit := strings.Split(videoStream.AvgFrameRate, "/")
-		base, _ := strconv.ParseFloat(frameRateSplit[0], 64)
-		divider, _ := strconv.ParseFloat(frameRateSplit[1], 64)
-
-		anime := Anime{
-			Name:               pathSplit[len(pathSplit)-1],
-			Length:             int64(data.Format.DurationSeconds * 1000),
-			Size:               file.Size(),
-			Width:              videoStream.Width,
-			Height:             videoStream.Height,
-			FrameRate:          base / divider,
-			TotalFrames:        int((base / divider) * data.Format.DurationSeconds),
-			HasSubtitlesStream: data.FirstSubtitleStream() != nil,
-			Path:               path,
-			Streams:            data.Streams,
-			PixelFormat:        videoStream.PixFmt,
-			Status:             NotStarted,
-		}
-		animeList = append(animeList, anime)
-		gui.TotalProgress = fmt.Sprintf("%d / %d", calcFinished(), len(animeList))
-		logMessage("Added file "+path, false)
+		handleFfprobe(path, ctx)
 	}
 }
 
