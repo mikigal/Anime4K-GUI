@@ -43,7 +43,6 @@ func loop(window *g.MasterWindow) {
 	}
 
 	g.SingleWindow().Layout(
-		g.Label("asda"),
 		g.SplitLayout(g.DirectionHorizontal, &mainPos,
 			g.SplitLayout(g.DirectionVertical, &tablePos,
 				g.Layout{
