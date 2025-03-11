@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -127,6 +128,16 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 		if videoCodec != "libsvtav1" {
 			params = append(params, "-preset", "slow")
 		}
+	}
+
+	if videoCodec == "libx264" && settings.CpuThreads != int32(runtime.NumCPU()) {
+		params = append(params, "-threads", fmt.Sprintf("%d", settings.CpuThreads))
+	}
+	if videoCodec == "libx265" && settings.CpuThreads != int32(runtime.NumCPU()) {
+		params = append(params, "-x265-params", fmt.Sprintf("pools=%d", min(settings.CpuThreads, 16))) // libx265 allow max 16 threads
+	}
+	if videoCodec == "libsvtav1" && settings.CpuThreads != int32(runtime.NumCPU()) {
+		params = append(params, "-svtav1-params", fmt.Sprintf("pin=%d", settings.CpuThreads))
 	}
 
 	params = append(params, outputPath)

@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"syscall"
 
@@ -65,6 +66,7 @@ var (
 		Encoder:           0,
 		Crf:               20,
 		OutputFormat:      2,
+		CpuThreads:        int32(runtime.NumCPU()),
 		CompatibilityMode: false,
 		DebugMode:         false,
 		Version:           version,

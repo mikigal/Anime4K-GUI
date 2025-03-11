@@ -14,6 +14,7 @@ type Settings struct {
 	Encoder           int32  `json:"encoder"`
 	Crf               int32  `json:"crf"`
 	OutputFormat      int32  `json:"output_format"`
+	CpuThreads        int32  `json:"cpu_threads"`
 	CompatibilityMode bool   `json:"compatibility_mode"`
 	DebugMode         bool   `json:"debug_mode"`
 	Version           string `json:"version"`
