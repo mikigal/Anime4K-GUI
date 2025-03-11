@@ -87,7 +87,9 @@ Issues regarding low output quality will be **instantly** closed. Problems like 
 
 ## FFMPEG Distribution
 
-Due to GitHub maximum file limit I can not provide FFMPEG's binaries in this repository. If you want to compile project by yourself you have to download FFMPEG build [here](https://github.com/BtbN/FFmpeg-Builds) and put `ffmpeg.exe` and `ffprobe.exe` into `resources/ffmpeg` directory
+Due to GitHub maximum file limit I can not provide FFMPEG's binaries in this repository. 
+
+If you want to compile project by yourself you have to download **GPL** FFMPEG build [here](https://github.com/BtbN/FFmpeg-Builds) and put `ffmpeg.exe` and `ffprobe.exe` into `resources/ffmpeg` directory.
 
 ## Limitations
 1. If Input files contain subtitles streams you must use MKV as output format due to other MK4/AVI limitations
