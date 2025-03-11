@@ -37,7 +37,7 @@ var (
 		{"Anime4K Mode B+B", "shaders/Anime4K_ModeB_B.glsl"},
 		{"Anime4K Mode C", "shaders/Anime4K_ModeC.glsl"},
 		{"Anime4K Mode C+A", "shaders/Anime4K_ModeC_A.glsl"},
-		{"FSRCNNX", "shaders/FSRCNNX_x2_16-0-4-1.glsl"},
+		{"FSRCNNX x2", "shaders/FSRCNNX_x2_16-0-4-1.glsl"},
 	}
 
 	allEncoders = []Encoder{
