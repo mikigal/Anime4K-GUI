@@ -81,7 +81,7 @@ var (
 		TotalProgress: "",
 		ButtonLabel:   "Start",
 		Logs: "Version: Anime4K-GUI (" + version + ")\n" +
-			"Authors: mikigal (whole app + FFMPEG tweaks), Ethan (core FFMPEG stuff)\n" +
+			"Authors: mikigal, Ethan (core libplacebo stuff)\n" +
 			"Special thanks to bloc97 for Anime4K shaders\n" +
 			"Drag n' drop your video files into this window (supported extensions: mp4, avi, mkv)\n\n",
 	}

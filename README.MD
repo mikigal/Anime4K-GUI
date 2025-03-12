@@ -98,7 +98,7 @@ If you want to compile project by yourself you have to download **GPL** FFMPEG b
 
 ## Special Thanks
 
-- [Ethan](https://github.com/2u75) for most of the required FFMPEG knowledge and research.
+- [Ethan](https://github.com/2u75) for core libplacebo stuff and research.
 - [bloc97](https://github.com/bloc97/Anime4K) for Anime4K shaders.
 - [AllenDang](https://github.com/AllenDang/giu) for Giu framework.
 - [BtbN](https://github.com/BtbN/FFmpeg-Builds) for automated FFMPEG builds.
