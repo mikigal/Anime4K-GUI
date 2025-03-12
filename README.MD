@@ -71,7 +71,6 @@ Follow these steps to use the Anime4K-GUI:
    - Output format: Format for the output file. Pick MP4 for best support on most devices, MKV for the best compatibility with more complicated files (e.g. multiple streams). <br>
      **If Input files contain subtitles streams you must use MKV as output format due to other MK4/AVI limitations**
    - CPU threads: How many of CPU threads FFMPEG will use. You may limit it to make your system more responsive wile using CPU based encoder
-   - Compatibility mode: check it only if you have compatibility issues.
    - Debug mode: show more detailed logs, useful for troubleshooting and debugging
 
 4. **Upscale the Video**

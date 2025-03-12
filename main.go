@@ -60,16 +60,15 @@ var (
 
 	// Settings
 	settings = Settings{
-		UseSavedPosition:  true,
-		Resolution:        5,
-		Shaders:           0,
-		Encoder:           0,
-		Crf:               20,
-		OutputFormat:      2,
-		CpuThreads:        int32(runtime.NumCPU()),
-		CompatibilityMode: false,
-		DebugMode:         false,
-		Version:           version,
+		UseSavedPosition: true,
+		Resolution:       5,
+		Shaders:          0,
+		Encoder:          0,
+		Crf:              20,
+		OutputFormat:     2,
+		CpuThreads:       int32(runtime.NumCPU()),
+		DebugMode:        false,
+		Version:          version,
 	}
 
 	// GUI pointers

@@ -56,12 +56,10 @@ func searchHardwareAcceleration() {
 
 		logMessage("Available GPU acceleration: AMF", false)
 	} else if intel {
-		settings.CompatibilityMode = true
 		addEncoders("cpu")
 
 		logMessage("Intel GPUs are not supported - application may not work correctly", false)
 	} else {
-		settings.CompatibilityMode = true
 		addEncoders("cpu")
 
 		logMessage("There's no available GPU acceleration, application may not work correctly! Please verify your GPU drivers or report bug on GitHub", false)
