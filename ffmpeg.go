@@ -96,9 +96,7 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 		"-y",           // Override output file
 	}
 
-	if !settings.CompatibilityMode {
-		params = append(params, hwaccelParams...) // Apply selected video encoder and hardware acceleration parameters
-	}
+	params = append(params, hwaccelParams...) // Apply selected video encoder and hardware acceleration parameters
 
 	params = append(params,
 		"-i", fmt.Sprintf("%s", anime.Path), // Path to input file
@@ -118,18 +116,17 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 	}
 
 	params = append(params,
-		"-crf", fmt.Sprintf("%d", settings.Crf), // Constant Rate Factor (CRF) for encoder)
+		"-crf", fmt.Sprintf("%d", settings.Crf), // Apply Constant Rate Factor (CRF) for encoder
 	)
 
-	if !settings.CompatibilityMode {
-		params = append(params, "-c:v", videoCodec) // Apply selected video codec
+	params = append(params, "-c:v", videoCodec) // Apply selected video codec
 
-		// Preset for encoder, supported only by H264/H265
-		if videoCodec != "libsvtav1" {
-			params = append(params, "-preset", "slow")
-		}
+	// Preset for encoder, supported only by H264/H265
+	if videoCodec != "libsvtav1" {
+		params = append(params, "-preset", "slow")
 	}
 
+	// Threads limit for CPU based encoders
 	if videoCodec == "libx264" && settings.CpuThreads != int32(runtime.NumCPU()) {
 		params = append(params, "-threads", fmt.Sprintf("%d", settings.CpuThreads))
 	}
