@@ -12,7 +12,7 @@ Under the hood, the application leverages the power of FFMPEG to handle video pr
 - [System Requirements](#system-requirements)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
-- [FFMPEG Distribution](#ffmpeg-distribution)
+- [Building ang FFMPEG Distribution](#building-and-ffmpeg-distribution)
 - [Limitations](#limitations)
 - [Special Thanks](#special-thanks)
 - [Contribute](#contribute)
@@ -85,11 +85,12 @@ To get more detailed logs run application with `--debug` parameter or enable `De
 Firstly try using CPU-based encoding. For some reason GPU acceleration may not work correctly with your graphics card. Due to limited access to hardware, most tests were done with NVIDIA graphics cards; compatibility with other GPUs may be worse. If you have compatibility problems with your GPU, please create an issue with application logs and your computer's specifications. <br>
 Issues regarding low output quality will be **instantly** closed. Problems like that are related to the original Anime4K shaders - I can recommend trying other shaders mode settings. <br>
 
-## FFMPEG Distribution
+## Building and FFMPEG Distribution
 
 Due to GitHub maximum file limit I can not provide FFMPEG's binaries in this repository. 
 
 If you want to compile project by yourself you have to download **GPL** FFMPEG build [here](https://github.com/BtbN/FFmpeg-Builds) and put `ffmpeg.exe` and `ffprobe.exe` into `resources/ffmpeg` directory.
+Project can be built using MinGW64 UCRT v12 or newer due to Giu requirements
 
 ## Limitations
 1. If Input files contain subtitles streams you must use MKV as output format due to other MK4/AVI limitations
