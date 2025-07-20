@@ -25,6 +25,10 @@ func searchHardwareAcceleration() {
 		logDebug(fmt.Sprintf("GPU ID: %d, Vendor: %s", index, vendor), false)
 
 		if strings.Contains(vendor, "nvidia") {
+			if !gpuAv1Supported { // Check for SLI setups
+				gpuName := gpu.DeviceInfo.Product.Name
+				gpuAv1Supported = strings.Contains(gpuName, "RTX 40") || strings.Contains(gpuName, "RTX 50")
+			}
 			nvidia = true
 		} else if strings.Contains(vendor, "amd") || strings.Contains(vendor, "advanced micro devices") {
 			amd = true

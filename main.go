@@ -42,19 +42,20 @@ var (
 	}
 
 	allEncoders = []Encoder{
-		{"H.264 (CPU)", "libx264", "cpu"},
-		{"H.264 NVENC (NVIDIA)", "h264_nvenc", "nvidia"},
-		{"H.264 AMF (AMD)", "h264_amf", "advanced micro devices"},
+		{"H.264 (CPU)", "libx264", "cpu", true},
+		{"H.264 NVENC (NVIDIA)", "h264_nvenc", "nvidia", false},
+		{"H.264 AMF (AMD)", "h264_amf", "advanced micro devices", false},
 
-		{"H.265 (CPU)", "libx265", "cpu"},
-		{"H.265 NVENC (NVIDIA)", "hevc_nvenc", "nvidia"},
-		{"H.265 AMF (AMD)", "hevc_amf", "advanced micro devices"},
+		{"H.265 (CPU)", "libx265", "cpu", true},
+		{"H.265 NVENC (NVIDIA)", "hevc_nvenc", "nvidia", false},
+		{"H.265 AMF (AMD)", "hevc_amf", "advanced micro devices", false},
 
-		{"AV1 (CPU)", "libsvtav1", "cpu"},
-		{"AV1 NVENC (NVIDIA)", "av1_nvenc", "nvidia"},
-		{"AV1 AMF (AMD)", "av1_amf", "advanced micro devices"},
+		{"AV1 (CPU)", "libsvtav1", "cpu", true},
+		{"AV1 NVENC (NVIDIA)", "av1_nvenc", "nvidia", false},
+		{"AV1 AMF (AMD)", "av1_amf", "advanced micro devices", false},
 	}
 
+	gpuAv1Supported   = false
 	availableEncoders = make([]Encoder, 0)
 	outputFormats     = []string{"MP4", "AVI", "MKV"}
 
@@ -64,7 +65,8 @@ var (
 		Resolution:       5,
 		Shaders:          0,
 		Encoder:          0,
-		Crf:              20,
+		Crf:              18,
+		Cq:               18,
 		OutputFormat:     2,
 		CpuThreads:       int32(runtime.NumCPU()),
 		DebugMode:        false,

@@ -89,7 +89,8 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 }
 
 func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, outputPath string) []string {
-	videoCodec = availableEncoders[settings.Encoder].FfmpegValue
+	encoder := availableEncoders[settings.Encoder]
+	videoCodec = encoder.FfmpegValue
 
 	params := []string{
 		"-hide_banner", // Hide banner with FFMPEG version
@@ -115,9 +116,22 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 		}
 	}
 
-	params = append(params,
-		"-crf", fmt.Sprintf("%d", settings.Crf), // Apply Constant Rate Factor (CRF) for encoder
-	)
+	if encoder.CrfSupported {
+		params = append(params,
+			"-crf", fmt.Sprintf("%d", settings.Crf),
+		)
+	} else {
+		if encoder.Vendor == "nvidia" {
+			params = append(params, "-rc", "vbr")
+		} else {
+			params = append(params, "-rc", "cq")
+		}
+
+		params = append(params,
+			"-cq", fmt.Sprintf("%d", settings.Cq),
+			"-b:v", "0",
+		)
+	}
 
 	params = append(params, "-c:v", videoCodec) // Apply selected video codec
 

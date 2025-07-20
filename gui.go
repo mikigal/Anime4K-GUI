@@ -14,8 +14,13 @@ const shadersTooltip = "Check the project's GitHub page if you're not sure what 
 const encoderTooltip = "Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n" +
 	"GPU based AV1 is compatible only with RTX 4000+ and RX 7000+\n" +
 	"HDR videos are supported only by AV1 codec"
-const crfTooltip = "Constant Rate Factor parameter encoder. \nDon't set it too high - file will be very big. " +
-	"\n\nCorrect values: 0 - 51 \nIf you don't know what to enter, leave it as 20"
+const crfTooltip = "Constant Rate Factor (CRF) for CPU based encoders. \nLower value = better image quality, but larger files." +
+	"\n\nValid range: 0 - 51 \n0 = lossless, 18–23 = good quality, 28+ = lower quality." +
+	"\n\nIf you're not sure what to enter, try 18 (default)."
+
+const cqTooltip = "Constant Quality (CQ) parameter for NVIDIA NVENC encoder. \nLower values mean better quality but larger files." +
+	"\n\nValid range: 0 - 51 \n0 = lossless, 18 = visually near-lossless, 28+ = noticeable compression." +
+	"\n\nIf you're not sure what to enter, try 18 (default)"
 const outputFormatTooltip = "If your input file contains subtitles streams you must use MKV as output format due to other formats limitations"
 const cpuThreadsTooltip = "How many of CPU threads FFMPEG will use \nYou may limit it to make your system more responsive wile using CPU based encoder"
 const debugModeTooltip = "Show more detailed logs, useful for troubleshooting and debugging"
@@ -68,11 +73,7 @@ func loop(window *g.MasterWindow) {
 					g.Tooltip(encoderTooltip),
 					g.Label(""),
 
-					g.Label("Constant Rate Factor (CRF)"),
-					g.Tooltip(crfTooltip),
-					g.InputInt(&settings.Crf).Size(400).OnChange(func() { handleMinMax(&settings.Crf, 0, 0, 51, 51) }),
-					g.Tooltip(crfTooltip),
-					g.Label(""),
+					crfCqWidget(),
 
 					g.Label("Output format"),
 					g.Tooltip(outputFormatTooltip),
@@ -80,11 +81,7 @@ func loop(window *g.MasterWindow) {
 					g.Tooltip(outputFormatTooltip),
 					g.Label(""),
 
-					g.Label("CPU threads"),
-					g.Tooltip(cpuThreadsTooltip),
-					g.InputInt(&settings.CpuThreads).Size(400).OnChange(func() { handleMinMax(&settings.CpuThreads, 1, 1, int32(runtime.NumCPU()), int32(runtime.NumCPU())) }),
-					g.Tooltip(cpuThreadsTooltip),
-					g.Label(""),
+					threadWidget(),
 
 					g.Checkbox("Debug mode", &settings.DebugMode),
 					g.Tooltip(debugModeTooltip),
@@ -112,6 +109,43 @@ func loop(window *g.MasterWindow) {
 	)
 
 	settings.PositionX, settings.PositionY = window.GetPos()
+}
+
+func crfCqWidget() g.Layout {
+	selectedEncoder := availableEncoders[settings.Encoder]
+
+	if selectedEncoder.CrfSupported {
+		return g.Layout{
+			g.Label("Constant Rate Factor (CRF)"),
+			g.Tooltip(crfTooltip),
+			g.InputInt(&settings.Crf).Size(400).OnChange(func() { handleMinMax(&settings.Crf, 0, 0, 51, 51) }),
+			g.Tooltip(crfTooltip),
+			g.Label(""),
+		}
+	}
+
+	return g.Layout{
+		g.Label("Constant Quality (CQ)"),
+		g.Tooltip(cqTooltip),
+		g.InputInt(&settings.Cq).Size(400).OnChange(func() { handleMinMax(&settings.Cq, 0, 0, 51, 51) }),
+		g.Tooltip(cqTooltip),
+		g.Label(""),
+	}
+}
+
+func threadWidget() g.Layout {
+	selectedEncoder := availableEncoders[settings.Encoder]
+	if selectedEncoder.Vendor != "cpu" {
+		return g.Layout{}
+	}
+
+	return g.Layout{
+		g.Label("CPU threads"),
+		g.Tooltip(cpuThreadsTooltip),
+		g.InputInt(&settings.CpuThreads).Size(400).OnChange(func() { handleMinMax(&settings.CpuThreads, 1, 1, int32(runtime.NumCPU()), int32(runtime.NumCPU())) }),
+		g.Tooltip(cpuThreadsTooltip),
+		g.Label(""),
+	}
 }
 
 func handleDrop(files []string) {

@@ -36,9 +36,10 @@ type Shader struct {
 }
 
 type Encoder struct {
-	Name        string
-	FfmpegValue string
-	Vendor      string
+	Name         string
+	FfmpegValue  string
+	Vendor       string
+	CrfSupported bool
 }
 
 type Resolution struct {
@@ -74,6 +75,10 @@ func removeAnime(index int) {
 
 func addEncoders(vendor string) {
 	for _, encoder := range allEncoders {
+		if encoder.FfmpegValue == "av1_nvenc" && !gpuAv1Supported {
+			continue
+		}
+
 		if encoder.Vendor == vendor || encoder.Vendor == "cpu" {
 			availableEncoders = append(availableEncoders, encoder)
 		}
