@@ -31,6 +31,7 @@ add_subdirectory(lib/glfw)
 add_subdirectory(lib/imgui)
 add_subdirectory(lib/freetype)
 add_subdirectory(lib/spdlog)
+add_subdirectory(lib/tiny-process-library)
 
 include_directories(lib/glad/include)
 include_directories(lib/glfw/include)
@@ -38,6 +39,7 @@ include_directories(lib/imgui)
 include_directories(lib/freetype/include)
 include_directories(lib/spdlog/include)
 include_directories(lib/json)
+include_directories(lib/tiny-process-library)
 include_directories(src)
 
 add_executable(Anime4K_GUI src/main.cpp
@@ -50,7 +52,7 @@ add_executable(Anime4K_GUI src/main.cpp
 
 add_dependencies(${PROJECT_NAME} pack_assets)
 target_precompile_headers(${PROJECT_NAME} PRIVATE src/pch.h)
-target_link_libraries(${PROJECT_NAME} PRIVATE glad glfw imgui freetype spdlog)
+target_link_libraries(${PROJECT_NAME} PRIVATE glad glfw imgui freetype spdlog tiny-process-library)
 
 if (APPLE)
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework IOKit")
