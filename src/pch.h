@@ -15,6 +15,9 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
+#include <json.hpp>
+#include <json_fwd.hpp>
+
 #include <iostream>
 #include <string>
 #include <unordered_map>

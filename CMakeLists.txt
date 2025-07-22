@@ -37,6 +37,7 @@ include_directories(lib/glfw/include)
 include_directories(lib/imgui)
 include_directories(lib/freetype/include)
 include_directories(lib/spdlog/include)
+include_directories(lib/json)
 include_directories(src)
 
 add_executable(Anime4K_GUI src/main.cpp
