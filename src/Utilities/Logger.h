@@ -34,65 +34,37 @@ public:
     template <typename... Args>
     static void Info(fmt::format_string<Args...> message, Args&&... args) {
         spdlog::info(message, std::forward<Args>(args)...);
-#ifdef __APPLE__
-        std::string formatted = fmt::format(message, std::forward<Args>(args)...);
-        std::printf("[Info] %s\n", formatted.c_str());
-#endif
     }
 
     template <typename... Args>
     static void Warn(fmt::format_string<Args...> message, Args&&... args) {
         spdlog::warn(message, std::forward<Args>(args)...);
-#ifdef __APPLE__
-        std::string formatted = fmt::format(message, std::forward<Args>(args)...);
-        std::printf("[Warn] %s\n", formatted.c_str());
-#endif
     }
 
     template <typename... Args>
     static void Error(fmt::format_string<Args...> message, Args&&... args) {
         spdlog::error(message, std::forward<Args>(args)...);
-#ifdef __APPLE__
-        std::string formatted = fmt::format(message, std::forward<Args>(args)...);
-        std::printf("[Error] %s\n", formatted.c_str());
-#endif
     }
 
     template <typename... Args>
     static void Critical(fmt::format_string<Args...> message, Args&&... args) {
         spdlog::critical(message, std::forward<Args>(args)...);
-#ifdef __APPLE__
-        std::string formatted = fmt::format(message, std::forward<Args>(args)...);
-        std::printf("[Critical] %s\n", formatted.c_str());
-#endif
     }
 
     template <typename... Args>
     static void Trace(fmt::format_string<Args...> message, Args&&... args) {
         spdlog::trace(message, std::forward<Args>(args)...);
-#ifdef __APPLE__
-        std::string formatted = fmt::format(message, std::forward<Args>(args)...);
-        std::printf("[Trace] %s\n", formatted.c_str());
-#endif
     }
 
     template <typename... Args>
     static void Debug(fmt::format_string<Args...> message, Args&&... args) {
         spdlog::debug(message, std::forward<Args>(args)...);
-#ifdef __APPLE__
-        std::string formatted = fmt::format(message, std::forward<Args>(args)...);
-        std::printf("[Debug] %s\n", formatted.c_str());
-#endif
     }
 
     template <typename... Args>
     static void Assert(const bool condition, const std::string& message, Args&&... args) {
         if (!condition) {
             spdlog::critical("Assertion failed: {}", message, std::forward<Args>(args)...);
-#ifdef __APPLE__
-            std::string formatted = fmt::format(message, std::forward<Args>(args)...);
-            std::printf("Assertion failed: %s\n", formatted.c_str());
-#endif
             throw std::runtime_error(message);
         }
     }

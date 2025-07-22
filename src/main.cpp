@@ -7,6 +7,7 @@ void RenderUI();
 
 int main() {
     Upscaler::AssetLoader::Get().Load("assets.pak");
+    Upscaler::Logger::Info("Loaded assets");
 
     Upscaler::Renderer renderer;
     bool result = renderer.Initialize();
