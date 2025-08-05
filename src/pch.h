@@ -7,6 +7,8 @@
 
 #define GLSL_VERSION "#version 330"
 
+#define DEBUG
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>

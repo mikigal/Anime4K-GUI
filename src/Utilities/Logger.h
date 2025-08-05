@@ -1,6 +1,7 @@
 ﻿#ifndef LOGGER_H
 #define LOGGER_H
 
+#include <pch.h>
 #include <spdlog/spdlog.h>
 
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -21,7 +22,7 @@ public:
         spdlog::set_pattern("[%H:%M:%S] [%^%l%$] %v");
         spdlog::set_default_logger(spdlog::stdout_color_mt("CFLogger"));
 #if defined(DEBUG) || defined(_DEBUG)
-        spdlog::set_level(spdlog::level::trace);
+        spdlog::set_level(spdlog::level::debug);
 #else
         spdlog::set_level(spdlog::level::info);
 #endif

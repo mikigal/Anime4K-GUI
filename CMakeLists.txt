@@ -49,10 +49,13 @@ add_executable(Anime4K_GUI src/main.cpp
         src/Utilities/Logger.h
         src/UI/Renderer.cpp
         src/UI/Renderer.h
-        src/Data/Anime.h
+        src/Data/Video.h
         src/Data/Encoder.h
         src/Data/Shader.h
-        src/Data/Resolution.h)
+        src/Data/Resolution.h
+        src/Utilities/Utilities.h
+        src/VideoLoader.cpp
+        src/VideoLoader.h)
 
 add_dependencies(${PROJECT_NAME} pack_assets)
 target_precompile_headers(${PROJECT_NAME} PRIVATE src/pch.h)
