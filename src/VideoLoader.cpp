@@ -9,7 +9,7 @@ namespace Upscaler {
         LOG_INFO("Loading video metadata: {}", path);
 
         long startMillis = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-        std::filesystem::path filePath = std::filesystem::path("/Users/mikigal/Desktop/Another01.mp4");
+        std::filesystem::path filePath = std::filesystem::path(path);
         std::string jsonString = "";
 
         TinyProcessLib::Process process(

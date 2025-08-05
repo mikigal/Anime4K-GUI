@@ -2,23 +2,150 @@
 #include "pch.h"
 #include "Utilities/AssetLoader.h"
 #include "Utilities/Logger.h"
+
+#ifdef _WIN32
 #include "Utilities/WindowUtilities.h"
+#endif
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 950
 
 namespace Upscaler {
+    int selectedResolution = 0;
+    int selectedShader = 0;
+    int selectedEncoder = 0;
+    int crf = 18;
+    int cq = 18;
+    int cpuThreads = 4;
+    bool debugMode = false;
+
+    std::string logs = "Starting encoding...";
+
+    std::vector<char*> resolutions = {"1920x1080", "1280x720", "640x480"};
+    std::vector<char*> shaders = {"Anime4K", "FSRCNNX", "None"};
+    std::vector<char*> encoders = {"NVENC", "CPU x264", "AV1"};
+    std::vector<char*> formats = {"MKV", "MP4"};
+
+    std::vector<std::string> videoList = {
+        "Attack on Titan", "One Piece", "Jujutsu Kaisen"
+    };
 
     void Renderer::RenderUI() {
-        ImGui::Text("Hello, Dear ImGUI!");
-    }
+        // ============ Table ============
+        ImGui::Begin("Video List");
+        if (ImGui::BeginTable("VideoTable##Persistent", 3, ImGuiTableFlags_BordersOuter |
+                                                           ImGuiTableFlags_RowBg |
+                                                           ImGuiTableFlags_Resizable |
+                                                           ImGuiTableFlags_Reorderable |
+                                                           ImGuiTableFlags_SizingStretchSame)) {
+            ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 40.0f);
+            ImGui::TableSetupColumn("Title");
+            ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_WidthFixed, 200.0f);
+            ImGui::TableHeadersRow();
 
+            for (int i = 0; i < videoList.size(); ++i) {
+                ImGui::TableNextRow();
+
+                std::string idText = std::to_string(i + 1);
+                float textWidth = ImGui::CalcTextSize(idText.c_str()).x;
+                float columnWidth = ImGui::GetColumnWidth();
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (columnWidth - textWidth) * 0.5f);
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("%d", i + 1);
+
+                ImGui::TableSetColumnIndex(1);
+                ImGui::Text("%s", videoList[i].c_str());
+
+                ImGui::TableSetColumnIndex(2);
+                ImGui::PushID(i);
+
+                float btnWidth = ImGui::CalcTextSize("Remove").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+                float colWidth = ImGui::GetColumnWidth();
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (colWidth - btnWidth) * 0.5f);
+
+                float cellHeight = ImGui::GetTextLineHeightWithSpacing();
+                float btnHeight = ImGui::GetFrameHeight();
+                float offsetY = (cellHeight - btnHeight) * 0.5f;
+                if (offsetY > 0.0f) {
+                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + offsetY);
+                }
+
+                if (ImGui::Button("Remove")) {
+
+                }
+
+                ImGui::PopID();
+            }
+
+            ImGui::EndTable();
+        }
+
+        ImGui::End();
+
+        // ============ Settings ============
+        ImGui::Begin("Settings");
+        ImGui::Text("Target resolution");
+        ImGui::SetNextItemWidth(300);
+        ImGui::Combo("##res", &selectedResolution, resolutions.data(), resolutions.size());
+        ImGui::Spacing();
+
+        ImGui::Text("Shaders");
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Shader info here...");
+        ImGui::SetNextItemWidth(300);
+        ImGui::Combo("##shaders", &selectedShader, shaders.data(), shaders.size());
+        ImGui::Spacing();
+
+        ImGui::Text("Encoder");
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Encoder tooltip here...");
+        ImGui::SetNextItemWidth(300);
+        ImGui::Combo("##encoders", &selectedEncoder, encoders.data(), encoders.size());
+        ImGui::Spacing();
+
+        if (selectedEncoder == 1) {
+            ImGui::Text("Constant Rate Factor (CRF)");
+            ImGui::SetNextItemWidth(300);
+            ImGui::InputInt("##crf", &crf);
+        }
+        else {
+            ImGui::Text("Constant Quality (CQ)");
+            ImGui::SetNextItemWidth(300);
+            ImGui::InputInt("##cq", &cq);
+        }
+        ImGui::Spacing();
+
+        ImGui::Text("Output format");
+        ImGui::SetNextItemWidth(300);
+        static int format = 0;
+        ImGui::Combo("##formats", &format, formats.data(), formats.size());
+        ImGui::Spacing();
+
+        if (selectedEncoder == 1) {
+            ImGui::Text("CPU threads");
+            ImGui::SetNextItemWidth(300);
+            ImGui::InputInt("##cpuThreads", &cpuThreads);
+            ImGui::Spacing();
+        }
+
+        ImGui::Checkbox("Debug mode", &debugMode);
+        ImGui::Dummy(ImVec2(0, 10));
+
+        if (ImGui::Button("Start Encoding", ImVec2(300, 30))) {
+            // Start/cancel logic
+        }
+        ImGui::End();
+
+        // ============ Logs ============
+        ImGui::Begin("Logs");
+        ImGui::InputTextMultiline("##logs", &logs[0], logs.capacity() + 1,
+                                      ImVec2(-FLT_MIN, 300), ImGuiInputTextFlags_ReadOnly);
+        ImGui::End();
+    }
 
     bool Renderer::Initialize() {
         InitializeWindow();
 
         ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO();
+        ImGuiIO &io = ImGui::GetIO();
         io.IniFilename = "imgui.ini";
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -39,11 +166,7 @@ namespace Upscaler {
 
             ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
 
-            ImGui::Begin("Window");
-            {
-                RenderUI();
-            }
-            ImGui::End();
+            RenderUI();
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -61,7 +184,7 @@ namespace Upscaler {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-        GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Hello, ImGUI!",
+        GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Anime4K-GUI",
                                               nullptr, nullptr);
         if (window == nullptr) {
             Logger::Critical("Could not create GLFW window");
@@ -93,7 +216,7 @@ namespace Upscaler {
 
 
     void Renderer::ApplyStyle() {
-        ImGuiIO& io = ImGui::GetIO();
+        ImGuiIO &io = ImGui::GetIO();
         ImFontConfig config;
         config.OversampleH = 1;
         config.OversampleV = 1;
@@ -101,11 +224,12 @@ namespace Upscaler {
         config.PixelSnapH = true;
 
         AssetLoader::AssetData font = AssetLoader::Get().GetFileData("OpenSans.ttf");
-        io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), 18, &config, nullptr);
+        m_Font = io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), 18, &config, nullptr);
+        io.FontDefault = m_Font;
         io.Fonts->Build();
 
-        ImGuiStyle& style = ImGui::GetStyle();
-        ImVec4* colors = style.Colors;
+        ImGuiStyle &style = ImGui::GetStyle();
+        ImVec4 *colors = style.Colors;
 
         colors[ImGuiCol_WindowBg] = ImVec4(0.07f, 0.07f, 0.09f, 1.00f);
         colors[ImGuiCol_MenuBarBg] = ImVec4(0.12f, 0.12f, 0.15f, 1.00f);
@@ -152,6 +276,12 @@ namespace Upscaler {
         colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.40f, 0.50f, 1.00f);
         colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.45f, 0.45f, 0.55f, 1.00f);
 
+        colors[ImGuiCol_TableHeaderBg] = ImVec4(0.13f, 0.13f, 0.17f, 1.00f);
+        colors[ImGuiCol_TableBorderLight] = ImVec4(0.20f, 0.20f, 0.25f, 0.20f);
+        colors[ImGuiCol_TableBorderStrong] = ImVec4(0.20f, 0.20f, 0.25f, 0.30f);
+        colors[ImGuiCol_TableRowBg] = ImVec4(0.09f, 0.09f, 0.11f, 1.00f);
+        colors[ImGuiCol_TableRowBgAlt] = ImVec4(0.10f, 0.10f, 0.13f, 1.00f);
+
         style.WindowRounding = 5.0f;
         style.FrameRounding = 5.0f;
         style.GrabRounding = 5.0f;
@@ -162,5 +292,6 @@ namespace Upscaler {
         style.FramePadding = ImVec2(6, 4);
         style.ItemSpacing = ImVec2(8, 6);
         style.PopupBorderSize = 0.f;
+        style.CellPadding = ImVec2(10, 4);
     }
 } // Upscaler

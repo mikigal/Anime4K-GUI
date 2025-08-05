@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.1)
-
 project(tiny-process-library)
 
 if(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")

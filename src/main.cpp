@@ -14,7 +14,7 @@ int main() {
     Upscaler::AssetLoader::Get().Load("assets.pak");
     Upscaler::Logger::Info("Loaded assets");
 
-    std::string a = "/Users/mikigal/Desktop/Another01.mp4";
+    std::string a = "/home/mikigal/Documents/Another01.mp4";
     Upscaler::VideoLoader videoLoader;
     videoLoader.loadVideo(a);
 

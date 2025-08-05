@@ -6,6 +6,7 @@ namespace Upscaler {
 
 class Renderer {
 public:
+    ImFont* m_Font;
     bool Initialize();
     void Terminate();
     void RenderUI();
