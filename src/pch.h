@@ -17,6 +17,7 @@
 
 #include <json.hpp>
 #include <json_fwd.hpp>
+#include <process.hpp>
 
 #include <iostream>
 #include <string>
