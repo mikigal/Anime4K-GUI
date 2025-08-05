@@ -136,7 +136,7 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 	params = append(params, "-c:v", videoCodec) // Apply selected video codec
 
 	// Preset for encoder, supported only by H264/H265
-	if videoCodec != "libsvtav1" {
+	if !strings.Contains(videoCodec, "av1") {
 		params = append(params, "-preset", "slow")
 	}
 
