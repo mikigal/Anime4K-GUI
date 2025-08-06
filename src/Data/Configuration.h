@@ -5,15 +5,22 @@
 #include "Encoder.h"
 #include "Resolution.h"
 #include "Shader.h"
+#include "App.h"
 
 namespace Upscaler {
     class Configuration {
+
     public:
-        std::vector<Encoder> m_Encoders;
-        std::vector<Resolution> m_Resolutions;
-        std::vector<Shader> m_Shaders;
-        std::vector<std::string> m_CodecBlacklist;
+        App& m_App;
+        std::vector<Encoder> Encoders;
+        std::vector<Resolution> Resolutions;
+        std::vector<Shader> Shaders;
+        std::vector<std::string> CodecBlacklist;
         void Load();
+
+        Configuration(App &m_app)
+            : m_App(m_app) {
+        }
     };
 }
 

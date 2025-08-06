@@ -1,5 +1,6 @@
 ﻿#include "Renderer.h"
 #include "pch.h"
+#include "Data/Configuration.h"
 #include "Utilities/AssetLoader.h"
 #include "Utilities/Logger.h"
 
@@ -21,14 +22,16 @@ namespace Upscaler {
 
     std::string logs = "Starting encoding...";
 
-    std::vector<char*> resolutions = {"1920x1080", "1280x720", "640x480"};
-    std::vector<char*> shaders = {"Anime4K", "FSRCNNX", "None"};
-    std::vector<char*> encoders = {"NVENC", "CPU x264", "AV1"};
     std::vector<char*> formats = {"MKV", "MP4"};
 
     std::vector<std::string> videoList = {
         "Attack on Titan", "One Piece", "Jujutsu Kaisen"
     };
+
+    std::vector<char *> shaderNames;
+    std::vector<const char *> resolutionNames;
+    std::vector<const char *> encoderNames; // TODO: Available encoders
+
 
     void Renderer::RenderUI() {
         // ============ Table ============
@@ -86,19 +89,19 @@ namespace Upscaler {
         ImGui::Begin("Settings");
         ImGui::Text("Target resolution");
         ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##res", &selectedResolution, resolutions.data(), resolutions.size());
+        ImGui::Combo("##res", &selectedResolution, resolutionNames.data(), resolutionNames.size());
         ImGui::Spacing();
 
         ImGui::Text("Shaders");
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("Shader info here...");
         ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##shaders", &selectedShader, shaders.data(), shaders.size());
+        ImGui::Combo("##shaders", &selectedShader, shaderNames.data(), shaderNames.size());
         ImGui::Spacing();
 
         ImGui::Text("Encoder");
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("Encoder tooltip here...");
         ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##encoders", &selectedEncoder, encoders.data(), encoders.size());
+        ImGui::Combo("##encoders", &selectedEncoder, encoderNames.data(), encoderNames.size());
         ImGui::Spacing();
 
         if (selectedEncoder == 1) {
@@ -141,7 +144,7 @@ namespace Upscaler {
         ImGui::End();
     }
 
-    bool Renderer::Initialize() {
+    bool Renderer::Init() {
         InitializeWindow();
 
         ImGui::CreateContext();
@@ -223,7 +226,7 @@ namespace Upscaler {
         config.FontDataOwnedByAtlas = false;
         config.PixelSnapH = true;
 
-        AssetLoader::AssetData font = AssetLoader::Get().GetFileData("OpenSans.ttf");
+        AssetLoader::AssetData font = m_App.GetAssetLoader().GetFileData("OpenSans.ttf");
         m_Font = io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), 18, &config, nullptr);
         io.FontDefault = m_Font;
         io.Fonts->Build();

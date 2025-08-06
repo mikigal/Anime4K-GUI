@@ -3,17 +3,10 @@
 #include <pch.h>
 
 namespace Upscaler {
-    class Resolution {
-    public:
-        int m_Width;
-        int m_Height;
-        std::string m_AspectRatio;
-
-        Resolution(int m_width, int m_height, const std::string &m_aspect_ratio)
-            : m_Width(m_width),
-              m_Height(m_height),
-              m_AspectRatio(m_aspect_ratio) {
-        }
+    struct Resolution {
+        const int Width;
+        const int Height;
+        const std::string AspectRatio;
     };
 }
 

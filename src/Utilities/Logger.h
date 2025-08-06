@@ -6,14 +6,14 @@
 
 #include "spdlog/sinks/stdout_color_sinks.h"
 
-#define LOG_INFO(message, ...) Upscaler::Logger::Info(message, ##__VA_ARGS__)
-#define LOG_WARN(message, ...) Upscaler::Logger::Warn(message, ##__VA_ARGS__)
-#define LOG_ERROR(message, ...) Upscaler::Logger::Error(message, ##__VA_ARGS__)
-#define LOG_CRITICAL(message, ...) Upscaler::Logger::Critical(message, ##__VA_ARGS__)
-#define LOG_TRACE(message, ...) Upscaler::Logger::Trace(message, ##__VA_ARGS__)
-#define LOG_DEBUG(message, ...) Upscaler::Logger::Debug(message, ##__VA_ARGS__)
+#define LOG_INFO(message, ...) Logger::Info(message, ##__VA_ARGS__)
+#define LOG_WARN(message, ...) Logger::Warn(message, ##__VA_ARGS__)
+#define LOG_ERROR(message, ...) Logger::Error(message, ##__VA_ARGS__)
+#define LOG_CRITICAL(message, ...) Logger::Critical(message, ##__VA_ARGS__)
+#define LOG_TRACE(message, ...) Logger::Trace(message, ##__VA_ARGS__)
+#define LOG_DEBUG(message, ...) Logger::Debug(message, ##__VA_ARGS__)
 #define ASSERT(condition, message, ...) \
-    Upscaler::Logger::Assert(condition, message, ##__VA_ARGS__)
+    Logger::Assert(condition, message, ##__VA_ARGS__)
 
 namespace Upscaler {
 class Logger {

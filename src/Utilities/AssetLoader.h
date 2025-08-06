@@ -40,6 +40,8 @@ public:
         for (const auto& [filename, data] : m_Files) {
             LOG_DEBUG("File: {}, Size: {} bytes", filename, data.size());
         }
+
+        LOG_INFO("Loaded {}", filename);
     }
 
     bool HasFile(const std::string& filename) const {
@@ -52,15 +54,7 @@ public:
         return it->second;
     }
 
-    static AssetLoader& Get() {
-        if (!s_Instance) {
-            s_Instance = new AssetLoader();
-        }
-        return *s_Instance;
-    }
-
 private:
-    inline static AssetLoader* s_Instance = nullptr;
     std::unordered_map<std::string, AssetData> m_Files;
 };
 } // namespace Upscaler

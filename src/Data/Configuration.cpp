@@ -4,12 +4,9 @@
 #include "Utilities/AssetLoader.h"
 
 namespace Upscaler {
-    static Configuration* config;
 
     void Configuration::Load() {
-        config = this;
-
-        AssetLoader::AssetData data = AssetLoader::Get().GetFileData("data.json");
+        AssetLoader::AssetData data = m_App.GetAssetLoader().GetFileData("data.json");
         nlohmann::json json = nlohmann::json::parse(data.begin(), data.end());
 
         for (nlohmann::basic_json<>& item : json["resolutions"]) {
@@ -18,18 +15,18 @@ namespace Upscaler {
                 item.at("height"),
                 item.at("aspect_ratio")
             );
-            m_Resolutions.push_back(resolution);
+            Resolutions.push_back(resolution);
         }
-        LOG_DEBUG("Loaded {} resolutions", m_Resolutions.size());
+        LOG_DEBUG("Loaded {} resolutions", Resolutions.size());
 
         for (nlohmann::basic_json<>& item : json["shaders"]) {
             Shader shader(
                 item.at("name"),
                 item.at("path")
             );
-            m_Shaders.push_back(shader);
+            Shaders.push_back(shader);
         }
-        LOG_DEBUG("Loaded {} shaders", m_Shaders.size());
+        LOG_DEBUG("Loaded {} shaders", Shaders.size());
 
         for (nlohmann::basic_json<>& item : json["encoders"]) {
             Encoder encoder(
@@ -41,12 +38,12 @@ namespace Upscaler {
                 item.at("hwaccel_params").get<std::vector<std::string>>(),
                 item.at("params").get<std::vector<std::string>>()
             );
-            m_Encoders.push_back(encoder);
+            Encoders.push_back(encoder);
         }
-        LOG_DEBUG("Loaded {} encoders", m_Encoders.size());
+        LOG_DEBUG("Loaded {} encoders", Encoders.size());
 
-        m_CodecBlacklist= json["codec_blacklist"].get<std::vector<std::string>>();
-        LOG_DEBUG("Loaded {} blacklisted codecs", m_CodecBlacklist.size());
+        CodecBlacklist = json["codec_blacklist"].get<std::vector<std::string>>();
+        LOG_DEBUG("Loaded {} blacklisted codecs", CodecBlacklist.size());
 
         LOG_INFO("Loaded application config");
     }
