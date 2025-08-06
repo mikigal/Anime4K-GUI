@@ -11,7 +11,7 @@ namespace Upscaler {
 
     class Configuration {
     public:
-        App* m_App;
+        App* Instance;
         std::vector<Encoder> Encoders;
         std::vector<Resolution> Resolutions;
         std::vector<Shader> Shaders;
@@ -20,8 +20,8 @@ namespace Upscaler {
 
         void Load();
 
-        Configuration(App* m_app)
-            : m_App(m_app) {
+        Configuration(App* instance)
+            : Instance(instance) {
         }
     };
 }

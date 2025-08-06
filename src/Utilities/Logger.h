@@ -6,80 +6,105 @@
 
 #include "spdlog/sinks/stdout_color_sinks.h"
 
-#define LOG_INFO(message, ...) Logger::Info(message, ##__VA_ARGS__)
-#define LOG_WARN(message, ...) Logger::Warn(message, ##__VA_ARGS__)
-#define LOG_ERROR(message, ...) Logger::Error(message, ##__VA_ARGS__)
-#define LOG_CRITICAL(message, ...) Logger::Critical(message, ##__VA_ARGS__)
-#define LOG_TRACE(message, ...) Logger::Trace(message, ##__VA_ARGS__)
-#define LOG_DEBUG(message, ...) Logger::Debug(message, ##__VA_ARGS__)
-#define ASSERT(condition, message, ...) \
-    Logger::Assert(condition, message, ##__VA_ARGS__)
-
 namespace Upscaler {
     class Logger {
     public:
-        static void Init() {
+        void Init() {
             spdlog::set_pattern("[%H:%M:%S] [%^%l%$] %v");
-            spdlog::set_default_logger(spdlog::stdout_color_mt("CFLogger"));
+            spdlog::set_default_logger(spdlog::stdout_color_mt("UpscalerLogger"));
 #if defined(DEBUG) || defined(_DEBUG)
             spdlog::set_level(spdlog::level::debug);
 #else
-        spdlog::set_level(spdlog::level::info);
+            spdlog::set_level(spdlog::level::info);
 #endif
         }
 
-        static void Shutdown() {
+        void Shutdown() {
             spdlog::shutdown();
         }
 
         template<typename... Args>
-        static void Info(fmt::format_string<Args...> message, Args&&... args) {
+        void Info(fmt::format_string<Args...> message, Args&&... args) {
             spdlog::info(message, std::forward<Args>(args)...);
+            if (spdlog::should_log(spdlog::level::info)) {
+                std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
+                Renderer::Logs += fmt::format("[{}] [info] {}\n", GetFormattedTime(), formattedMessage);
+            }
         }
 
         template<typename... Args>
-        static void Warn(fmt::format_string<Args...> message, Args&&... args) {
+        void Warn(fmt::format_string<Args...> message, Args&&... args) {
             spdlog::warn(message, std::forward<Args>(args)...);
+            if (spdlog::should_log(spdlog::level::warn)) {
+                std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
+                Renderer::Logs += fmt::format("[{}] [warn] {}\n", GetFormattedTime(), formattedMessage);
+            }
         }
 
         template<typename... Args>
-        static void Error(fmt::format_string<Args...> message, Args&&... args) {
+        void Error(fmt::format_string<Args...> message, Args&&... args) {
             spdlog::error(message, std::forward<Args>(args)...);
+            if (spdlog::should_log(spdlog::level::err)) {
+                std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
+                Renderer::Logs += fmt::format("[{}] [error] {}\n", GetFormattedTime(), formattedMessage);
+            }
         }
 
         template<typename... Args>
-        static void Critical(fmt::format_string<Args...> message, Args&&... args) {
+        void Critical(fmt::format_string<Args...> message, Args&&... args) {
             spdlog::critical(message, std::forward<Args>(args)...);
+            if (spdlog::should_log(spdlog::level::critical)) {
+                std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
+                Renderer::Logs += fmt::format("[{}] [critical] {}\n", GetFormattedTime(), formattedMessage);
+            }
         }
 
         template<typename... Args>
-        static void Trace(fmt::format_string<Args...> message, Args&&... args) {
+        void Trace(fmt::format_string<Args...> message, Args&&... args) {
             spdlog::trace(message, std::forward<Args>(args)...);
+            if (spdlog::should_log(spdlog::level::trace)) {
+                std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
+                Renderer::Logs += fmt::format("[{}] [trace] {}\n", GetFormattedTime(), formattedMessage);
+            }
         }
 
         template<typename... Args>
-        static void Debug(fmt::format_string<Args...> message, Args&&... args) {
+        void Debug(fmt::format_string<Args...> message, Args&&... args) {
             spdlog::debug(message, std::forward<Args>(args)...);
+            if (spdlog::should_log(spdlog::level::debug)) {
+                std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
+                Renderer::Logs += fmt::format("[{}] [debug] {}\n", GetFormattedTime(), formattedMessage);
+            }
         }
 
         template<typename... Args>
-        static void Assert(const bool condition, const std::string& message, Args&&... args) {
+        void Assert(const bool condition, const std::string& message, Args&&... args) {
             if (!condition) {
                 spdlog::critical("Assertion failed: {}", message, std::forward<Args>(args)...);
                 throw std::runtime_error(message);
             }
         }
 
-        static void SetLevel(spdlog::level::level_enum level) {
+        void SetLevel(spdlog::level::level_enum level) {
             spdlog::set_level(level);
         }
 
-        static spdlog::level::level_enum GetLevel() {
+        spdlog::level::level_enum GetLevel() {
             return spdlog::get_level();
         }
 
-        static std::shared_ptr<spdlog::logger> GetDefaultLogger() {
+        std::shared_ptr<spdlog::logger> GetDefaultLogger() {
             return spdlog::default_logger();
+        }
+
+        std::string GetFormattedTime() {
+            auto now = std::chrono::system_clock::now();
+            std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+            std::tm tm = *std::localtime(&now_c);
+
+            char timeBuffer[9]; // "HH:MM:SS"
+            std::strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", &tm);
+            return std::string(timeBuffer);
         }
     };
 } // namespace Upscaler

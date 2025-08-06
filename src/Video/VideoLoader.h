@@ -7,13 +7,13 @@ namespace Upscaler {
 
     class VideoLoader {
     public:
-        App* m_App;
+        App* Instance;
         std::vector<Video> m_Videos;
 
         void loadVideo(std::string& path);
 
-        VideoLoader(App* m_app)
-            : m_App(m_app) {
+        VideoLoader(App* instance)
+            : Instance(instance) {
         }
     };
 }

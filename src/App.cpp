@@ -2,8 +2,8 @@
 
 namespace Upscaler {
     void App::Init() {
-        Logger::Init();
-        LOG_DEBUG("Initialized logger");
+        m_Logger.Init();
+        GetLogger().Debug("Initialized logger");
 
         m_AssetLoader.Load("assets.pak");
         m_Configuration.Load();

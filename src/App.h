@@ -4,14 +4,16 @@
 #include "Data/Configuration.h"
 #include "UI/Renderer.h"
 #include "Utilities/AssetLoader.h"
+#include "Utilities/Logger.h"
 
 namespace Upscaler {
     class App {
     private:
-        AssetLoader m_AssetLoader;
+        AssetLoader m_AssetLoader{this};
         VideoLoader m_VideoLoader{this};
         Configuration m_Configuration{this};
         Renderer m_Renderer{this};
+        Logger m_Logger;
 
     public:
         void Init();
@@ -20,6 +22,7 @@ namespace Upscaler {
         VideoLoader& GetVideoLoader() { return m_VideoLoader; }
         Configuration& GetConfiguration() { return m_Configuration; }
         Renderer& GetRenderer() { return m_Renderer; }
+        Logger& GetLogger() { return m_Logger; }
     };
 }
 

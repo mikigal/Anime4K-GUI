@@ -5,7 +5,7 @@
 
 namespace Upscaler {
     void Configuration::Load() {
-        AssetLoader::AssetData data = m_App->GetAssetLoader().GetFileData("data.json");
+        AssetLoader::AssetData data = Instance->GetAssetLoader().GetFileData("data.json");
         nlohmann::json json = nlohmann::json::parse(data.begin(), data.end());
 
         for (nlohmann::basic_json<>& item: json["resolutions"]) {
@@ -16,7 +16,7 @@ namespace Upscaler {
             );
             Resolutions.push_back(resolution);
         }
-        LOG_DEBUG("Loaded {} resolutions", Resolutions.size());
+        Instance->GetLogger().Debug("Loaded {} resolutions", Resolutions.size());
 
         for (nlohmann::basic_json<>& item: json["shaders"]) {
             Shader shader(
@@ -25,7 +25,7 @@ namespace Upscaler {
             );
             Shaders.push_back(shader);
         }
-        LOG_DEBUG("Loaded {} shaders", Shaders.size());
+        Instance->GetLogger().Debug("Loaded {} shaders", Shaders.size());
 
         for (nlohmann::basic_json<>& item: json["encoders"]) {
             Encoder encoder(
@@ -39,14 +39,14 @@ namespace Upscaler {
             );
             Encoders.push_back(encoder);
         }
-        LOG_DEBUG("Loaded {} encoders", Encoders.size());
+        Instance->GetLogger().Debug("Loaded {} encoders", Encoders.size());
 
         CodecBlacklist = json["codec_blacklist"].get<std::vector<std::string> >();
-        LOG_DEBUG("Loaded {} blacklisted codecs", CodecBlacklist.size());
+        Instance->GetLogger().Debug("Loaded {} blacklisted codecs", CodecBlacklist.size());
 
         OutputFormats = json["output_formats"].get<std::vector<std::string> >();
-        LOG_DEBUG("Loaded {} output formats", OutputFormats.size());
+        Instance->GetLogger().Debug("Loaded {} output formats", OutputFormats.size());
 
-        LOG_INFO("Loaded application config");
+        Instance->GetLogger().Debug("Loaded application config");
     }
 }

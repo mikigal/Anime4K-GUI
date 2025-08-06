@@ -1,12 +1,13 @@
 #include "VideoLoader.h"
 #include <pch.h>
 
+#include "App.h"
 #include "Utilities/Logger.h"
 #include "Utilities/Utilities.h"
 
 namespace Upscaler {
     void VideoLoader::loadVideo(std::string& path) {
-        LOG_INFO("Loading video metadata: {}", path);
+        Instance->GetLogger().Info("Loading video metadata: {}", path);
 
         long startMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
@@ -19,13 +20,13 @@ namespace Upscaler {
                 jsonString.append(bytes, n);
             },
             [](const char* bytes, size_t n) {
-                LOG_ERROR("An error occurred while executing ffprobe, stderr: {}", std::string(bytes, n));
+                std::cout << "An error occurred while executing ffprobe, stderr: " << std::string(bytes, n) << std::endl;
             });
 
         int exitCode = process.get_exit_status();
-        LOG_DEBUG("ffprobe exited with code {}", exitCode);
+        Instance->GetLogger().Debug("ffprobe exited with code {}", exitCode);
         if (exitCode != 0) {
-            LOG_ERROR("An error occurred while executing ffprobe");
+            Instance->GetLogger().Error("An error occurred while executing ffprobe");
             return;
         }
 
@@ -62,7 +63,7 @@ namespace Upscaler {
 
         long endMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();
-        LOG_INFO("Loaded video {} metadata, took {}ms", filePath.string(), endMillis - startMillis);
+        Instance->GetLogger().Info("Loaded video {} metadata, took {}ms", filePath.string(), endMillis - startMillis);
 
         m_Videos.push_back(video);
     }

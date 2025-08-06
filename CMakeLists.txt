@@ -60,6 +60,7 @@ add_executable(Anime4K_GUI src/main.cpp
         src/Data/Configuration.h
         src/App.cpp
         src/App.h
+        src/Utilities/AssetLoader.cpp
 )
 
 add_dependencies(${PROJECT_NAME} pack_assets)

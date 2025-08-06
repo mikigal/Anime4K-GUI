@@ -14,6 +14,8 @@
 #define WINDOW_HEIGHT 950
 
 namespace Upscaler {
+    std::string Renderer::Logs;
+
     std::vector<std::string> videoList = {
         "Attack on Titan", "One Piece", "Jujutsu Kaisen"
     };
@@ -118,6 +120,7 @@ namespace Upscaler {
             ImGui::Spacing();
         }
 
+
         ImGui::Checkbox("Debug mode", &SelectedDebugMode);
         ImGui::Dummy(ImVec2(0, 10));
 
@@ -195,19 +198,19 @@ namespace Upscaler {
     }
 
     bool Renderer::Init() {
-        for (Shader& shader: m_App->GetConfiguration().Shaders) {
+        for (Shader& shader: Instance->GetConfiguration().Shaders) {
             shadersNames.push_back(shader.Name.c_str());
         }
 
-        for (Resolution& resolution: m_App->GetConfiguration().Resolutions) {
+        for (Resolution& resolution: Instance->GetConfiguration().Resolutions) {
             resolutionsNames.push_back(resolution.VisibleName.c_str());
         }
 
-        for (Encoder& encoder: m_App->GetConfiguration().Encoders) {
+        for (Encoder& encoder: Instance->GetConfiguration().Encoders) {
             encodersNames.push_back(encoder.Name.c_str());
         }
 
-        for (std::string& outputFormat: m_App->GetConfiguration().OutputFormats) {
+        for (std::string& outputFormat: Instance->GetConfiguration().OutputFormats) {
             outputFormatsNames.push_back(outputFormat.c_str());
         }
 
@@ -291,14 +294,14 @@ namespace Upscaler {
         GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Anime4K-GUI",
                                               nullptr, nullptr);
         if (window == nullptr) {
-            Logger::Critical("Could not create GLFW window");
+            Instance->GetLogger().Critical("Could not create GLFW window");
             glfwTerminate();
             exit(EXIT_FAILURE);
         }
         glfwMakeContextCurrent(window);
 
         if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
-            Logger::Critical("Could not initialize GLAD");
+            Instance->GetLogger().Critical("Could not initialize GLAD");
             exit(EXIT_FAILURE);
         }
 
@@ -327,7 +330,7 @@ namespace Upscaler {
         config.FontDataOwnedByAtlas = false;
         config.PixelSnapH = true;
 
-        AssetLoader::AssetData font = m_App->GetAssetLoader().GetFileData("OpenSans.ttf");
+        AssetLoader::AssetData font = Instance->GetAssetLoader().GetFileData("OpenSans.ttf");
         m_Font = io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), 18, &config, nullptr);
         io.FontDefault = m_Font;
         io.Fonts->Build();
