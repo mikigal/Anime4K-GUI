@@ -25,9 +25,16 @@ namespace Upscaler {
     std::vector<const char*> encodersNames; // TODO: Available encoders
     std::vector<const char*> outputFormatsNames;
 
+    std::vector<std::string> droppedFiles;
+
+
+
     void Renderer::RenderUI() {
         // ============ Table ============
         ImGui::Begin("Video List");
+
+        ImGui::BeginChild("VideoDropTargetChild", ImVec2(0, 0), true, ImGuiWindowFlags_None);
+
         if (ImGui::BeginTable("VideoTable##Persistent", 3, ImGuiTableFlags_BordersOuter |
                                                            ImGuiTableFlags_RowBg |
                                                            ImGuiTableFlags_Resizable |
@@ -66,6 +73,8 @@ namespace Upscaler {
                 }
 
                 if (ImGui::Button("Remove")) {
+                    videoList.erase(videoList.begin() + i);
+                    --i;
                 }
 
                 ImGui::PopID();
@@ -74,7 +83,17 @@ namespace Upscaler {
             ImGui::EndTable();
         }
 
+        if (ImGui::BeginDragDropTarget()) {
+            ImGui::EndDragDropTarget();
+        }
+
+        ImGui::EndChild();
         ImGui::End();
+
+        for (const std::string& path : droppedFiles) {
+            videoList.push_back(path);
+        }
+        droppedFiles.clear();
 
         // ============ Settings ============
         ImGui::Begin("Settings");
@@ -131,7 +150,7 @@ namespace Upscaler {
 
         // ============ Logs ============
         ImGui::Begin("Logs");
-        std::string logsDisplayBuffer = Logs + '\0'; // dodaj null-terminator
+        std::string logsDisplayBuffer = Logs + '\0';
         ImGui::InputTextMultiline("##logs", logsDisplayBuffer.data(), logsDisplayBuffer.size(),
                                   ImVec2(-FLT_MIN, 220), ImGuiInputTextFlags_ReadOnly);
         ImGui::End();
@@ -144,7 +163,7 @@ namespace Upscaler {
 
         float progressHeight = 20.0f;
         float totalWidth = ImGui::GetContentRegionAvail().x;
-        float progressBarWidth = totalWidth - 318.0f; // miejsce na Speed i ETA
+        float progressBarWidth = totalWidth - 318.0f;
 
         ImVec2 startPos = ImGui::GetCursorScreenPos();
         float textLineHeight = ImGui::GetTextLineHeight();
@@ -155,7 +174,7 @@ namespace Upscaler {
         ImGui::SameLine();
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 2));
-        ImGui::SetCursorScreenPos(ImVec2(startPos.x + 110.0f, startPos.y)); // stałe przesunięcie
+        ImGui::SetCursorScreenPos(ImVec2(startPos.x + 110.0f, startPos.y));
         ImGui::PushItemWidth(progressBarWidth);
         ImGui::ProgressBar(Progress, ImVec2(progressBarWidth, progressHeight), "");
         ImGui::PopItemWidth();
@@ -290,9 +309,12 @@ namespace Upscaler {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Anime4K-GUI",
                                               nullptr, nullptr);
+        glfwSetDropCallback(window, DropCallback);
+
         if (window == nullptr) {
             Instance->GetLogger().Critical("Could not create GLFW window");
             glfwTerminate();
@@ -321,6 +343,16 @@ namespace Upscaler {
         glfwTerminate();
     }
 
+    void Renderer::DropCallback(GLFWwindow* window, int count, const char** paths) {
+        for (int i = 0; i < count; ++i) {
+            std::string path(paths[i]);
+            std::string lower = path;
+            std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+            if (lower.ends_with(".mp4") || lower.ends_with(".avi") || lower.ends_with(".mkv")) {
+                droppedFiles.push_back(path);
+            }
+        }
+    }
 
     void Renderer::ApplyStyle() {
         ImGuiIO& io = ImGui::GetIO();

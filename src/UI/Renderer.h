@@ -36,6 +36,7 @@ namespace Upscaler {
 
         void InitializeWindow();
         void ApplyStyle();
+        static void DropCallback(GLFWwindow*, int, const char**);
     };
 } // Upscaler
 
