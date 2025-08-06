@@ -1,0 +1,109 @@
+{
+  "resolutions": [
+    { "width": 1024, "height": 768, "aspect_ratio": "4:3" },
+    { "width": 1440, "height": 1080, "aspect_ratio": "4:3" },
+    { "width": 1920, "height": 1440, "aspect_ratio": "4:3" },
+    { "width": 2880, "height": 2160, "aspect_ratio": "4:3" },
+
+    { "width": 1280, "height": 720, "aspect_ratio": "16:9" },
+    { "width": 1920, "height": 1080, "aspect_ratio": "16:9" },
+    { "width": 2560, "height": 1440, "aspect_ratio": "16:9" },
+    { "width": 3840, "height": 2160, "aspect_ratio": "16:9" }
+  ],
+  "shaders": [
+    { "name": "Anime4K Mode A", "path": "shaders/Anime4K_ModeA.glsl" },
+    { "name": "Anime4K Mode A+A", "path": "shaders/Anime4K_ModeA_A.glsl" },
+    { "name": "Anime4K Mode B", "path": "shaders/Anime4K_ModeB.glsl" },
+    { "name": "Anime4K Mode B+B", "path": "shaders/Anime4K_ModeB_B.glsl" },
+    { "name": "Anime4K Mode C", "path": "shaders/Anime4K_ModeC.glsl" },
+    { "name": "Anime4K Mode C+A", "path": "shaders/Anime4K_ModeC_A.glsl" },
+    { "name": "Anime4K SRGAN (Experimental)", "path": "shaders/Anime4K_SRGAN.glsl" },
+    { "name": "FSRCNNX x2", "path": "shaders/FSRCNNX_x2_16-0-4-1.glsl" }
+  ],
+  "encoders": [
+    {
+      "name": "H.264 (CPU)",
+      "value": "libx264",
+      "vendor": "cpu",
+      "crf_supported": true,
+      "cq_supported": false,
+      "hwaccel_params": [],
+      "params": ["-preset slow", "-crf {CRF} -threads {THREADS}"]
+    },
+    {
+      "name": "H.264 NVENC (NVIDIA)",
+      "value": "h264_nvenc",
+      "vendor": "nvidia",
+      "crf_supported": false,
+      "cq_supported": true,
+      "hwaccel_params": ["-hwaccel_device cuda", "-hwaccel_output_format cuda"],
+      "params": ["-preset slow", "-rc vbr", "-b:v 0", "-cq {CQ}"]
+    },
+    {
+      "name": "H.264 AMF (AMD)",
+      "value": "h264_amf",
+      "vendor": "advanced micro devices",
+      "crf_supported": false,
+      "cq_supported": false,
+      "hwaccel_params": ["-hwaccel_device opencl"],
+      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality", "-profile main"]
+    },
+
+    {
+      "name": "H.265 (CPU)",
+      "value": "libx265",
+      "vendor": "cpu",
+      "crf_supported": true,
+      "cq_supported": false,
+      "hwaccel_params": [],
+      "params": ["-preset slow", "-crf {CRF}", "-x265-params pools={THREADS}"]
+    },
+    {
+      "name": "H.265 NVENC (NVIDIA)",
+      "value": "hevc_nvenc",
+      "vendor": "nvidia",
+      "crf_supported": false,
+      "cq_supported": true,
+      "hwaccel_params": ["-hwaccel_device cuda", "-hwaccel_output_format cuda"],
+      "params": ["-preset slow", "-rc vbr", "-b:v 0", "-cq {CQ}"]
+    },
+    {
+      "name": "H.265 AMF (AMD)",
+      "value": "hevc_amf",
+      "vendor": "advanced micro devices",
+      "crf_supported": false,
+      "cq_supported": false,
+      "hwaccel_params": ["-hwaccel_device opencl"],
+      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality", "-profile main"]
+    },
+
+    {
+      "name": "AV1 (CPU)",
+      "value": "libsvtav1",
+      "vendor": "cpu",
+      "crf_supported": true,
+      "cq_supported": false,
+      "hwaccel_params": [],
+      "params": ["-crf {CRF}", "-svtav1-params pin={THREADS}"]
+    },
+    {
+      "name": "AV1 NVENC (NVIDIA)",
+      "value": "av1_nvenc",
+      "vendor": "nvidia",
+      "crf_supported": false,
+      "cq_supported": true,
+      "hwaccel_params": ["-hwaccel_device cuda", "-hwaccel_output_format cuda"],
+      "params": ["-rc vbr", "-b:v 0", "-cq {CQ}"]
+    },
+    {
+      "name": "AV1 AMF (AMD)",
+      "value": "av1_amf",
+      "vendor": "advanced micro devices",
+      "crf_supported": false,
+      "cq_supported": false,
+      "hwaccel_params": ["-hwaccel_device opencl"],
+      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality"]
+    }
+  ],
+  "codec_blacklist": ["mjpeg", "png"]
+}

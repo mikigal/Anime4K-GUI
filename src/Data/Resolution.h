@@ -1,17 +1,18 @@
 #ifndef RESOLUTION_H
 #define RESOLUTION_H
+#include <pch.h>
 
 namespace Upscaler {
-    class Shader {
+    class Resolution {
     public:
         int m_Width;
         int m_Height;
-        bool m_Panoramic;
+        std::string m_AspectRatio;
 
-        Shader(int m_width, int m_height, bool m_panoramic)
+        Resolution(int m_width, int m_height, const std::string &m_aspect_ratio)
             : m_Width(m_width),
               m_Height(m_height),
-              m_Panoramic(m_panoramic) {
+              m_AspectRatio(m_aspect_ratio) {
         }
     };
 }

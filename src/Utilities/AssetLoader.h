@@ -2,7 +2,7 @@
 #define ASSETLOADER_H
 
 #include "pch.h"
-//#include "Logger.h"
+#include "Logger.h"
 
 #define GET_ASSET(filename) Upscaler::AssetLoader::Get().GetFileData(filename)
 
@@ -12,12 +12,12 @@ public:
     typedef std::vector<char> AssetData;
 
     void Load(const std::string& filename) {
-        //LOG_DEBUG("Loading pak file: {}", filename);
+        LOG_DEBUG("Loading pak file: {}", filename);
         std::ifstream file(filename, std::ios::binary);
         if (!file)
             throw std::runtime_error("Failed to open pak file: " + filename);
 
-        //ASSERT(file.is_open(), "Pak file is not open: " + filename);
+        ASSERT(file.is_open(), "Pak file is not open: " + filename);
 
         uint32_t fileCount = 0;
         file.read(reinterpret_cast<char*>(&fileCount), sizeof(fileCount));
@@ -38,7 +38,7 @@ public:
         }
 
         for (const auto& [filename, data] : m_Files) {
-            //LOG_TRACE("File: {}, Size: {} bytes", filename, data.size());
+            LOG_DEBUG("File: {}, Size: {} bytes", filename, data.size());
         }
     }
 
@@ -48,7 +48,7 @@ public:
 
     const AssetData& GetFileData(const std::string& filename) const {
         const auto it = m_Files.find(filename);
-        //ASSERT(it != m_Files.end(), "File not found in pak: " + filename);
+        ASSERT(it != m_Files.end(), "File not found in pak: " + filename);
         return it->second;
     }
 

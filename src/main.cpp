@@ -1,11 +1,10 @@
 #include <sys/syslog.h>
 
 #include "VideoLoader.h"
+#include "Data/Configuration.h"
 #include "UI/Renderer.h"
 #include "Utilities/AssetLoader.h"
 #include "Utilities/Logger.h"
-
-void RenderUI();
 
 int main() {
     Upscaler::Logger::Init();
@@ -13,6 +12,9 @@ int main() {
 
     Upscaler::AssetLoader::Get().Load("assets.pak");
     Upscaler::Logger::Info("Loaded assets");
+
+    Upscaler::Configuration config;
+    config.Load();
 
     std::string a = "/home/mikigal/Documents/Another01.mp4";
     Upscaler::VideoLoader videoLoader;
