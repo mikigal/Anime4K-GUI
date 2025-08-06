@@ -105,5 +105,6 @@
       "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality"]
     }
   ],
+  "output_formats": ["MP4", "AVI", "MKV"],
   "codec_blacklist": ["mjpeg", "png"]
 }

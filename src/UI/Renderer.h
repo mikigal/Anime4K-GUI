@@ -1,27 +1,42 @@
 ﻿#ifndef RENDERER_H
 #define RENDERER_H
-#include "App.h"
 
 namespace Upscaler {
+    class App;
 
-class Renderer {
-public:
-    ImFont* m_Font;
-    bool Init();
-    void Terminate();
-    void RenderUI();
-    App& m_App;
+    class Renderer {
+    public:
+        ImFont* m_Font;
+        App* m_App;
 
-    Renderer(App &m_app)
-        : m_App(m_app) {
-    }
-private:
-    GLFWwindow* m_Window = nullptr;
+        // UI pointers
+        int SelectedResolution = 0;
+        int SelectedShader = 0;
+        int SelectedEncoder = 0;
+        int SelectedCrf = 0;
+        int SelectedCq = 0;
+        int SelectedCpuThreads = 0;
+        bool SelectedDebugMode = false;
 
-    void InitializeWindow();
-    void ApplyStyle();
-};
+        std::string Logs = "";
+        float Progress = 0;
+        float Speed = 0;
+        int EtaSeconds = 0;
 
+        bool Init();
+        void Terminate();
+        void RenderUI();
+
+        Renderer(App* m_app)
+            : m_App(m_app) {
+        }
+
+    private:
+        GLFWwindow* m_Window = nullptr;
+
+        void InitializeWindow();
+        void ApplyStyle();
+    };
 } // Upscaler
 
 #endif //RENDERER_H

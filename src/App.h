@@ -1,6 +1,6 @@
 #ifndef UPSCALER_H
 #define UPSCALER_H
-#include "VideoLoader.h"
+#include "Video/VideoLoader.h"
 #include "Data/Configuration.h"
 #include "UI/Renderer.h"
 #include "Utilities/AssetLoader.h"
@@ -12,11 +12,13 @@ namespace Upscaler {
         VideoLoader m_VideoLoader{this};
         Configuration m_Configuration{this};
         Renderer m_Renderer{this};
+
     public:
         void Init();
+
         AssetLoader& GetAssetLoader() { return m_AssetLoader; }
         VideoLoader& GetVideoLoader() { return m_VideoLoader; }
-        Configuration& GetConfiguration() { return m_Configuration;}
+        Configuration& GetConfiguration() { return m_Configuration; }
         Renderer& GetRenderer() { return m_Renderer; }
     };
 }

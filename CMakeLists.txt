@@ -54,8 +54,8 @@ add_executable(Anime4K_GUI src/main.cpp
         src/Data/Shader.h
         src/Data/Resolution.h
         src/Utilities/Utilities.h
-        src/VideoLoader.cpp
-        src/VideoLoader.h
+        src/Video/VideoLoader.cpp
+        src/Video/VideoLoader.h
         src/Data/Configuration.cpp
         src/Data/Configuration.h
         src/App.cpp

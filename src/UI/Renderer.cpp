@@ -3,6 +3,8 @@
 #include "Data/Configuration.h"
 #include "Utilities/AssetLoader.h"
 #include "Utilities/Logger.h"
+#include "App.h"
+#include "imgui_internal.h"
 
 #ifdef _WIN32
 #include "Utilities/WindowUtilities.h"
@@ -12,26 +14,14 @@
 #define WINDOW_HEIGHT 950
 
 namespace Upscaler {
-    int selectedResolution = 0;
-    int selectedShader = 0;
-    int selectedEncoder = 0;
-    int crf = 18;
-    int cq = 18;
-    int cpuThreads = 4;
-    bool debugMode = false;
-
-    std::string logs = "Starting encoding...";
-
-    std::vector<char*> formats = {"MKV", "MP4"};
-
     std::vector<std::string> videoList = {
         "Attack on Titan", "One Piece", "Jujutsu Kaisen"
     };
 
-    std::vector<char *> shaderNames;
-    std::vector<const char *> resolutionNames;
-    std::vector<const char *> encoderNames; // TODO: Available encoders
-
+    std::vector<const char*> shadersNames;
+    std::vector<const char*> resolutionsNames;
+    std::vector<const char*> encodersNames; // TODO: Available encoders
+    std::vector<const char*> outputFormatsNames;
 
     void Renderer::RenderUI() {
         // ============ Table ============
@@ -74,7 +64,6 @@ namespace Upscaler {
                 }
 
                 if (ImGui::Button("Remove")) {
-
                 }
 
                 ImGui::PopID();
@@ -89,47 +78,47 @@ namespace Upscaler {
         ImGui::Begin("Settings");
         ImGui::Text("Target resolution");
         ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##res", &selectedResolution, resolutionNames.data(), resolutionNames.size());
+        ImGui::Combo("##res", &SelectedResolution, resolutionsNames.data(), resolutionsNames.size());
         ImGui::Spacing();
 
         ImGui::Text("Shaders");
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("Shader info here...");
         ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##shaders", &selectedShader, shaderNames.data(), shaderNames.size());
+        ImGui::Combo("##shaders", &SelectedShader, shadersNames.data(), shadersNames.size());
         ImGui::Spacing();
 
         ImGui::Text("Encoder");
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("Encoder tooltip here...");
         ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##encoders", &selectedEncoder, encoderNames.data(), encoderNames.size());
+        ImGui::Combo("##encoders", &SelectedEncoder, encodersNames.data(), encodersNames.size());
         ImGui::Spacing();
 
-        if (selectedEncoder == 1) {
+        if (SelectedEncoder == 1) {
             ImGui::Text("Constant Rate Factor (CRF)");
             ImGui::SetNextItemWidth(300);
-            ImGui::InputInt("##crf", &crf);
+            ImGui::InputInt("##crf", &SelectedCrf);
         }
         else {
             ImGui::Text("Constant Quality (CQ)");
             ImGui::SetNextItemWidth(300);
-            ImGui::InputInt("##cq", &cq);
+            ImGui::InputInt("##cq", &SelectedCq);
         }
         ImGui::Spacing();
 
         ImGui::Text("Output format");
         ImGui::SetNextItemWidth(300);
         static int format = 0;
-        ImGui::Combo("##formats", &format, formats.data(), formats.size());
+        ImGui::Combo("##formats", &format, outputFormatsNames.data(), outputFormatsNames.size());
         ImGui::Spacing();
 
-        if (selectedEncoder == 1) {
+        if (SelectedEncoder == 1) {
             ImGui::Text("CPU threads");
             ImGui::SetNextItemWidth(300);
-            ImGui::InputInt("##cpuThreads", &cpuThreads);
+            ImGui::InputInt("##cpuThreads", &SelectedCpuThreads);
             ImGui::Spacing();
         }
 
-        ImGui::Checkbox("Debug mode", &debugMode);
+        ImGui::Checkbox("Debug mode", &SelectedDebugMode);
         ImGui::Dummy(ImVec2(0, 10));
 
         if (ImGui::Button("Start Encoding", ImVec2(300, 30))) {
@@ -139,16 +128,93 @@ namespace Upscaler {
 
         // ============ Logs ============
         ImGui::Begin("Logs");
-        ImGui::InputTextMultiline("##logs", &logs[0], logs.capacity() + 1,
-                                      ImVec2(-FLT_MIN, 300), ImGuiInputTextFlags_ReadOnly);
+        std::string logsDisplayBuffer = Logs + '\0'; // dodaj null-terminator
+        ImGui::InputTextMultiline("##logs", logsDisplayBuffer.data(), logsDisplayBuffer.size(),
+                                  ImVec2(-FLT_MIN, 220), ImGuiInputTextFlags_ReadOnly);
+        ImGui::End();
+
+        ImGui::Begin("Progress");
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
+
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(35, 35, 50, 255));
+        ImGui::PushStyleColor(ImGuiCol_PlotHistogram, IM_COL32(120, 100, 255, 255));
+
+        float progressHeight = 20.0f;
+        float totalWidth = ImGui::GetContentRegionAvail().x;
+        float progressBarWidth = totalWidth - 318.0f; // miejsce na Speed i ETA
+
+        ImVec2 startPos = ImGui::GetCursorScreenPos();
+        float textLineHeight = ImGui::GetTextLineHeight();
+        float centerOffset = (progressHeight - textLineHeight) * 0.5f;
+
+        ImGui::SetCursorScreenPos(ImVec2(startPos.x, startPos.y + centerOffset));
+        ImGui::Text("Progress: 0 / 1");
+        ImGui::SameLine();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 2));
+        ImGui::SetCursorScreenPos(ImVec2(startPos.x + 110.0f, startPos.y)); // stałe przesunięcie
+        ImGui::PushItemWidth(progressBarWidth);
+        ImGui::ProgressBar(Progress, ImVec2(progressBarWidth, progressHeight), "");
+        ImGui::PopItemWidth();
+        ImGui::PopStyleVar();
+
+        ImVec2 barPos = ImGui::GetItemRectMin();
+        ImVec2 barSize = ImGui::GetItemRectSize();
+
+        std::string percentText = std::to_string(int(Progress * 100)) + "%";
+        ImVec2 percentSize = ImGui::CalcTextSize(percentText.c_str());
+
+        float fillEndX = barPos.x + barSize.x * Progress;
+        float margin = 4.0f;
+        float textX = ImMin(fillEndX + margin, barPos.x + barSize.x - percentSize.x - margin);
+        float textY = barPos.y + (barSize.y - percentSize.y) * 0.5f;
+
+        ImGui::GetWindowDrawList()->AddText(ImVec2(textX, textY), ImGui::GetColorU32(ImGuiCol_Text),
+                                            percentText.c_str());
+
+        ImVec2 afterBar = ImVec2(barPos.x + barSize.x + 16.0f, startPos.y + centerOffset);
+        ImGui::SetCursorScreenPos(afterBar);
+        ImGui::Text("Speed: %.1fx", Speed);
+
+        ImGui::SameLine();
+        ImVec2 sepPos = ImGui::GetCursorScreenPos();
+        sepPos.x += 8.0f;
+        ImGui::GetWindowDrawList()->AddLine(
+            ImVec2(sepPos.x, sepPos.y),
+            ImVec2(sepPos.x, sepPos.y + textLineHeight),
+            ImGui::GetColorU32(ImGuiCol_Text)
+        );
+        ImGui::Dummy(ImVec2(16.0f, 0));
+        ImGui::SameLine();
+
+        ImGui::SetCursorScreenPos(ImVec2(sepPos.x + 16.0f, startPos.y + centerOffset));
+        ImGui::Text("ETA: 00:%02d:%02d", EtaSeconds / 60, EtaSeconds % 60);
+
+        ImGui::PopStyleColor(2);
         ImGui::End();
     }
 
     bool Renderer::Init() {
+        for (Shader& shader: m_App->GetConfiguration().Shaders) {
+            shadersNames.push_back(shader.Name.c_str());
+        }
+
+        for (Resolution& resolution: m_App->GetConfiguration().Resolutions) {
+            resolutionsNames.push_back(resolution.VisibleName.c_str());
+        }
+
+        for (Encoder& encoder: m_App->GetConfiguration().Encoders) {
+            encodersNames.push_back(encoder.Name.c_str());
+        }
+
+        for (std::string& outputFormat: m_App->GetConfiguration().OutputFormats) {
+            outputFormatsNames.push_back(outputFormat.c_str());
+        }
+
         InitializeWindow();
 
         ImGui::CreateContext();
-        ImGuiIO &io = ImGui::GetIO();
+        ImGuiIO& io = ImGui::GetIO();
         io.IniFilename = "imgui.ini";
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -157,6 +223,7 @@ namespace Upscaler {
 
         ApplyStyle();
 
+        bool firstFrame = true;
         while (!glfwWindowShouldClose(m_Window)) {
             glfwPollEvents();
 
@@ -168,6 +235,40 @@ namespace Upscaler {
             ImGui::NewFrame();
 
             ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->ID);
+            if (firstFrame) {
+                ImGuiID dockspace_id = ImGui::GetMainViewport()->ID;
+                ImGui::DockBuilderRemoveNode(dockspace_id);
+                ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+                ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->Size);
+
+                ImGuiID mainDockId = dockspace_id;
+
+                ImGuiID bottomDock;
+                ImGui::DockBuilderSplitNode(mainDockId, ImGuiDir_Down, 0.33f, &bottomDock, &mainDockId);
+
+                ImGuiID logsDock, progressDock;
+                ImGui::DockBuilderSplitNode(bottomDock, ImGuiDir_Down, 0.22f, &progressDock, &logsDock);
+
+                ImGuiID settingsDock, videoDock;
+                ImGui::DockBuilderSplitNode(mainDockId, ImGuiDir_Right, 0.2f, &settingsDock, &videoDock);
+
+                ImGui::DockBuilderGetNode(videoDock)->LocalFlags |= ImGuiDockNodeFlags_NoTabBar |
+                        ImGuiDockNodeFlags_NoResize;
+                ImGui::DockBuilderGetNode(settingsDock)->LocalFlags |= ImGuiDockNodeFlags_NoTabBar |
+                        ImGuiDockNodeFlags_NoResize;
+                ImGui::DockBuilderGetNode(logsDock)->LocalFlags |= ImGuiDockNodeFlags_NoTabBar |
+                        ImGuiDockNodeFlags_NoResize;
+                ImGui::DockBuilderGetNode(progressDock)->LocalFlags |= ImGuiDockNodeFlags_NoTabBar |
+                        ImGuiDockNodeFlags_NoResize;
+
+                ImGui::DockBuilderDockWindow("Video List", videoDock);
+                ImGui::DockBuilderDockWindow("Settings", settingsDock);
+                ImGui::DockBuilderDockWindow("Logs", logsDock);
+                ImGui::DockBuilderDockWindow("Progress", progressDock);
+
+                ImGui::DockBuilderFinish(dockspace_id);
+                firstFrame = false;
+            }
 
             RenderUI();
 
@@ -187,7 +288,7 @@ namespace Upscaler {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-        GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Anime4K-GUI",
+        GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Anime4K-GUI",
                                               nullptr, nullptr);
         if (window == nullptr) {
             Logger::Critical("Could not create GLFW window");
@@ -219,20 +320,20 @@ namespace Upscaler {
 
 
     void Renderer::ApplyStyle() {
-        ImGuiIO &io = ImGui::GetIO();
+        ImGuiIO& io = ImGui::GetIO();
         ImFontConfig config;
         config.OversampleH = 1;
         config.OversampleV = 1;
         config.FontDataOwnedByAtlas = false;
         config.PixelSnapH = true;
 
-        AssetLoader::AssetData font = m_App.GetAssetLoader().GetFileData("OpenSans.ttf");
+        AssetLoader::AssetData font = m_App->GetAssetLoader().GetFileData("OpenSans.ttf");
         m_Font = io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), 18, &config, nullptr);
         io.FontDefault = m_Font;
         io.Fonts->Build();
 
-        ImGuiStyle &style = ImGui::GetStyle();
-        ImVec4 *colors = style.Colors;
+        ImGuiStyle& style = ImGui::GetStyle();
+        ImVec4* colors = style.Colors;
 
         colors[ImGuiCol_WindowBg] = ImVec4(0.07f, 0.07f, 0.09f, 1.00f);
         colors[ImGuiCol_MenuBarBg] = ImVec4(0.12f, 0.12f, 0.15f, 1.00f);

@@ -8,16 +8,17 @@ namespace Upscaler {
     void VideoLoader::loadVideo(std::string& path) {
         LOG_INFO("Loading video metadata: {}", path);
 
-        long startMillis = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        long startMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
         std::filesystem::path filePath = std::filesystem::path(path);
         std::string jsonString = "";
 
         TinyProcessLib::Process process(
             "ffprobe -v quiet -print_format json -show_format -show_streams " + filePath.string(), "",
-            [&jsonString](const char *bytes, size_t n) {
+            [&jsonString](const char* bytes, size_t n) {
                 jsonString.append(bytes, n);
             },
-            [](const char *bytes, size_t n) {
+            [](const char* bytes, size_t n) {
                 LOG_ERROR("An error occurred while executing ffprobe, stderr: {}", std::string(bytes, n));
             });
 
@@ -57,7 +58,7 @@ namespace Upscaler {
 
         totalFrames = frameRate * duration;
         Video video(filePath.filename(), duration, size, width, height, frameRate, totalFrames, false,
-                              streamCodecs, pixelFormat, filePath.string(), ProcessingStatus::WAITING);
+                    streamCodecs, pixelFormat, filePath.string(), ProcessingStatus::WAITING);
 
         long endMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();

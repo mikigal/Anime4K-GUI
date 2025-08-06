@@ -1,7 +1,6 @@
 #include "App.h"
 
 namespace Upscaler {
-
     void App::Init() {
         Logger::Init();
         LOG_DEBUG("Initialized logger");
@@ -12,7 +11,6 @@ namespace Upscaler {
         std::string a = "/home/mikigal/Documents/Another01.mp4";
         m_VideoLoader.loadVideo(a);
 
-        m_Renderer = Renderer();
         bool result = m_Renderer.Init();
         if (!result) {
             exit(1);

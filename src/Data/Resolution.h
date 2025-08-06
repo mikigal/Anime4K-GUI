@@ -1,5 +1,6 @@
 #ifndef RESOLUTION_H
 #define RESOLUTION_H
+#include <format>
 #include <pch.h>
 
 namespace Upscaler {
@@ -7,6 +8,7 @@ namespace Upscaler {
         const int Width;
         const int Height;
         const std::string AspectRatio;
+        const std::string VisibleName = std::format("{}x{} ({})", Width, Height, AspectRatio);
     };
 }
 

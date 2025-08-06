@@ -25,8 +25,6 @@ namespace Upscaler {
         std::string Path;
         ProcessingStatus Status;
     };
-
-
 }
 
 #endif //ANIME_H
