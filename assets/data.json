@@ -27,8 +27,10 @@
       "vendor": "cpu",
       "crf_supported": true,
       "cq_supported": false,
+      "threads_limit_supported": true,
       "hwaccel_params": [],
-      "params": ["-preset slow", "-crf {CRF} -threads {THREADS}"]
+      "params": ["-preset slow", "-crf {CRF}"],
+      "threads_limit_params": ["-threads {THREADS}"]
     },
     {
       "name": "H.264 NVENC (NVIDIA)",
@@ -36,17 +38,21 @@
       "vendor": "nvidia",
       "crf_supported": false,
       "cq_supported": true,
+      "threads_limit_supported": false,
       "hwaccel_params": ["-hwaccel_device cuda", "-hwaccel_output_format cuda"],
-      "params": ["-preset slow", "-rc vbr", "-b:v 0", "-cq {CQ}"]
+      "params": ["-preset slow", "-rc vbr", "-b:v 0", "-cq {CQ}"],
+      "threads_limit_params": []
     },
     {
       "name": "H.264 AMF (AMD)",
       "value": "h264_amf",
       "vendor": "advanced micro devices",
       "crf_supported": false,
-      "cq_supported": false,
-      "hwaccel_params": ["-hwaccel_device opencl"],
-      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality", "-profile main"]
+      "cq_supported": true,
+      "threads_limit_supported": false,
+      "hwaccel_params": [],
+      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality", "-profile main"],
+      "threads_limit_params": []
     },
 
     {
@@ -55,8 +61,10 @@
       "vendor": "cpu",
       "crf_supported": true,
       "cq_supported": false,
+      "threads_limit_supported": true,
       "hwaccel_params": [],
-      "params": ["-preset slow", "-crf {CRF}", "-x265-params pools={THREADS}"]
+      "params": ["-preset slow", "-crf {CRF}"],
+      "threads_limit_params": ["-x265-params pools={THREADS}"]
     },
     {
       "name": "H.265 NVENC (NVIDIA)",
@@ -64,17 +72,21 @@
       "vendor": "nvidia",
       "crf_supported": false,
       "cq_supported": true,
+      "threads_limit_supported": false,
       "hwaccel_params": ["-hwaccel_device cuda", "-hwaccel_output_format cuda"],
-      "params": ["-preset slow", "-rc vbr", "-b:v 0", "-cq {CQ}"]
+      "params": ["-preset slow", "-rc vbr", "-b:v 0", "-cq {CQ}"],
+      "threads_limit_params": []
     },
     {
       "name": "H.265 AMF (AMD)",
       "value": "hevc_amf",
       "vendor": "advanced micro devices",
       "crf_supported": false,
-      "cq_supported": false,
-      "hwaccel_params": ["-hwaccel_device opencl"],
-      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality", "-profile main"]
+      "cq_supported": true,
+      "threads_limit_supported": false,
+      "hwaccel_params": [],
+      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality", "-profile main"],
+      "threads_limit_params": []
     },
 
     {
@@ -83,8 +95,10 @@
       "vendor": "cpu",
       "crf_supported": true,
       "cq_supported": false,
+      "threads_limit_supported": true,
       "hwaccel_params": [],
-      "params": ["-crf {CRF}", "-svtav1-params pin={THREADS}"]
+      "params": ["-crf {CRF}"],
+      "threads_limit_params": ["-svtav1-params pin={THREADS}"]
     },
     {
       "name": "AV1 NVENC (NVIDIA)",
@@ -92,17 +106,21 @@
       "vendor": "nvidia",
       "crf_supported": false,
       "cq_supported": true,
+      "threads_limit_supported": false,
       "hwaccel_params": ["-hwaccel_device cuda", "-hwaccel_output_format cuda"],
-      "params": ["-rc vbr", "-b:v 0", "-cq {CQ}"]
+      "params": ["-rc vbr", "-b:v 0", "-cq {CQ}"],
+      "threads_limit_params": []
     },
     {
       "name": "AV1 AMF (AMD)",
       "value": "av1_amf",
       "vendor": "advanced micro devices",
       "crf_supported": false,
-      "cq_supported": false,
-      "hwaccel_params": ["-hwaccel_device opencl"],
-      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality"]
+      "cq_supported": true,
+      "threads_limit_supported": false,
+      "hwaccel_params": [],
+      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality"],
+      "threads_limit_params": []
     }
   ],
   "output_formats": ["MP4", "AVI", "MKV"],

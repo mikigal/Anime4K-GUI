@@ -34,8 +34,10 @@ namespace Upscaler {
                 item.at("vendor"),
                 item.at("crf_supported"),
                 item.at("cq_supported"),
+                item.at("threads_limit_supported"),
                 item.at("hwaccel_params").get<std::vector<std::string> >(),
-                item.at("params").get<std::vector<std::string> >()
+                item.at("params").get<std::vector<std::string> >(),
+                item.at("threads_limit_params").get<std::vector<std::string> >()
             );
             Encoders.push_back(encoder);
         }
