@@ -8,6 +8,7 @@ namespace Upscaler {
     public:
         App* Instance;
         std::vector<std::string> FindGPUs();
+        std::string GetVendorFromDeviceID(const std::string&);
         void AnalyzeAvailableEncoders();
 
         GpuDetector(App* instance)

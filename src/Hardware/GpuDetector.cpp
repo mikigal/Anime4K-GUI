@@ -1,5 +1,7 @@
 #include "GpuDetector.h"
 
+#include <regex>
+
 #include "App.h"
 #include "pch.h"
 #include "Data/Encoder.h"
@@ -26,7 +28,14 @@ namespace Upscaler {
             std::ranges::transform(gpu, gpu.begin(),
                                    [](const unsigned char c) { return std::tolower(c); });
 
-            if (gpu.find("advanced micro devices") != std::string::npos) {
+            // Fix potential vendor name mismatch
+            std::string from = "advanced micro devices";
+            int pos = gpu.find(from);
+            if (pos != std::string::npos) {
+                gpu.replace(pos, from.length(), "amd");
+            }
+
+            if (gpu.find("amd") != std::string::npos) {
                 amd = true;
                 // Only RX 7000 and RX 9000 support AV1 encoding
                 av1Supported = gpu.find("rx 7") != std::string::npos || gpu.find("rx 9") != std::string::npos;
@@ -55,7 +64,7 @@ namespace Upscaler {
                 encoder.Available = true;
             }
 
-            if (encoder.Vendor == "advanced micro devices" && amd && (encoder.Type != "av1" || (encoder.Type == "av1" && av1Supported))) {
+            if (encoder.Vendor == "amd" && amd && (encoder.Type != "av1" || (encoder.Type == "av1" && av1Supported))) {
                 encoder.Available = true;
             }
 
@@ -77,7 +86,9 @@ namespace Upscaler {
         while (EnumDisplayDevices(nullptr, deviceIndex, &dd, 0)) {
             if (dd.StateFlags & DISPLAY_DEVICE_ACTIVE || dd.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) {
                 std::string model = dd.DeviceString;
-                gpus.push_back(model);
+                std::string deviceID = dd.DeviceID;
+                std::string vendor = GetVendorFromDeviceID(deviceID);
+                gpus.push_back(vendor + " " + model);
             }
             deviceIndex++;
         }
@@ -115,5 +126,20 @@ namespace Upscaler {
 #endif
 
         return gpus;
+    }
+
+    std::string GpuDetector::GetVendorFromDeviceID(const std::string& deviceID) {
+        std::regex venRegex("VEN_([0-9A-Fa-f]{4})");
+        std::smatch match;
+
+        if (std::regex_search(deviceID, match, venRegex)) {
+            std::string venID = match[1];
+            if (venID == "10DE") return "NVIDIA";
+            if (venID == "1002") return "AMD";
+            if (venID == "8086") return "Intel";
+            return "UnknownVendor(" + venID + ")";
+        }
+
+        return "UnknownVendor";
     }
 }

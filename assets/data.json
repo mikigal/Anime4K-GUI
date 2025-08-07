@@ -48,7 +48,7 @@
     {
       "name": "H.264 AMF (AMD)",
       "value": "h264_amf",
-      "vendor": "advanced micro devices",
+      "vendor": "amd",
       "type": "h264",
       "crf_supported": false,
       "cq_supported": true,
@@ -85,7 +85,7 @@
     {
       "name": "H.265 AMF (AMD)",
       "value": "hevc_amf",
-      "vendor": "advanced micro devices",
+      "vendor": "amd",
       "type": "h265",
       "crf_supported": false,
       "cq_supported": true,
@@ -122,7 +122,7 @@
     {
       "name": "AV1 AMF (AMD)",
       "value": "av1_amf",
-      "vendor": "advanced micro devices",
+      "vendor": "amd",
       "type": "av1",
       "crf_supported": false,
       "cq_supported": true,
