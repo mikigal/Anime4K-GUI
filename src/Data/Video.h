@@ -7,7 +7,7 @@ namespace Upscaler {
         WAITING,
         PROCESSING,
         FINISHED,
-        ERROR,
+        FAILED,
         NOT_STARTED
     };
 
