@@ -61,6 +61,8 @@ add_executable(Anime4K_GUI src/main.cpp
         src/App.cpp
         src/App.h
         src/Utilities/AssetLoader.cpp
+        src/Utilities/GpuDetector.h
+        src/Utilities/GpuDetector.cpp
 )
 
 add_dependencies(${PROJECT_NAME} pack_assets)
