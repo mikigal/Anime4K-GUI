@@ -17,6 +17,7 @@ namespace Upscaler {
 
     public:
         void Init();
+        void PreventSleep();
 
         AssetLoader& GetAssetLoader() { return m_AssetLoader; }
         VideoLoader& GetVideoLoader() { return m_VideoLoader; }
