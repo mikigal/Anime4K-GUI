@@ -2,6 +2,7 @@
 #define UPSCALER_H
 #include "Video/VideoLoader.h"
 #include "Data/Configuration.h"
+#include "Hardware/GpuDetector.h"
 #include "UI/Renderer.h"
 #include "Utilities/AssetLoader.h"
 #include "Utilities/Logger.h"
@@ -13,6 +14,7 @@ namespace Upscaler {
         VideoLoader m_VideoLoader{this};
         Configuration m_Configuration{this};
         Renderer m_Renderer{this};
+        GpuDetector m_GpuDetector{this};
         Logger m_Logger;
 
     public:
@@ -23,6 +25,7 @@ namespace Upscaler {
         VideoLoader& GetVideoLoader() { return m_VideoLoader; }
         Configuration& GetConfiguration() { return m_Configuration; }
         Renderer& GetRenderer() { return m_Renderer; }
+        GpuDetector& GetGpuDetector() { return m_GpuDetector; }
         Logger& GetLogger() { return m_Logger; }
     };
 }

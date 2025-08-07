@@ -10,14 +10,10 @@ namespace Upscaler {
         m_AssetLoader.Load("assets.pak");
         m_Configuration.Load();
 
+        m_GpuDetector.AnalyzeAvailableEncoders();
+
         std::string a = "/home/mikigal/Documents/Another01.mp4";
         m_VideoLoader.loadVideo(a);
-
-        std::vector<std::string> gpus = GpuDetector::FindGPUs();
-        m_Logger.Info("Available GPUs:");
-        for (const std::string& gpu : gpus) {
-            m_Logger.Info("  {}", gpu);
-        }
 
         PreventSleep();
 

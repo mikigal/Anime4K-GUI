@@ -2,9 +2,17 @@
 #define GPUDETECTOR_H
 
 namespace Upscaler {
+    class App;
+
     class GpuDetector {
     public:
-        static std::vector<std::string> FindGPUs();
+        App* Instance;
+        std::vector<std::string> FindGPUs();
+        void AnalyzeAvailableEncoders();
+
+        GpuDetector(App* instance)
+            : Instance(instance) {
+        }
     };
 }
 

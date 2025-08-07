@@ -32,6 +32,7 @@ namespace Upscaler {
                 item.at("name"),
                 item.at("value"),
                 item.at("vendor"),
+                item.at("type"),
                 item.at("crf_supported"),
                 item.at("cq_supported"),
                 item.at("threads_limit_supported"),

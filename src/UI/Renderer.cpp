@@ -22,12 +22,10 @@ namespace Upscaler {
 
     std::vector<const char*> shadersNames;
     std::vector<const char*> resolutionsNames;
-    std::vector<const char*> encodersNames; // TODO: Available encoders
+    std::vector<const char*> encodersNames;
     std::vector<const char*> outputFormatsNames;
 
     std::vector<std::string> droppedFiles;
-
-
 
     void Renderer::RenderUI() {
         // ============ Table ============
@@ -226,6 +224,10 @@ namespace Upscaler {
         }
 
         for (Encoder& encoder: Instance->GetConfiguration().Encoders) {
+            if (!encoder.Available) {
+                continue;
+            }
+
             encodersNames.push_back(encoder.Name.c_str());
         }
 

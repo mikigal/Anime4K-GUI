@@ -7,12 +7,14 @@ namespace Upscaler {
         const std::string Name;
         const std::string Value;
         const std::string Vendor;
+        const std::string Type;
         const bool CrfSupport;
         const bool CqSupport;
         const bool ThreadsLimitSupported;
         const std::vector<std::string> HwaccelParams;
         const std::vector<std::string> Params;
         const std::vector<std::string> ThreadsLimitParams;
+        bool Available = false;
     };
 }
 
