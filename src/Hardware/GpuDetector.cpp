@@ -22,6 +22,7 @@ namespace Upscaler {
 
         bool nvidia = false;
         bool amd = false;
+        bool intel = false;
         bool av1Supported = false;
         for (std::string gpu : gpus) {
             Instance->GetLogger().Info("  - {}", gpu);
@@ -47,10 +48,23 @@ namespace Upscaler {
                 av1Supported = gpu.find("rtx 40") != std::string::npos || gpu.find("rtx 50") != std::string::npos;
             }
 
-            // Check for AMD iGPU
+            if (gpu.find("intel") != std::string::npos) {
+                intel = true;
+            }
+
+            // Check for iGPU
             if (nvidia && amd) {
                 Instance->GetLogger().Info("Found AMD iGPU, ignoring it");
                 amd = false;
+            }
+
+            if (nvidia && intel || amd && intel) {
+                Instance->GetLogger().Info("Found Intel iGPU, ignoring it");
+                intel = false;
+            }
+
+            if (intel) {
+                Instance->GetLogger().Warn("Found Intel dGPU which is not supported. Only CPU based encoders will be available");
             }
         }
 
