@@ -330,6 +330,7 @@ namespace Upscaler {
         }
 
 #ifdef _WIN32
+        Windows::SetIcon(window);
         Windows::EnableWindowDarkMode(window);
 #endif
 
