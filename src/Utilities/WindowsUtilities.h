@@ -39,6 +39,12 @@ namespace Upscaler {
             DestroyIcon(hIconBig);
             DestroyIcon(hIconSmall);
         }
+
+        static void PreventSleep() {
+            if (!SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED)) {
+                m_Logger.Error("Failed to block sleep/hibernation. Error code: {}", GetLastError());
+            }
+        }
     };
 }
 #endif

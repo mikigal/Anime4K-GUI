@@ -31,8 +31,9 @@ namespace Upscaler {
         bool intel = false;
         bool apple = false;
         bool av1Supported = false;
-        for (std::string gpu : gpus) {
-            Instance->GetLogger().Info("  - {}", gpu);
+        for (int i = 0; i < gpus.size(); i++) {
+            std::string& gpu = gpus[i];
+            Instance->GetLogger().Info("  {}. {}", i + 1, gpu);
             std::ranges::transform(gpu, gpu.begin(),
                                    [](const unsigned char c) { return std::tolower(c); });
 
@@ -62,23 +63,28 @@ namespace Upscaler {
             if (gpu.find("apple") != std::string::npos) {
                 apple = true;
             }
-
-            // Check for iGPU
-            if (nvidia && amd) {
-                Instance->GetLogger().Info("Found AMD iGPU, ignoring it");
-                amd = false;
-            }
-
-            if (nvidia && intel || amd && intel) {
-                Instance->GetLogger().Info("Found Intel iGPU, ignoring it");
-                intel = false;
-            }
-
-            if (intel) {
-                Instance->GetLogger().Warn("Found Intel dGPU which is not supported. Only CPU based encoders will be available");
-            }
         }
 
+        // Check for iGPU
+        if (nvidia && amd) {
+            Instance->GetLogger().Info("Found AMD iGPU, ignoring it");
+            amd = false;
+        }
+
+        if (nvidia && intel || amd && intel) {
+            Instance->GetLogger().Info("Found Intel iGPU, ignoring it");
+            intel = false;
+        }
+
+        if (intel) {
+            Instance->GetLogger().Warn("Found Intel dGPU which is not supported. Only CPU based encoders will be available");
+        }
+
+
+        Instance->GetLogger().Info("");
+#ifdef __linux__
+        Instance->GetLogger().Warn("NVIDIA GPUs on Linux are supported only with nvidia-open drivers");
+#endif
         Instance->GetLogger().Debug("Available encoders:");
         for (Encoder& encoder : Instance->GetConfiguration().Encoders) {
             if (encoder.Vendor == "cpu") {

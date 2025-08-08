@@ -39,6 +39,15 @@ namespace Upscaler {
         static int ToMegabytes(long bytes) {
             return bytes / 1024 / 1024;
         }
+
+        static void PreventSleep(Logger& logger) {
+#ifdef _WIN32
+            WindowsUtilities::PreventSleep();
+#else
+            logger.Warn("Sleep prevention is not supported on this operating system. Please ensure your computer does not go to sleep while processing videos.");
+#endif
+
+        }
     };
 }
 #endif //UTILITIES_H

@@ -7,7 +7,7 @@
 
 namespace Upscaler {
     void VideoLoader::LoadVideo(std::string& path) {
-        Instance->GetLogger().Info("Loading video metadata: {}", path);
+        Instance->GetLogger().Debug("Loading video metadata: {}", path);
 
         long startMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();

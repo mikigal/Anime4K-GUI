@@ -65,7 +65,7 @@ namespace Upscaler {
             Instance->GetLogger().Debug("File: {}, Size: {} bytes", filename, data.size());
         }
 
-        Instance->GetLogger().Info("Loaded {}", filename);
+        Instance->GetLogger().Debug("Loaded {}", filename);
     }
 
     bool AssetLoader::HasFile(const std::string& filename) const {

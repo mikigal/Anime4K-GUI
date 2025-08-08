@@ -44,7 +44,7 @@ include_directories(src)
 
 add_executable(Anime4K_GUI src/main.cpp
         src/pch.h
-        src/Utilities/WindowUtilities.h
+        src/Utilities/WindowsUtilities.h
         src/Utilities/AssetLoader.h
         src/Utilities/Logger.h
         src/UI/Renderer.cpp

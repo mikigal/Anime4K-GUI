@@ -9,14 +9,13 @@
 namespace Upscaler {
     class Logger {
     public:
-        void Init() {
+        void Init(bool debug) {
             spdlog::set_pattern("[%H:%M:%S] [%^%l%$] %v");
             spdlog::set_default_logger(spdlog::stdout_color_mt("UpscalerLogger"));
-#if defined(DEBUG) || defined(_DEBUG)
-            spdlog::set_level(spdlog::level::debug);
-#else
-            spdlog::set_level(spdlog::level::info);
-#endif
+            if (debug) {
+
+            }
+            spdlog::set_level(debug ? spdlog::level::debug : spdlog::level::info);
         }
 
         void Shutdown() {
