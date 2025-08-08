@@ -73,6 +73,17 @@ if (APPLE)
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework IOKit")
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework Cocoa")
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework OpenGL")
+
+    set(ASSETS_FILE ${CMAKE_BINARY_DIR}/bin/assets.pak)
+    set(ICNS_FILE resources/icon.icns)
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE MACOSX_BUNDLE_ICON_FILE "icon.icns")
+
+    set_source_files_properties(${ASSETS_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    set_source_files_properties(${ICNS_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
+    target_sources(${PROJECT_NAME} PRIVATE ${ASSETS_FILE})
+    target_sources(${PROJECT_NAME} PRIVATE ${ICNS_FILE})
 endif()
 
 if(WIN32)

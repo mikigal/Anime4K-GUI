@@ -10,7 +10,7 @@ namespace Upscaler {
         App* Instance;
         typedef std::vector<char> AssetData;
 
-        void Load(const std::string& filename);
+        void Load(const std::string& filename, const std::string& ext);
         bool HasFile(const std::string& filename) const;
         const AssetData& GetFileData(const std::string& filename) const;
 
