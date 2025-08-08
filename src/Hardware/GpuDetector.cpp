@@ -12,9 +12,15 @@
 #elif defined(__linux__)
     #include <cstdio>
     #include <memory>
+#elif defined(__APPLE__)
+    #include <sys/sysctl.h>
 #endif
 
 namespace Upscaler {
+
+#if defined(__APPLE__)
+
+#endif
 
     void GpuDetector::AnalyzeAvailableEncoders() {
         std::vector<std::string> gpus = FindGPUs();
@@ -23,6 +29,7 @@ namespace Upscaler {
         bool nvidia = false;
         bool amd = false;
         bool intel = false;
+        bool apple = false;
         bool av1Supported = false;
         for (std::string gpu : gpus) {
             Instance->GetLogger().Info("  - {}", gpu);
@@ -52,6 +59,10 @@ namespace Upscaler {
                 intel = true;
             }
 
+            if (gpu.find("apple") != std::string::npos) {
+                apple = true;
+            }
+
             // Check for iGPU
             if (nvidia && amd) {
                 Instance->GetLogger().Info("Found AMD iGPU, ignoring it");
@@ -79,6 +90,10 @@ namespace Upscaler {
             }
 
             if (encoder.Vendor == "amd" && amd && (encoder.Type != "av1" || (encoder.Type == "av1" && av1Supported))) {
+                encoder.Available = true;
+            }
+
+            if (encoder.Vendor == "apple" && apple) {
                 encoder.Available = true;
             }
 
@@ -136,7 +151,26 @@ namespace Upscaler {
 
         pclose(pipe);
 #elif defined(__APPLE__)
-        gpus.push_back("Apple Silicon GPU");
+
+        auto GetFromSysctl = [](const char* name) -> std::string {
+            size_t size = 0;
+            if (sysctlbyname(name, nullptr, &size, nullptr, 0) != 0 || size == 0) return {};
+            std::string s(size, '\0');
+            if (sysctlbyname(name, s.data(), &size, nullptr, 0) != 0) return {};
+            if (!s.empty() && s.back() == '\0') s.pop_back();
+            return s;
+        };
+
+        std::string arch = GetFromSysctl("hw.machine");
+
+        if (arch == "arm64") {
+            std::string cpu = GetFromSysctl("machdep.cpu.brand_string") == "" ? GetFromSysctl("machdep.cpu.brand_string") : GetFromSysctl("machdep.cpu.brand_string") ;
+            gpus.push_back(cpu);
+        }
+        else {
+            Instance->GetLogger().Warn("Hardware encoders on Intel based Macs are not supported");
+        }
+
 #endif
 
         return gpus;

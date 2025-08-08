@@ -10,6 +10,7 @@ namespace Upscaler {
         const std::string Type;
         const bool CrfSupport;
         const bool CqSupport;
+        const bool VideoToolboxCqSupport;
         const bool ThreadsLimitSupported;
         const std::vector<std::string> HwaccelParams;
         const std::vector<std::string> Params;
