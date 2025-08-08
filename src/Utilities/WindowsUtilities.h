@@ -40,9 +40,9 @@ namespace Upscaler {
             DestroyIcon(hIconSmall);
         }
 
-        static void PreventSleep() {
+        static void PreventSleep(Logger& logger) {
             if (!SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED)) {
-                m_Logger.Error("Failed to block sleep/hibernation. Error code: {}", GetLastError());
+                logger.Error("Failed to block sleep/hibernation. Error code: {}", GetLastError());
             }
         }
     };

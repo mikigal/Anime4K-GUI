@@ -2,6 +2,10 @@
 #define UTILITIES_H
 #include <pch.h>
 
+#ifdef _WIN32
+#include "WindowsUtilities.h"
+#endif
+
 namespace Upscaler {
     class Utilities {
     public:
@@ -42,7 +46,7 @@ namespace Upscaler {
 
         static void PreventSleep(Logger& logger) {
 #ifdef _WIN32
-            WindowsUtilities::PreventSleep();
+            Windows::PreventSleep(logger);
 #else
             logger.Warn("Sleep prevention is not supported on this operating system. Please ensure your computer does not go to sleep while processing videos.");
 #endif

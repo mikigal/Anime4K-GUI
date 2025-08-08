@@ -9,7 +9,7 @@
 #include "RendererUtilities.h"
 
 #ifdef _WIN32
-#include "Utilities/WindowUtilities.h"
+#include "Utilities/WindowsUtilities.h"
 #endif
 
 #define WINDOW_WIDTH 1600

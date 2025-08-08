@@ -5,7 +5,7 @@
 #define STATUS_NOT_STARTED "Not Started"
 #define STATUS_WAITING "Waiting"
 #define STATUS_PROCESSING "Processing"
-#define FAILED "Failed"
+#define STATUS_FAILED "Failed"
 #define STATUS_FINISHED "Finished"
 
 namespace Upscaler {
