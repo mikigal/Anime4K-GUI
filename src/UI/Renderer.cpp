@@ -6,6 +6,7 @@
 #include "App.h"
 #include "imgui_internal.h"
 #include "Utilities/Utilities.h"
+#include "RendererUtilities.h"
 
 #ifdef _WIN32
 #include "Utilities/WindowUtilities.h"
@@ -16,21 +17,26 @@
 
 namespace Upscaler {
     std::string Renderer::Logs;
-
-
-
     std::vector<std::string> Renderer::m_DroppedFiles;
 
     void Renderer::RenderUI() {
-        // ============ Table ============
-        ImGui::Begin("Video List");
+        for (std::string& path: m_DroppedFiles) {
+            Instance->GetVideoLoader().LoadVideo(path);
+        }
+        m_DroppedFiles.clear();
 
+        RenderVideoTable();
+        RenderSettings();
+        RenderLogs();
+        RenderProgress();
+    }
+
+    void Renderer::RenderVideoTable() {
+        ImGui::Begin("Video List");
         ImGui::BeginChild("VideoDropTargetChild", ImVec2(0, 0), true, ImGuiWindowFlags_None);
 
-        if (ImGui::BeginTable("VideoTable##Persistent", 7, ImGuiTableFlags_BordersOuter |
-                                                           ImGuiTableFlags_RowBg |
-                                                           ImGuiTableFlags_Resizable |
-                                                           ImGuiTableFlags_Reorderable)) {
+        if (ImGui::BeginTable("VideoTable##Persistent", 7, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg |
+                                                           ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable)) {
             ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 40.0f);
             ImGui::TableSetupColumn("Title", ImGuiTableColumnFlags_WidthFixed, 700.0f);
             ImGui::TableSetupColumn("Resolution");
@@ -44,41 +50,27 @@ namespace Upscaler {
                 Video& video = Instance->GetVideoLoader().m_Videos[i];
                 ImGui::TableNextRow();
 
-                std::string idText = std::to_string(i + 1);
-                float textWidth = ImGui::CalcTextSize(idText.c_str()).x;
-                float columnWidth = ImGui::GetColumnWidth();
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (columnWidth - textWidth) * 0.5f);
-                ImGui::TableSetColumnIndex(0);
-                ImGui::Text("%d", i + 1);
+                ImGui::TableNextColumn();
+                RendererUtilities::CenteredText("%d", i + 1);
+                ImGui::TableNextColumn();
+                RendererUtilities::CenteredText("%s", video.Name.c_str());
+                ImGui::TableNextColumn();
+                RendererUtilities::CenteredText("%dx%d", video.Width, video.Height);
+                ImGui::TableNextColumn();
+                RendererUtilities::CenteredText("%s", Utilities::FormatTime(video.Duration).c_str());
+                ImGui::TableNextColumn();
+                RendererUtilities::CenteredText("%d MB", Utilities::ToMegabytes(video.Size));
+                ImGui::TableNextColumn();
+                RendererUtilities::CenteredText("%s", video.Status.c_str());
 
-                ImGui::TableSetColumnIndex(1);
-                ImGui::Text("%s", video.Name.c_str());
-
-                ImGui::TableSetColumnIndex(2);
-                ImGui::Text("%dx%d", video.Width, video.Height);
-
-                ImGui::TableSetColumnIndex(3);
-                ImGui::Text("%s", Utilities::FormatTime(video.Duration).c_str());
-
-                ImGui::TableSetColumnIndex(4);
-                ImGui::Text("%d MB", Utilities::ToMegabytes(video.Size));
-
-                ImGui::TableSetColumnIndex(5);
-                ImGui::Text("%s", video.Status.c_str());
-
-                ImGui::TableSetColumnIndex(6);
+                ImGui::TableNextColumn();
                 ImGui::PushID(i);
 
                 float btnWidth = ImGui::CalcTextSize("Remove").x + ImGui::GetStyle().FramePadding.x * 2.0f;
-                float colWidth = ImGui::GetColumnWidth();
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (colWidth - btnWidth) * 0.5f);
-
-                float cellHeight = ImGui::GetTextLineHeightWithSpacing();
-                float btnHeight = ImGui::GetFrameHeight();
-                float offsetY = (cellHeight - btnHeight) * 0.5f;
-                if (offsetY > 0.0f) {
-                    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + offsetY);
-                }
+                ImVec2 cursorPos = ImGui::GetCursorPos();
+                ImGui::SetCursorPosX(cursorPos.x + (ImGui::GetColumnWidth() - btnWidth) * 0.5f);
+                ImGui::SetCursorPosY(
+                    cursorPos.y + (ImGui::GetTextLineHeightWithSpacing() - ImGui::GetFrameHeight()) * 0.5f);
 
                 if (ImGui::Button("Remove")) {
                     Instance->GetLogger().Info("Removed file {}", video.Name);
@@ -98,48 +90,21 @@ namespace Upscaler {
 
         ImGui::EndChild();
         ImGui::End();
-
-        for (std::string& path : m_DroppedFiles) {
-            Instance->GetVideoLoader().LoadVideo(path);
-        }
-        m_DroppedFiles.clear();
-
-        // ============ Settings ============
+    }
+    void Renderer::RenderSettings() {
         ImGui::Begin("Settings");
-        ImGui::Text("Target resolution");
-        ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##res", &SelectedResolution, m_ResolutionsNames.data(), m_ResolutionsNames.size());
-        ImGui::Spacing();
-
-        ImGui::Text("Shaders");
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Shader info here...");
-        ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##shaders", &SelectedShader, m_ShadersNames.data(), m_ShadersNames.size());
-        ImGui::Spacing();
-
-        ImGui::Text("Encoder");
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Encoder tooltip here...");
-        ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##encoders", &SelectedEncoder, m_EncodersNames.data(), m_EncodersNames.size());
-        ImGui::Spacing();
+        RendererUtilities::ComboWithLabel("Target resolution", nullptr, "##resolution", &SelectedResolution, m_ResolutionsNames);
+        RendererUtilities::ComboWithLabel("Shaders", nullptr, "##shaders", &SelectedShader, m_ShadersNames);
+        RendererUtilities::ComboWithLabel("Encoder", nullptr, "##encoders", &SelectedEncoder, m_EncodersNames);
 
         if (SelectedEncoder == 1) {
-            ImGui::Text("Constant Rate Factor (CRF)");
-            ImGui::SetNextItemWidth(300);
-            ImGui::InputInt("##crf", &SelectedCrf);
+            RendererUtilities::NumberInput("Constant Rate Factor (CRF)", nullptr, "##crf", &SelectedCrf);
         }
         else {
-            ImGui::Text("Constant Quality (CQ)");
-            ImGui::SetNextItemWidth(300);
-            ImGui::InputInt("##cq", &SelectedCq);
+            RendererUtilities::NumberInput("Constant Quality (CQ)", nullptr, "##cq", &SelectedCq);
         }
-        ImGui::Spacing();
 
-        ImGui::Text("Output format");
-        ImGui::SetNextItemWidth(300);
-        static int format = 0;
-        ImGui::Combo("##formats", &format, m_OutputFormatsNames.data(), m_OutputFormatsNames.size());
-        ImGui::Spacing();
+        RendererUtilities::ComboWithLabel("Output formats", nullptr, "##output_formats", &SelectedOutputFormat, m_OutputFormatsNames);
 
         if (SelectedEncoder == 1) {
             ImGui::Text("CPU threads");
@@ -148,23 +113,23 @@ namespace Upscaler {
             ImGui::Spacing();
         }
 
-
         ImGui::Checkbox("Debug mode", &SelectedDebugMode);
         ImGui::Dummy(ImVec2(0, 10));
 
         if (ImGui::Button("Start Encoding", ImVec2(300, 30))) {
             // Start/cancel logic
         }
-        ImGui::End();
 
-        // ============ Logs ============
+        ImGui::End();
+    }
+    void Renderer::RenderLogs() {
         ImGui::Begin("Logs");
         std::string logsDisplayBuffer = Logs + '\0';
         ImGui::InputTextMultiline("##logs", logsDisplayBuffer.data(), logsDisplayBuffer.size(),
                                   ImVec2(-FLT_MIN, 220), ImGuiInputTextFlags_ReadOnly);
         ImGui::End();
-
-        // ============ Progress ============
+    }
+    void Renderer::RenderProgress() {
         ImGui::Begin("Progress");
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
 
@@ -176,8 +141,7 @@ namespace Upscaler {
         float progressBarWidth = totalWidth - 318.0f;
 
         ImVec2 startPos = ImGui::GetCursorScreenPos();
-        float textLineHeight = ImGui::GetTextLineHeight();
-        float centerOffset = (progressHeight - textLineHeight) * 0.5f;
+        float centerOffset = (progressHeight - ImGui::GetTextLineHeight()) * 0.5f;
 
         ImGui::SetCursorScreenPos(ImVec2(startPos.x, startPos.y + centerOffset));
         ImGui::Text("Progress: 0 / 1");
@@ -213,9 +177,8 @@ namespace Upscaler {
         sepPos.x += 8.0f;
         ImGui::GetWindowDrawList()->AddLine(
             ImVec2(sepPos.x, sepPos.y),
-            ImVec2(sepPos.x, sepPos.y + textLineHeight),
-            ImGui::GetColorU32(ImGuiCol_Text)
-        );
+            ImVec2(sepPos.x, sepPos.y + ImGui::GetTextLineHeight()),
+            ImGui::GetColorU32(ImGuiCol_Text));
         ImGui::Dummy(ImVec2(16.0f, 0));
         ImGui::SameLine();
 
