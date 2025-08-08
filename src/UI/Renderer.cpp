@@ -5,6 +5,7 @@
 #include "Utilities/Logger.h"
 #include "App.h"
 #include "imgui_internal.h"
+#include "Utilities/Utilities.h"
 
 #ifdef _WIN32
 #include "Utilities/WindowUtilities.h"
@@ -16,16 +17,9 @@
 namespace Upscaler {
     std::string Renderer::Logs;
 
-    std::vector<std::string> videoList = {
-        "Attack on Titan", "One Piece", "Jujutsu Kaisen"
-    };
 
-    std::vector<const char*> shadersNames;
-    std::vector<const char*> resolutionsNames;
-    std::vector<const char*> encodersNames;
-    std::vector<const char*> outputFormatsNames;
 
-    std::vector<std::string> droppedFiles;
+    std::vector<std::string> Renderer::m_DroppedFiles;
 
     void Renderer::RenderUI() {
         // ============ Table ============
@@ -33,17 +27,21 @@ namespace Upscaler {
 
         ImGui::BeginChild("VideoDropTargetChild", ImVec2(0, 0), true, ImGuiWindowFlags_None);
 
-        if (ImGui::BeginTable("VideoTable##Persistent", 3, ImGuiTableFlags_BordersOuter |
+        if (ImGui::BeginTable("VideoTable##Persistent", 7, ImGuiTableFlags_BordersOuter |
                                                            ImGuiTableFlags_RowBg |
                                                            ImGuiTableFlags_Resizable |
-                                                           ImGuiTableFlags_Reorderable |
-                                                           ImGuiTableFlags_SizingStretchSame)) {
+                                                           ImGuiTableFlags_Reorderable)) {
             ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 40.0f);
-            ImGui::TableSetupColumn("Title");
-            ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_WidthFixed, 200.0f);
+            ImGui::TableSetupColumn("Title", ImGuiTableColumnFlags_WidthFixed, 700.0f);
+            ImGui::TableSetupColumn("Resolution");
+            ImGui::TableSetupColumn("Length");
+            ImGui::TableSetupColumn("Size");
+            ImGui::TableSetupColumn("Status");
+            ImGui::TableSetupColumn("Action");
             ImGui::TableHeadersRow();
 
-            for (int i = 0; i < videoList.size(); ++i) {
+            for (int i = 0; i < Instance->GetVideoLoader().m_Videos.size(); ++i) {
+                Video& video = Instance->GetVideoLoader().m_Videos[i];
                 ImGui::TableNextRow();
 
                 std::string idText = std::to_string(i + 1);
@@ -54,9 +52,21 @@ namespace Upscaler {
                 ImGui::Text("%d", i + 1);
 
                 ImGui::TableSetColumnIndex(1);
-                ImGui::Text("%s", videoList[i].c_str());
+                ImGui::Text("%s", video.Name.c_str());
 
                 ImGui::TableSetColumnIndex(2);
+                ImGui::Text("%dx%d", video.Width, video.Height);
+
+                ImGui::TableSetColumnIndex(3);
+                ImGui::Text("%s", Utilities::FormatTime(video.Duration).c_str());
+
+                ImGui::TableSetColumnIndex(4);
+                ImGui::Text("%d MB", Utilities::ToMegabytes(video.Size));
+
+                ImGui::TableSetColumnIndex(5);
+                ImGui::Text("%s", video.Status.c_str());
+
+                ImGui::TableSetColumnIndex(6);
                 ImGui::PushID(i);
 
                 float btnWidth = ImGui::CalcTextSize("Remove").x + ImGui::GetStyle().FramePadding.x * 2.0f;
@@ -71,8 +81,9 @@ namespace Upscaler {
                 }
 
                 if (ImGui::Button("Remove")) {
-                    videoList.erase(videoList.begin() + i);
-                    --i;
+                    Instance->GetLogger().Info("Removed file {}", video.Name);
+                    Instance->GetVideoLoader().m_Videos.erase(Instance->GetVideoLoader().m_Videos.begin() + i);
+                    i--;
                 }
 
                 ImGui::PopID();
@@ -88,28 +99,28 @@ namespace Upscaler {
         ImGui::EndChild();
         ImGui::End();
 
-        for (const std::string& path : droppedFiles) {
-            videoList.push_back(path);
+        for (std::string& path : m_DroppedFiles) {
+            Instance->GetVideoLoader().LoadVideo(path);
         }
-        droppedFiles.clear();
+        m_DroppedFiles.clear();
 
         // ============ Settings ============
         ImGui::Begin("Settings");
         ImGui::Text("Target resolution");
         ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##res", &SelectedResolution, resolutionsNames.data(), resolutionsNames.size());
+        ImGui::Combo("##res", &SelectedResolution, m_ResolutionsNames.data(), m_ResolutionsNames.size());
         ImGui::Spacing();
 
         ImGui::Text("Shaders");
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("Shader info here...");
         ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##shaders", &SelectedShader, shadersNames.data(), shadersNames.size());
+        ImGui::Combo("##shaders", &SelectedShader, m_ShadersNames.data(), m_ShadersNames.size());
         ImGui::Spacing();
 
         ImGui::Text("Encoder");
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("Encoder tooltip here...");
         ImGui::SetNextItemWidth(300);
-        ImGui::Combo("##encoders", &SelectedEncoder, encodersNames.data(), encodersNames.size());
+        ImGui::Combo("##encoders", &SelectedEncoder, m_EncodersNames.data(), m_EncodersNames.size());
         ImGui::Spacing();
 
         if (SelectedEncoder == 1) {
@@ -127,7 +138,7 @@ namespace Upscaler {
         ImGui::Text("Output format");
         ImGui::SetNextItemWidth(300);
         static int format = 0;
-        ImGui::Combo("##formats", &format, outputFormatsNames.data(), outputFormatsNames.size());
+        ImGui::Combo("##formats", &format, m_OutputFormatsNames.data(), m_OutputFormatsNames.size());
         ImGui::Spacing();
 
         if (SelectedEncoder == 1) {
@@ -153,6 +164,7 @@ namespace Upscaler {
                                   ImVec2(-FLT_MIN, 220), ImGuiInputTextFlags_ReadOnly);
         ImGui::End();
 
+        // ============ Progress ============
         ImGui::Begin("Progress");
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
 
@@ -216,11 +228,11 @@ namespace Upscaler {
 
     bool Renderer::Init() {
         for (Shader& shader: Instance->GetConfiguration().Shaders) {
-            shadersNames.push_back(shader.Name.c_str());
+            m_ShadersNames.push_back(shader.Name.c_str());
         }
 
         for (Resolution& resolution: Instance->GetConfiguration().Resolutions) {
-            resolutionsNames.push_back(resolution.VisibleName.c_str());
+            m_ResolutionsNames.push_back(resolution.VisibleName.c_str());
         }
 
         for (Encoder& encoder: Instance->GetConfiguration().Encoders) {
@@ -228,11 +240,11 @@ namespace Upscaler {
                 continue;
             }
 
-            encodersNames.push_back(encoder.Name.c_str());
+            m_EncodersNames.push_back(encoder.Name.c_str());
         }
 
         for (std::string& outputFormat: Instance->GetConfiguration().OutputFormats) {
-            outputFormatsNames.push_back(outputFormat.c_str());
+            m_OutputFormatsNames.push_back(outputFormat.c_str());
         }
 
         InitializeWindow();
@@ -352,7 +364,7 @@ namespace Upscaler {
             std::string lower = path;
             std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
             if (lower.ends_with(".mp4") || lower.ends_with(".avi") || lower.ends_with(".mkv")) {
-                droppedFiles.push_back(path);
+                m_DroppedFiles.push_back(path);
             }
         }
     }

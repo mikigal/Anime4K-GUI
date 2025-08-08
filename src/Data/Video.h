@@ -2,15 +2,13 @@
 #define ANIME_H
 #include <pch.h>
 
-namespace Upscaler {
-    enum class ProcessingStatus {
-        WAITING,
-        PROCESSING,
-        FINISHED,
-        FAILED,
-        NOT_STARTED
-    };
+#define STATUS_NOT_STARTED "Not Started"
+#define STATUS_WAITING "Waiting"
+#define STATUS_PROCESSING "Processing"
+#define FAILED "Failed"
+#define STATUS_FINISHED "Finished"
 
+namespace Upscaler {
     struct Video {
         std::string Name;
         int Duration;
@@ -23,7 +21,7 @@ namespace Upscaler {
         std::vector<std::string> StreamCodecs;
         std::string PixelFormat;
         std::string Path;
-        ProcessingStatus Status;
+        std::string Status;
     };
 }
 

@@ -6,7 +6,7 @@
 #include "Utilities/Utilities.h"
 
 namespace Upscaler {
-    void VideoLoader::loadVideo(std::string& path) {
+    void VideoLoader::LoadVideo(std::string& path) {
         Instance->GetLogger().Info("Loading video metadata: {}", path);
 
         long startMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -48,7 +48,7 @@ namespace Upscaler {
                 duration = std::stof(stream["duration"].get<std::string>());
                 pixelFormat = stream["pix_fmt"].get<std::string>();
 
-                std::vector<std::string> frameRateSplit = split(stream["avg_frame_rate"].get<std::string>(), '/');
+                std::vector<std::string> frameRateSplit = Utilities::Split(stream["avg_frame_rate"].get<std::string>(), '/');
                 float base = std::stof(frameRateSplit[0]);
                 float divider = std::stof(frameRateSplit[1]);
                 frameRate = base / divider;
@@ -59,7 +59,7 @@ namespace Upscaler {
 
         totalFrames = frameRate * duration;
         Video video(filePath.filename().string(), duration, size, width, height, frameRate, totalFrames, false,
-                    streamCodecs, pixelFormat, filePath.string(), ProcessingStatus::WAITING);
+                    streamCodecs, pixelFormat, filePath.string(), STATUS_NOT_STARTED);
 
         long endMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();

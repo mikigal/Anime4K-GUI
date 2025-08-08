@@ -10,7 +10,7 @@ namespace Upscaler {
         App* Instance;
         std::vector<Video> m_Videos;
 
-        void loadVideo(std::string& path);
+        void LoadVideo(std::string& path);
 
         VideoLoader(App* instance)
             : Instance(instance) {

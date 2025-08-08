@@ -13,7 +13,7 @@ namespace Upscaler {
         m_GpuDetector.AnalyzeAvailableEncoders();
 
         std::string a = "/home/mikigal/Documents/Another01.mp4";
-        m_VideoLoader.loadVideo(a);
+        m_VideoLoader.LoadVideo(a);
 
         PreventSleep();
 

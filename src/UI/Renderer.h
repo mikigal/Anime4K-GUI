@@ -25,7 +25,6 @@ namespace Upscaler {
 
         bool Init();
         void Terminate();
-        void RenderUI();
 
         Renderer(App* instance)
             : Instance(instance) {
@@ -33,7 +32,14 @@ namespace Upscaler {
 
     private:
         GLFWwindow* m_Window = nullptr;
+        std::vector<const char*> m_ShadersNames;
+        std::vector<const char*> m_ResolutionsNames;
+        std::vector<const char*> m_EncodersNames;
+        std::vector<const char*> m_OutputFormatsNames;
 
+        static std::vector<std::string> m_DroppedFiles;
+
+        void RenderUI();
         void InitializeWindow();
         void ApplyStyle();
         static void DropCallback(GLFWwindow*, int, const char**);
