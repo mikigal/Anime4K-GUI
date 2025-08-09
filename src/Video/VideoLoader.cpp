@@ -48,7 +48,7 @@ namespace Upscaler {
                 duration = std::stof(stream["duration"].get<std::string>());
                 pixelFormat = stream["pix_fmt"].get<std::string>();
 
-                std::vector<std::string> frameRateSplit = Utilities::Split(stream["avg_frame_rate"].get<std::string>(), '/');
+                std::vector<std::string> frameRateSplit = Utilities::Split(stream["avg_frame_rate"].get<std::string>(), "/");
                 float base = std::stof(frameRateSplit[0]);
                 float divider = std::stof(frameRateSplit[1]);
                 frameRate = base / divider;

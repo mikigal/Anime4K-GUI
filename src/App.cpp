@@ -11,6 +11,7 @@ namespace Upscaler {
         m_AssetLoader.Load("assets", "pak");
         m_Configuration.Load();
 
+        m_VideoProcessor.ValidateFFmpeg();
         m_GpuDetector.AnalyzeAvailableEncoders();
 
         Utilities::PreventSleep(m_Logger);
