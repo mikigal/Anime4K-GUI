@@ -33,7 +33,7 @@ namespace Upscaler {
         bool av1Supported = false;
         for (int i = 0; i < gpus.size(); i++) {
             std::string& gpu = gpus[i];
-            Instance->GetLogger().Info("  {}. {}", i + 1, gpu);
+            Instance->GetLogger().Info("  {}. {} {}", i + 1, gpu, (i == gpus.size() - 1 ? "\n" : ""));
             std::ranges::transform(gpu, gpu.begin(),
                                    [](const unsigned char c) { return std::tolower(c); });
 
@@ -80,10 +80,8 @@ namespace Upscaler {
             Instance->GetLogger().Warn("Found Intel dGPU which is not supported. Only CPU based encoders will be available");
         }
 
-
-        Instance->GetLogger().Info("");
 #ifdef __linux__
-        Instance->GetLogger().Warn("NVIDIA GPUs on Linux are supported only with nvidia-open drivers");
+        Instance->GetLogger().Warn("NVIDIA GPUs on Linux are supported only with nvidia-open drivers. If you encounter any issues make sure you use correct drivers");
 #endif
         Instance->GetLogger().Debug("Available encoders:");
         for (Encoder& encoder : Instance->GetConfiguration().Encoders) {

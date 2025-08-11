@@ -52,7 +52,7 @@ namespace Upscaler {
 #ifdef _WIN32
             Windows::PreventSleep(logger);
 #else
-            logger.Warn("Sleep prevention is not supported on this operating system. Please ensure your computer does not go to sleep while processing videos.");
+            logger.Warn("Sleep prevention is not supported on your operating system. Please ensure your computer does not go to sleep while processing videos.");
 #endif
 
         }

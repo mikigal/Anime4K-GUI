@@ -24,6 +24,8 @@ namespace Upscaler {
         float Speed = 0;
         int EtaSeconds = 0;
 
+        bool CriticalError = false;
+
         bool Init();
         void Terminate();
 

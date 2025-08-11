@@ -116,8 +116,17 @@ namespace Upscaler {
         ImGui::Checkbox("Debug mode", &SelectedDebugMode);
         ImGui::Dummy(ImVec2(0, 10));
 
+        if (CriticalError) {
+            ImGui::BeginDisabled();
+        }
         if (ImGui::Button("Start Encoding", ImVec2(300, 30))) {
             // Start/cancel logic
+        }
+        if (CriticalError) {
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+                ImGui::SetTooltip("%s", "Can not start upscaling due to critical error. \nCcheck logs for more details");
+            }
+            ImGui::EndDisabled();
         }
 
         ImGui::End();
