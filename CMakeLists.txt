@@ -72,6 +72,12 @@ add_dependencies(${PROJECT_NAME} pack_assets)
 target_precompile_headers(${PROJECT_NAME} PRIVATE src/pch.h)
 target_link_libraries(${PROJECT_NAME} PRIVATE glad glfw imgui freetype spdlog tiny-process-library)
 
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/shaders"
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders"
+)
+
 if (APPLE)
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework IOKit")
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework Cocoa")
