@@ -10,7 +10,7 @@ namespace Upscaler {
         std::string output;
 
         TinyProcessLib::Process process(
-            "ffmpegx -version", "",
+            "ffmpeg -version", "",
             [&output](const char* bytes, size_t n) {
                 output.append(bytes, n);
             },
