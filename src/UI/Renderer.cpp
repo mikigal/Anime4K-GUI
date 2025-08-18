@@ -119,8 +119,8 @@ namespace Upscaler {
         if (CriticalError) {
             ImGui::BeginDisabled();
         }
-        if (ImGui::Button("Start Encoding", ImVec2(300, 30))) {
-            // Start/cancel logic
+        if (ImGui::Button(Instance->GetVideoProcessor().Processing ? "Cancel" : "Start", ImVec2(300, 30))) {
+            Instance->GetVideoProcessor().HandleButton();
         }
         if (CriticalError) {
             if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -153,7 +153,7 @@ namespace Upscaler {
         float centerOffset = (progressHeight - ImGui::GetTextLineHeight()) * 0.5f;
 
         ImGui::SetCursorScreenPos(ImVec2(startPos.x, startPos.y + centerOffset));
-        ImGui::Text("Progress: 0 / 1");
+        ImGui::Text(std::format("Progress: 0 / {}", Instance->GetVideoLoader().m_Videos.size()).c_str());
         ImGui::SameLine();
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 2));
@@ -339,6 +339,29 @@ namespace Upscaler {
                 m_DroppedFiles.push_back(path);
             }
         }
+    }
+
+    // Look by names as SelectedEncoder is index of currently available encoders
+    Encoder& Renderer::GetSelectedEncoder() {
+        for (Encoder& encoder : Instance->GetConfiguration().Encoders) {
+            if (encoder.Name == m_EncodersNames[SelectedEncoder]) {
+                return encoder;
+            }
+        }
+
+        throw std::runtime_error("Encoder " + std::string(m_EncodersNames[SelectedEncoder]) + " does not exist");
+    }
+
+    Resolution& Renderer::GetSelectedResolution() {
+        return Instance->GetConfiguration().Resolutions[SelectedResolution];
+    }
+
+    Shader& Renderer::GetSelectedShader() {
+        return Instance->GetConfiguration().Shaders[SelectedShader];
+    }
+
+    std::string& Renderer::GetSelectedOutputFormat() {
+        return Instance->GetConfiguration().OutputFormats[SelectedOutputFormat];
     }
 
     void Renderer::ApplyStyle() {

@@ -5,7 +5,7 @@
 
 namespace Upscaler {
     void App::Init() {
-        m_Logger.Init(false);
+        m_Logger.Init(true);
         GetLogger().Debug("Initialized logger");
 
         m_AssetLoader.Load("assets", "pak");
@@ -23,5 +23,6 @@ namespace Upscaler {
         }
 
         m_Renderer.Terminate();
+        m_Logger.Shutdown();
     }
 }

@@ -12,9 +12,6 @@ namespace Upscaler {
         void Init(bool debug) {
             spdlog::set_pattern("[%H:%M:%S] [%^%l%$] %v");
             spdlog::set_default_logger(spdlog::stdout_color_mt("UpscalerLogger"));
-            if (debug) {
-
-            }
             spdlog::set_level(debug ? spdlog::level::debug : spdlog::level::info);
         }
 

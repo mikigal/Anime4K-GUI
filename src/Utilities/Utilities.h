@@ -48,6 +48,19 @@ namespace Upscaler {
             return bytes / 1024 / 1024;
         }
 
+        static std::string AddUpscaledSuffix(std::string& pathStr) {
+            namespace fs = std::filesystem;
+
+            fs::path path(pathStr);
+            fs::path parent = path.parent_path();
+            std::string stem = path.stem().string();
+            std::string ext = path.extension().string();
+
+            fs::path newPath = parent / (stem + "_upscaled" + ext);
+            return newPath.string();
+        }
+
+
         static void PreventSleep(Logger& logger) {
 #ifdef _WIN32
             Windows::PreventSleep(logger);

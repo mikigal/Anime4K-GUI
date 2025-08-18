@@ -1,5 +1,8 @@
 ﻿#ifndef RENDERER_H
 #define RENDERER_H
+#include "Data/Encoder.h"
+#include "Data/Resolution.h"
+#include "Data/Shader.h"
 
 namespace Upscaler {
     class App;
@@ -28,6 +31,10 @@ namespace Upscaler {
 
         bool Init();
         void Terminate();
+        Resolution& GetSelectedResolution();
+        Encoder& GetSelectedEncoder();
+        Shader& GetSelectedShader();
+        std::string& GetSelectedOutputFormat();
 
         Renderer(App* instance)
             : Instance(instance) {
