@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"syscall"
 
 	g "github.com/AllenDang/giu"
@@ -17,6 +18,12 @@ const version = "1.2.3"
 
 var (
 	supportedInput = []string{".mp4", ".avi", ".mkv"}
+
+	// Parallel Processing
+	guiMutex     sync.Mutex
+	fileProgress = make(map[int]float32)
+	fileSpeed    = make(map[int]float64)
+	fileEta      = make(map[int]string)
 
 	// Available options
 	resolutions = []Resolution{
@@ -103,7 +110,7 @@ func main() {
 	loaded := loadSettings()
 	preventSleep()
 
-	window := g.NewMasterWindow("Anime4K-GUI", 1600, 950, g.MasterWindowFlagsNotResizable)
+	window := g.NewMasterWindow("Anime4K-GUI", 1800, 950, g.MasterWindowFlagsNotResizable)
 	searchHardwareAcceleration()
 
 	if loaded && settings.UseSavedPosition {
@@ -134,86 +141,134 @@ func startProcessing() {
 	for i := 0; i < len(animeList); i++ {
 		if animeList[i].Status != Finished {
 			animeList[i].Status = Waiting
+			fileProgress[i] = 0.0 // Reset progress
+		} else {
+			fileProgress[i] = 1.0
 		}
+		fileSpeed[i] = 0.0
+		delete(fileEta, i)
 	}
 
 	gui.Progress = 0
 	gui.ProgressLabel = ""
 	gui.ButtonLabel = "Cancel"
 	processing = true
-	resetUI()
+	cancelled = false // Reset cancelled flag to ensure new jobs can run
+	// resetUI() // No need to reset full UI here if we are about to start
 
 	logMessage("Started upscaling! Upscaled videos will be saved in original directory, with _upscaled suffix in files name", false)
 
 	logDebug("CV value: "+videoCodec, false)
 	g.Update()
 
+	// Parallel Processing
+	var wg sync.WaitGroup
+	// Ensure safe default if not set
+	if settings.MaxConcurrentUpscales == 0 {
+		settings.MaxConcurrentUpscales = 1
+	}
+
+	concurrencyLimit := settings.MaxConcurrentUpscales
+	// Force concurrency to 1 if CPU is used
+	if availableEncoders[settings.Encoder].Vendor == "cpu" {
+		concurrencyLimit = 1
+		logDebug("CPU encoder selected, enforcing concurrency limit of 1", false)
+	}
+
+	sem := make(chan struct{}, concurrencyLimit)
+
 	for index, anime := range animeList {
-		if animeList[index].Status == Finished {
+		idx := index
+		a := anime
+
+		if animeList[idx].Status == Finished {
 			continue
 		}
 
-		message := fmt.Sprintf("Processing %s (%d / %d)...", anime.Name, index+1, len(animeList))
-		logMessage(message, false)
-		animeList[index].Status = Processing
-		g.Update()
-
-		if anime.HasSubtitlesStream && outputFormat != "mkv" {
-			handleStartUpscalingError("", index, "File "+anime.Name+" contains subtitles stream, output format must be MKV", errors.New(""))
-			return
+		if cancelled {
+			break
 		}
 
-		outputPath := fmt.Sprintf("%s_upscaled.%s", strings.TrimSuffix(anime.Path, filepath.Ext(anime.Path)), strings.ToLower(outputFormat))
-		ffmpegParams := buildUpscalingParams(anime, resolution, shader, outputPath)
+		wg.Add(1)
+		sem <- struct{}{}
 
-		workingDirectory, err := os.Getwd()
-		if err != nil {
-			handleStartUpscalingError("", index, "Getting working directory error:", err)
-			return
-		}
+		go func(i int, anime Anime) {
+			defer wg.Done()
+			defer func() { <-sem }()
 
-		logDebug("Working directory: "+workingDirectory, false)
-		logDebug("Input path: "+anime.Path, false)
-		logDebug("Output path: "+outputPath, false)
-		logDebug("Target resolution: "+resolution.Format(), false)
-		logDebug("Shaders: "+shader.Path, false)
-		logDebug("Output format: "+outputFormat, false)
-		logDebug("FFMPEG command: .\\ffmpeg.exe\\ffmpeg.exe "+strings.Join(ffmpegParams, " "), false)
-		g.Update()
-
-		cmd := exec.Command(".\\ffmpeg\\ffmpeg.exe", ffmpegParams...)
-		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-
-		stderr, err := cmd.StderrPipe()
-		if err != nil {
-			handleStartUpscalingError(outputPath, index, "Creating pipe error:", err)
-			return
-		}
-
-		err = cmd.Start()
-		if err != nil {
-			handleStartUpscalingError(outputPath, index, "Starting ffmpeg process error:", err)
-			return
-		}
-
-		ffmpegLogs := handleUpscalingLogs(stderr, anime)
-
-		err = cmd.Wait()
-		if err != nil {
 			if cancelled {
-				cancelled = false
 				return
 			}
 
-			handleStartUpscalingError(outputPath, index, "FFMPEG Error:", err)
-			handleSoftError("FFMPEG logs:", ffmpegLogs)
-			return
-		}
+			guiMutex.Lock()
+			message := fmt.Sprintf("Processing %s (%d / %d)...", anime.Name, i+1, len(animeList))
+			gui.Logs += message + "\n"
+			animeList[i].Status = Processing
+			g.Update()
+			guiMutex.Unlock()
 
-		animeList[index].Status = Finished
-		resetUI()
-		logMessage(fmt.Sprintf("Finished processing %s", anime.Name), false)
+			if anime.HasSubtitlesStream && outputFormat != "mkv" {
+				handleStartUpscalingError("", i, "File "+anime.Name+" contains subtitles stream, output format must be MKV", errors.New(""))
+				return
+			}
+
+			outputPath := fmt.Sprintf("%s_upscaled.%s", strings.TrimSuffix(anime.Path, filepath.Ext(anime.Path)), strings.ToLower(outputFormat))
+			ffmpegParams := buildUpscalingParams(anime, resolution, shader, outputPath)
+
+			// Debug logs
+			workingDirectory, _ := os.Getwd()
+			guiMutex.Lock()
+			logDebug("Working directory: "+workingDirectory, false)
+			logDebug("Input path: "+anime.Path, false)
+			logDebug("Output path: "+outputPath, false)
+			logDebug("Target resolution: "+resolution.Format(), false)
+			logDebug("Shaders: "+shader.Path, false)
+			logDebug("Output format: "+outputFormat, false)
+			logDebug("FFMPEG command: .\\ffmpeg\\ffmpeg.exe "+strings.Join(ffmpegParams, " "), false)
+			logDebug(fmt.Sprintf("[%d] Starting %s", i, anime.Name), false)
+			guiMutex.Unlock()
+
+			cmd := exec.Command(".\\ffmpeg\\ffmpeg.exe", ffmpegParams...)
+			cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+
+			stderr, err := cmd.StderrPipe()
+			if err != nil {
+				handleStartUpscalingError(outputPath, i, "Creating pipe error:", err)
+				return
+			}
+
+			err = cmd.Start()
+			if err != nil {
+				handleStartUpscalingError(outputPath, i, "Starting ffmpeg process error:", err)
+				return
+			}
+
+			// We need handleUpscalingLogs to take 'i' (index) to update specific file progress
+			ffmpegLogs := handleUpscalingLogs(stderr, anime, i)
+
+			err = cmd.Wait()
+			if err != nil {
+				if cancelled {
+					return
+				}
+				handleStartUpscalingError(outputPath, i, "FFMPEG Error:", err)
+				handleSoftError("FFMPEG logs:", ffmpegLogs)
+				return
+			}
+
+			guiMutex.Lock()
+			animeList[i].Status = Finished
+			fileProgress[i] = 1.0
+			fileSpeed[i] = 0.0
+			g.Update()
+			guiMutex.Unlock()
+
+			logMessage(fmt.Sprintf("Finished processing %s", anime.Name), false)
+
+		}(idx, a)
 	}
+
+	wg.Wait()
 
 	gui.ButtonLabel = "Start"
 	processing = false
@@ -224,29 +279,45 @@ func startProcessing() {
 
 func cancelProcessing() {
 	cancelled = true
-	cmd := exec.Command("taskkill", "/IM", "ffmpeg.exe", "/F")
-	err := cmd.Start()
-	if err != nil {
-		handleSoftError("Starting taskkill error", err.Error())
-		return
-	}
-
-	err = cmd.Wait()
-	if err != nil {
-		handleSoftError("Taskkill error", err.Error())
-		return
-	}
-
-	for i := 0; i < len(animeList); i++ {
-		if animeList[i].Status != Finished {
-			animeList[i].Status = NotStarted
-			g.Update()
-		}
-	}
-
-	processing = false
-	gui.ButtonLabel = "Start"
-	resetUI()
-	logMessage("Cancelled upscaling!", false)
+	// Update UI immediately to look responsive
+	gui.ButtonLabel = "Cancelling..."
 	g.Update()
+
+	go func() {
+		cmd := exec.Command("taskkill", "/IM", "ffmpeg.exe", "/F")
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+		err := cmd.Start()
+		if err != nil {
+			handleSoftError("Starting taskkill error", err.Error())
+			return
+		}
+
+		err = cmd.Wait()
+		if err != nil {
+			// Ignore error if taskkill fails (e.g. no processes found)
+		}
+
+		for i := 0; i < len(animeList); i++ {
+			if animeList[i].Status != Finished {
+				animeList[i].Status = NotStarted
+			}
+		}
+
+		// Reset parallel tracking maps
+		for k := range fileProgress {
+			delete(fileProgress, k)
+		}
+		for k := range fileSpeed {
+			delete(fileSpeed, k)
+		}
+		for k := range fileEta {
+			delete(fileEta, k)
+		}
+
+		processing = false
+		gui.ButtonLabel = "Start"
+		resetUI()
+		logMessage("Cancelled upscaling!", false)
+		g.Update()
+	}()
 }

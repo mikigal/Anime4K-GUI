@@ -6,18 +6,19 @@ import (
 )
 
 type Settings struct {
-	UseSavedPosition bool   `json:"use_saved_position"`
-	PositionX        int    `json:"position_x"`
-	PositionY        int    `json:"position_y"`
-	Resolution       int32  `json:"resolution"`
-	Shaders          int32  `json:"shaders"`
-	Encoder          int32  `json:"encoder"`
-	Crf              int32  `json:"crf"`
-	Cq               int32  `json:"cq"`
-	OutputFormat     int32  `json:"output_format"`
-	CpuThreads       int32  `json:"cpu_threads"`
-	DebugMode        bool   `json:"debug_mode"`
-	Version          string `json:"version"`
+	UseSavedPosition      bool   `json:"use_saved_position"`
+	PositionX             int    `json:"position_x"`
+	PositionY             int    `json:"position_y"`
+	Resolution            int32  `json:"resolution"`
+	Shaders               int32  `json:"shaders"`
+	Encoder               int32  `json:"encoder"`
+	Crf                   int32  `json:"crf"`
+	Cq                    int32  `json:"cq"`
+	OutputFormat          int32  `json:"output_format"`
+	CpuThreads            int32  `json:"cpu_threads"`
+	DebugMode             bool   `json:"debug_mode"`
+	Version               string `json:"version"`
+	MaxConcurrentUpscales int32  `json:"max_concurrent_upscales"`
 }
 
 func saveSettings() {

@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/jaypipes/ghw"
 	"strings"
+
+	"github.com/jaypipes/ghw"
 )
 
 func searchHardwareAcceleration() {
@@ -73,6 +74,17 @@ func searchHardwareAcceleration() {
 		if encoder.Vendor != "cpu" {
 			settings.Encoder = int32(index)
 			break
+		}
+	}
+
+	// Smart Default for Parallel Processing
+	if settings.MaxConcurrentUpscales == 0 {
+		if gpuAv1Supported { // RTX 40 or 50 series
+			settings.MaxConcurrentUpscales = 2
+			logDebug("Smart Default: Detected High-End GPU, setting concurrency to 2", false)
+		} else {
+			settings.MaxConcurrentUpscales = 1
+			logDebug("Smart Default: Standard GPU, setting concurrency to 1", false)
 		}
 	}
 }
