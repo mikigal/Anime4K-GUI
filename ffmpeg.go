@@ -56,6 +56,10 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime, index int) string {
 			frame, _ := strconv.ParseFloat(readOutputParameter(line, "frame", "fps"), 32)
 			if anime.TotalFrames > 0 {
 				currentProgress = float32(frame) / float32(anime.TotalFrames)
+				// If time is N/A, estimate current millis from progress
+				if anime.Length > 0 {
+					millis = int64(currentProgress * float32(anime.Length))
+				}
 			}
 
 			fps, _ := strconv.ParseFloat(readOutputParameter(line, "fps", "q"), 32)
