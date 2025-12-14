@@ -164,7 +164,20 @@
       "threads_limit_supported": false,
       "hwaccel_params": [],
       "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality"],
-      "threads_limit_params": []
+      "threads_limit_params": ["-threads"]
+    },
+    {
+      "name": "FFV1 (CPU)",
+      "value": "ffv1",
+      "vendor": "cpu",
+      "type": "ffv1",
+      "crf_supported": false,
+      "cq_supported": false,
+      "videotoolbox_cq_supported": false,
+      "threads_limit_supported": true,
+      "hwaccel_params": [],
+      "params": [],
+      "threads_limit_params": ["-threads {THREADS}"]
     }
   ],
   "output_formats": ["MP4", "AVI", "MKV"],

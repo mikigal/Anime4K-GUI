@@ -25,12 +25,15 @@ namespace Upscaler {
             ImGui::Spacing();
         }
 
-        static void NumberInput(const char* label, const char* tooltip, const char* id, int* current) {
+        static void NumberInput(const char* label, const char* tooltip, const char* id, int* current, int min, int max) {
             ImGui::Text("%s", label);
             ImGui::SetNextItemWidth(300);
             ImGui::InputInt(id, current);
             if (ImGui::IsItemHovered() && tooltip != nullptr) ImGui::SetTooltip("%s", tooltip);
             ImGui::Spacing();
+
+            if (*current < min) *current = min;
+            if (*current > max) *current = max;
         }
     };
 }

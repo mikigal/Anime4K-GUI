@@ -105,21 +105,21 @@ namespace Upscaler {
         RendererUtilities::ComboWithLabel("Shaders", nullptr, "##shaders", &SelectedShader, m_ShadersNames);
         RendererUtilities::ComboWithLabel("Encoder", nullptr, "##encoders", &SelectedEncoder, m_EncodersNames);
 
-        if (SelectedEncoder == 1) {
-            RendererUtilities::NumberInput("Constant Rate Factor (CRF)", nullptr, "##crf", &SelectedCrf);
+        Encoder selectedEncoder = GetSelectedEncoder();
+        if (selectedEncoder.CrfSupport) {
+            RendererUtilities::NumberInput("Constant Rate Factor (CRF)", nullptr, "##crf", &SelectedCrf, 1, 51);
         }
-        else {
-            RendererUtilities::NumberInput("Constant Quality (CQ)", nullptr, "##cq", &SelectedCq);
+        if (selectedEncoder.CqSupport) {
+            RendererUtilities::NumberInput("Constant Quality (CQ)", nullptr, "##cq", &SelectedCq, 1, 51);
+        }
+        if (selectedEncoder.VideoToolboxCqSupport) {
+            RendererUtilities::NumberInput("Constant Quality (CQ)", nullptr, "##cq", &SelectedCq, 1, 100);
+        }
+        if (selectedEncoder.ThreadsLimitSupported) {
+            RendererUtilities::NumberInput("CPU threads", nullptr, "##cpuThreads", &SelectedCpuThreads, 1, std::thread::hardware_concurrency());
         }
 
         RendererUtilities::ComboWithLabel("Output formats", nullptr, "##output_formats", &SelectedOutputFormat, m_OutputFormatsNames);
-
-        if (SelectedEncoder == 1) {
-            ImGui::Text("CPU threads");
-            ImGui::SetNextItemWidth(300);
-            ImGui::InputInt("##cpuThreads", &SelectedCpuThreads);
-            ImGui::Spacing();
-        }
 
         ImGui::Checkbox("Debug mode", &SelectedDebugMode);
         ImGui::Dummy(ImVec2(0, 10));

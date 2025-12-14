@@ -16,9 +16,9 @@ namespace Upscaler {
         int SelectedResolution = 0;
         int SelectedShader = 0;
         int SelectedEncoder = 0;
-        int SelectedCrf = 0;
-        int SelectedCq = 0;
-        int SelectedCpuThreads = 0;
+        int SelectedCrf = 18;
+        int SelectedCq = 18;
+        int SelectedCpuThreads = std::thread::hardware_concurrency();
         int SelectedOutputFormat = 0;
         bool SelectedDebugMode = false;
 
