@@ -13,7 +13,8 @@ import (
 const shadersTooltip = "Check the project's GitHub page if you're not sure what to choose"
 const encoderTooltip = "Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n" +
 	"GPU based AV1 is compatible only with RTX 4000+ and RX 7000+\n" +
-	"HDR videos are supported only by AV1 codec"
+	"HDR videos are supported only by AV1 codec\n" +
+	"FFV1 is lossless codec and provides best output quality, but output files are pretty big"
 const crfTooltip = "Constant Rate Factor (CRF) for CPU based encoders. \nLower value = better image quality, but larger files." +
 	"\n\nValid range: 0 - 51 \n0 = lossless, 18–23 = good quality, 28+ = lower quality." +
 	"\n\nIf you're not sure what to enter, try 18 (default)."
@@ -131,6 +132,10 @@ func loop(window *g.MasterWindow) {
 
 func crfCqWidget() g.Layout {
 	selectedEncoder := availableEncoders[settings.Encoder]
+
+	if selectedEncoder.FfmpegValue == "ffv1" {
+		return g.Layout{}
+	}
 
 	if selectedEncoder.CrfSupported {
 		return g.Layout{

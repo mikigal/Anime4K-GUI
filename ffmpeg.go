@@ -146,16 +146,18 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 			"-crf", fmt.Sprintf("%d", settings.Crf),
 		)
 	} else {
-		if encoder.Vendor == "nvidia" {
-			params = append(params, "-rc", "vbr")
-		} else {
-			params = append(params, "-rc", "cq")
-		}
+		if encoder.FfmpegValue != "ffv1" {
+			if encoder.Vendor == "nvidia" {
+				params = append(params, "-rc", "vbr")
+			} else {
+				params = append(params, "-rc", "cq")
+			}
 
-		params = append(params,
-			"-cq", fmt.Sprintf("%d", settings.Cq),
-			"-b:v", "0",
-		)
+			params = append(params,
+				"-cq", fmt.Sprintf("%d", settings.Cq),
+				"-b:v", "0",
+			)
+		}
 	}
 
 	params = append(params, "-c:v", videoCodec) // Apply selected video codec

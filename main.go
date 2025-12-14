@@ -60,6 +60,8 @@ var (
 		{"AV1 (CPU)", "libsvtav1", "cpu", true},
 		{"AV1 NVENC (NVIDIA)", "av1_nvenc", "nvidia", false},
 		{"AV1 AMF (AMD)", "av1_amf", "advanced micro devices", false},
+
+		{"FFV1 (CPU)", "ffv1", "cpu", false},
 	}
 
 	gpuAv1Supported   = false
