@@ -12,7 +12,7 @@ import (
 	g "github.com/AllenDang/giu"
 )
 
-func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
+func handleUpscalingLogs(stderr io.ReadCloser, anime Anime, index int) string {
 	scanner := bufio.NewScanner(stderr)
 	scanner.Split(bufio.ScanRunes)
 
@@ -30,59 +30,84 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime) string {
 		if !strings.HasPrefix(line, "frame=") {
 			trim := strings.ReplaceAll(line, "\r", "")
 			trim = strings.ReplaceAll(trim, "\n", "")
+
+			guiMutex.Lock()
 			logDebug(trim, false)
+			guiMutex.Unlock()
+
 			ffmpegLogs += line
 			line = ""
 			continue
 		}
 
+		guiMutex.Lock()
+
 		// It's line with speed and time
 		time := strings.Split(readOutputParameter(line, "time", "bitrate"), ".")[0]
 		millis := durationToMillis(time)
-		gui.Progress = float32(millis) / float32(anime.Length)
+
+		var currentProgress float32 = 0.0
+		if anime.Length > 0 {
+			currentProgress = float32(millis) / float32(anime.Length)
+		}
 
 		// FFMPEG may not report time, we must calculate it manually
 		if time == "N/A" && len(strings.Split(line, "frame=")) > 1 {
 			frame, _ := strconv.ParseFloat(readOutputParameter(line, "frame", "fps"), 32)
-			gui.Progress = float32(frame) / float32(anime.TotalFrames)
+			if anime.TotalFrames > 0 {
+				currentProgress = float32(frame) / float32(anime.TotalFrames)
+				// If time is N/A, estimate current millis from progress
+				if anime.Length > 0 {
+					millis = int64(currentProgress * float32(anime.Length))
+				}
+			}
 
 			fps, _ := strconv.ParseFloat(readOutputParameter(line, "fps", "q"), 32)
-			gui.CurrentSpeed = fmt.Sprintf("Speed: %.2fx", fps/anime.FrameRate)
-
-			leftFrames := anime.TotalFrames - int(frame)
-			leftMillis := int64((float32(leftFrames) / float32(fps)) * 1000)
-			gui.Eta = fmt.Sprintf("ETA: %s", formatMillis(leftMillis))
-		}
-
-		// Speed
-		speedRaw := strings.ReplaceAll(readOutputParameter(line, "speed", ""), "x", "")
-		if strings.Contains(speedRaw, ".") {
-			gui.CurrentSpeed = fmt.Sprintf("Speed: %s", speedRaw)
-			speedValue, _ := strconv.ParseFloat(speedRaw, 32)
-
-			// Just for safety
-			if speedValue != 0 {
-				etaMillis := float64(anime.Length-millis) / speedValue
-				gui.Eta = fmt.Sprintf("ETA: %s", formatMillis(int64(etaMillis)))
+			if anime.FrameRate > 0 {
+				fileSpeed[index] = fps / anime.FrameRate
 			}
 		}
 
-		// Progress bar
-		rounded := int(gui.Progress * 100)
-		if rounded == 99 {
-			gui.Progress = 1
-			gui.ProgressLabel = "100%"
-		} else {
-			gui.ProgressLabel = fmt.Sprintf("%d%%", rounded)
+		fileProgress[index] = currentProgress
+
+		// Newer version of FFMPEG add "elapsed=x" at the end of output line
+		// We need to handle both formats for best compatibility
+		var speedParameter string
+		if strings.Contains(line, "elapsed=") { // Newer FFMPEG releases
+			speedParameter = readOutputParameter(line, "speed", "elapsed")
+		} else { // Older ones
+			speedParameter = readOutputParameter(line, "speed", "")
 		}
+
+		// Speed
+		speedRaw := strings.ReplaceAll(speedParameter, "x", "")
+		if strings.Contains(speedRaw, ".") {
+			speedValue, _ := strconv.ParseFloat(speedRaw, 64)
+			if speedValue > 0 {
+				fileSpeed[index] = speedValue
+			}
+		}
+
+		// Calculate ETA using the latest speed (from either FPS or Speed tag)
+		if fileSpeed[index] > 0 && anime.Length > 0 {
+			remainingMillis := anime.Length - millis
+			if remainingMillis > 0 {
+				etaMillis := int64(float64(remainingMillis) / fileSpeed[index])
+				fileEta[index] = formatMillis(etaMillis)
+			}
+		}
+
+		// We don't calculate global ETA/Progress here anymore, purely per-file.
+		// Layout update is handled by main loop or g.Update() calls.
 
 		ffmpegLogs = strings.ReplaceAll(ffmpegLogs, progressLine, line)
 		gui.Logs = strings.ReplaceAll(gui.Logs, progressLine, line)
 		progressLine = line
 
-		line = ""
 		g.Update()
+		guiMutex.Unlock()
 
+		line = ""
 	}
 
 	return ffmpegLogs
