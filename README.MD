@@ -99,6 +99,7 @@ Project can be built using MinGW64 UCRT v12 or newer due to Giu requirements
 ## Special Thanks
 
 - [Ethan](https://github.com/2u75) for core libplacebo stuff and research.
+- [GalThePro](https://github.com/GalThePro) for implementation of parallel video processing with NVIDIA GPUs
 - [bloc97](https://github.com/bloc97/Anime4K) for Anime4K shaders.
 - [AllenDang](https://github.com/AllenDang/giu) for Giu framework.
 - [BtbN](https://github.com/BtbN/FFmpeg-Builds) for automated FFMPEG builds.
