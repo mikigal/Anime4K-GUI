@@ -70,8 +70,17 @@ func handleUpscalingLogs(stderr io.ReadCloser, anime Anime, index int) string {
 
 		fileProgress[index] = currentProgress
 
+		// Newer version of FFMPEG add "elapsed=x" at the end of output line
+		// We need to handle both formats for best compatibility
+		var speedParameter string
+		if strings.Contains(line, "elapsed=") { // Newer FFMPEG releases
+			speedParameter = readOutputParameter(line, "speed", "elapsed")
+		} else { // Older ones
+			speedParameter = readOutputParameter(line, "speed", "")
+		}
+
 		// Speed
-		speedRaw := strings.ReplaceAll(readOutputParameter(line, "speed", ""), "x", "")
+		speedRaw := strings.ReplaceAll(speedParameter, "x", "")
 		if strings.Contains(speedRaw, ".") {
 			speedValue, _ := strconv.ParseFloat(speedRaw, 64)
 			if speedValue > 0 {
