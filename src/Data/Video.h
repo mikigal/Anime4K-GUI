@@ -22,6 +22,9 @@ namespace Upscaler {
         std::string PixelFormat;
         std::string Path;
         std::string Status;
+        float Progress;
+        int Eta;
+        float Speed;
     };
 }
 

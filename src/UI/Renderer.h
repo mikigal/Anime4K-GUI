@@ -23,9 +23,6 @@ namespace Upscaler {
         bool SelectedDebugMode = false;
 
         static std::string Logs;
-        float Progress = 0;
-        float Speed = 0;
-        int EtaSeconds = 0;
 
         bool CriticalError = false;
 
@@ -53,7 +50,7 @@ namespace Upscaler {
         void RenderVideoTable();
         void RenderSettings();
         void RenderLogs();
-        void RenderProgress();
+        void RenderProgress(float);
 
         void InitializeWindow();
         void ApplyStyle();

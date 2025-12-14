@@ -11,7 +11,7 @@ file(GLOB_RECURSE ASSET_FILES "${ASSETS_DIR}/*")
 
 add_custom_command(
         OUTPUT ${ASSET_MANIFEST}
-        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/generate_asset_manifest.py ${ASSETS_DIR} ${ASSET_MANIFEST}
+        COMMAND python ${CMAKE_SOURCE_DIR}/generate_asset_manifest.py ${ASSETS_DIR} ${ASSET_MANIFEST}
         DEPENDS ${CMAKE_SOURCE_DIR}/generate_asset_manifest.py
         COMMENT "Generating asset manifest"
 )
@@ -19,7 +19,7 @@ add_custom_command(
 add_custom_command(
         OUTPUT ${PAK_FILE}
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/pack_assets.py ${ASSETS_DIR} ${PAK_FILE}
+        COMMAND python ${CMAKE_SOURCE_DIR}/pack_assets.py ${ASSETS_DIR} ${PAK_FILE}
         DEPENDS ${ASSET_MANIFEST} ${ASSET_FILES} ${CMAKE_SOURCE_DIR}/pack_assets.py
         COMMENT "Packing assets into custom .pak file"
 )

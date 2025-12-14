@@ -59,7 +59,7 @@ namespace Upscaler {
 
         totalFrames = frameRate * duration;
         Video video(filePath.filename().string(), duration, size, width, height, frameRate, totalFrames, false,
-                    streamCodecs, pixelFormat, filePath.string(), STATUS_NOT_STARTED);
+                    streamCodecs, pixelFormat, filePath.string(), STATUS_NOT_STARTED, 0, -1, -1);
 
         long endMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count();

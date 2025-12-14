@@ -13,7 +13,7 @@
 #endif
 
 #define WINDOW_WIDTH 1600
-#define WINDOW_HEIGHT 950
+#define WINDOW_HEIGHT 740
 
 namespace Upscaler {
     std::string Renderer::Logs;
@@ -28,20 +28,22 @@ namespace Upscaler {
         RenderVideoTable();
         RenderSettings();
         RenderLogs();
-        RenderProgress();
     }
 
     void Renderer::RenderVideoTable() {
         ImGui::Begin("Video List");
         ImGui::BeginChild("VideoDropTargetChild", ImVec2(0, 0), true, ImGuiWindowFlags_None);
 
-        if (ImGui::BeginTable("VideoTable##Persistent", 7, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg |
+        if (ImGui::BeginTable("VideoTable##Persistent", 10, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg |
                                                            ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable)) {
             ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 40.0f);
-            ImGui::TableSetupColumn("Title", ImGuiTableColumnFlags_WidthFixed, 700.0f);
+            ImGui::TableSetupColumn("Title", ImGuiTableColumnFlags_WidthFixed, 350.0f);
             ImGui::TableSetupColumn("Resolution");
             ImGui::TableSetupColumn("Length");
             ImGui::TableSetupColumn("Size");
+            ImGui::TableSetupColumn("Progress");
+            ImGui::TableSetupColumn("ETA");
+            ImGui::TableSetupColumn("Speed");
             ImGui::TableSetupColumn("Status");
             ImGui::TableSetupColumn("Action");
             ImGui::TableHeadersRow();
@@ -60,6 +62,12 @@ namespace Upscaler {
                 RendererUtilities::CenteredText("%s", Utilities::FormatTime(video.Duration).c_str());
                 ImGui::TableNextColumn();
                 RendererUtilities::CenteredText("%d MB", Utilities::ToMegabytes(video.Size));
+                ImGui::TableNextColumn();
+                RenderProgress(video.Progress);
+                ImGui::TableNextColumn();
+                RendererUtilities::CenteredText(video.Eta == -1 ? "-" : Utilities::FormatTime(video.Eta).c_str());
+                ImGui::TableNextColumn();
+                RendererUtilities::CenteredText(video.Speed == -1 ? "-" : "%.2fx", video.Speed);
                 ImGui::TableNextColumn();
                 RendererUtilities::CenteredText("%s", video.Status.c_str());
 
@@ -138,64 +146,39 @@ namespace Upscaler {
                                   ImVec2(-FLT_MIN, 220), ImGuiInputTextFlags_ReadOnly);
         ImGui::End();
     }
-    void Renderer::RenderProgress() {
-        ImGui::Begin("Progress");
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
+    void Renderer::RenderProgress( float progress) {
+        float cellWidth = ImGui::GetContentRegionAvail().x;
+        float height = 18.0f;
 
         ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(35, 35, 50, 255));
         ImGui::PushStyleColor(ImGuiCol_PlotHistogram, IM_COL32(120, 100, 255, 255));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 
-        float progressHeight = 20.0f;
-        float totalWidth = ImGui::GetContentRegionAvail().x;
-        float progressBarWidth = totalWidth - 318.0f;
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
+        ImGui::ProgressBar(progress, ImVec2(cellWidth, height), "");
 
-        ImVec2 startPos = ImGui::GetCursorScreenPos();
-        float centerOffset = (progressHeight - ImGui::GetTextLineHeight()) * 0.5f;
-
-        ImGui::SetCursorScreenPos(ImVec2(startPos.x, startPos.y + centerOffset));
-        ImGui::Text(std::format("Progress: 0 / {}", Instance->GetVideoLoader().m_Videos.size()).c_str());
-        ImGui::SameLine();
-
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 2));
-        ImGui::SetCursorScreenPos(ImVec2(startPos.x + 110.0f, startPos.y));
-        ImGui::PushItemWidth(progressBarWidth);
-        ImGui::ProgressBar(Progress, ImVec2(progressBarWidth, progressHeight), "");
-        ImGui::PopItemWidth();
         ImGui::PopStyleVar();
-
-        ImVec2 barPos = ImGui::GetItemRectMin();
-        ImVec2 barSize = ImGui::GetItemRectSize();
-
-        std::string percentText = std::to_string(int(Progress * 100)) + "%";
-        ImVec2 percentSize = ImGui::CalcTextSize(percentText.c_str());
-
-        float fillEndX = barPos.x + barSize.x * Progress;
-        float margin = 4.0f;
-        float textX = ImMin(fillEndX + margin, barPos.x + barSize.x - percentSize.x - margin);
-        float textY = barPos.y + (barSize.y - percentSize.y) * 0.5f;
-
-        ImGui::GetWindowDrawList()->AddText(ImVec2(textX, textY), ImGui::GetColorU32(ImGuiCol_Text),
-                                            percentText.c_str());
-
-        ImVec2 afterBar = ImVec2(barPos.x + barSize.x + 16.0f, startPos.y + centerOffset);
-        ImGui::SetCursorScreenPos(afterBar);
-        ImGui::Text("Speed: %.1fx", Speed);
-
-        ImGui::SameLine();
-        ImVec2 sepPos = ImGui::GetCursorScreenPos();
-        sepPos.x += 8.0f;
-        ImGui::GetWindowDrawList()->AddLine(
-            ImVec2(sepPos.x, sepPos.y),
-            ImVec2(sepPos.x, sepPos.y + ImGui::GetTextLineHeight()),
-            ImGui::GetColorU32(ImGuiCol_Text));
-        ImGui::Dummy(ImVec2(16.0f, 0));
-        ImGui::SameLine();
-
-        ImGui::SetCursorScreenPos(ImVec2(sepPos.x + 16.0f, startPos.y + centerOffset));
-        ImGui::Text("ETA: 00:%02d:%02d", EtaSeconds / 60, EtaSeconds % 60);
-
         ImGui::PopStyleColor(2);
-        ImGui::End();
+
+        ImVec2 barMin = ImGui::GetItemRectMin();
+        ImVec2 barMax = ImGui::GetItemRectMax();
+        ImVec2 barSize(
+            barMax.x - barMin.x,
+            barMax.y - barMin.y
+        );
+
+        std::string percentText = progress == 1 ? "Done" : std::to_string((int)(progress * 100.0f)) + "%";
+        ImVec2 textSize = ImGui::CalcTextSize(percentText.c_str());
+
+        ImVec2 textPos;
+        textPos.x = barMin.x + (barSize.x - textSize.x) * 0.5f;
+        textPos.y = barMin.y + (barSize.y - textSize.y) * 0.5f;
+
+        ImGui::GetWindowDrawList()->AddText(
+            textPos,
+            ImGui::GetColorU32(ImGuiCol_Text),
+            percentText.c_str()
+        );
     }
 
     bool Renderer::Init() {
@@ -251,28 +234,26 @@ namespace Upscaler {
 
                 ImGuiID mainDockId = dockspace_id;
 
-                ImGuiID bottomDock;
-                ImGui::DockBuilderSplitNode(mainDockId, ImGuiDir_Down, 0.33f, &bottomDock, &mainDockId);
+                // Bottom dock (logs only now)
+                ImGuiID logsDock;
+                ImGui::DockBuilderSplitNode(mainDockId, ImGuiDir_Down, 0.33f, &logsDock, &mainDockId);
 
-                ImGuiID logsDock, progressDock;
-                ImGui::DockBuilderSplitNode(bottomDock, ImGuiDir_Down, 0.22f, &progressDock, &logsDock);
-
+                // Right split (settings / video)
                 ImGuiID settingsDock, videoDock;
                 ImGui::DockBuilderSplitNode(mainDockId, ImGuiDir_Right, 0.2f, &settingsDock, &videoDock);
 
-                ImGui::DockBuilderGetNode(videoDock)->LocalFlags |= ImGuiDockNodeFlags_NoTabBar |
-                        ImGuiDockNodeFlags_NoResize;
-                ImGui::DockBuilderGetNode(settingsDock)->LocalFlags |= ImGuiDockNodeFlags_NoTabBar |
-                        ImGuiDockNodeFlags_NoResize;
-                ImGui::DockBuilderGetNode(logsDock)->LocalFlags |= ImGuiDockNodeFlags_NoTabBar |
-                        ImGuiDockNodeFlags_NoResize;
-                ImGui::DockBuilderGetNode(progressDock)->LocalFlags |= ImGuiDockNodeFlags_NoTabBar |
-                        ImGuiDockNodeFlags_NoResize;
+                // Flags
+                ImGui::DockBuilderGetNode(videoDock)->LocalFlags |=
+                    ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoResize;
+                ImGui::DockBuilderGetNode(settingsDock)->LocalFlags |=
+                    ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoResize;
+                ImGui::DockBuilderGetNode(logsDock)->LocalFlags |=
+                    ImGuiDockNodeFlags_NoTabBar | ImGuiDockNodeFlags_NoResize;
 
+                // Dock windows
                 ImGui::DockBuilderDockWindow("Video List", videoDock);
                 ImGui::DockBuilderDockWindow("Settings", settingsDock);
                 ImGui::DockBuilderDockWindow("Logs", logsDock);
-                ImGui::DockBuilderDockWindow("Progress", progressDock);
 
                 ImGui::DockBuilderFinish(dockspace_id);
                 firstFrame = false;
