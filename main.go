@@ -97,10 +97,9 @@ var (
 	}
 
 	// Internals
-	animeList       = make([]Anime, 0)
-	processing      = false
-	cancelled       = false
-	codecsBlacklist = []string{"mjpeg", "png"}
+	animeList  = make([]Anime, 0)
+	processing = false
+	cancelled  = false
 
 	// FFMPEG params
 	hwaccelParams []string

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"runtime"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -122,24 +121,21 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 		"-y",           // Override output file
 	}
 
-	params = append(params, hwaccelParams...) // Apply selected video encoder and hardware acceleration parameters
-
 	params = append(params,
 		"-i", fmt.Sprintf("%s", anime.Path), // Path to input file
 		"-init_hw_device", "vulkan",
-		"-vf", fmt.Sprintf("format=%s,hwupload,libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,format=%s",
-			anime.PixelFormat, resolution.Width, resolution.Height, shader.Path, anime.PixelFormat),
+		"-vf", fmt.Sprintf("libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,format=%s",
+			resolution.Width, resolution.Height, shader.Path, anime.PixelFormat),
 
 		"-c:a", "copy", // Copy all audio streams
-		"-c:s", "copy", // Copy all subtitles streams
-		"-c:d", "copy", // Copy all data streams
+		"-c:s", "copy?", // Copy all subtitles streams, ignore if format is not supported
 	)
 
-	for _, stream := range anime.Streams {
-		if !slices.Contains(codecsBlacklist, stream.CodecName) {
-			params = append(params, "-map", fmt.Sprintf("0:%d", stream.Index))
-		}
-	}
+	params = append(params, "-map", "0:v?")        // Map video streams if exists
+	params = append(params, "-map", "0:a?")        // Map audio streams if exists
+	params = append(params, "-map", "0:s?")        // Map subtitles streams if exists
+	params = append(params, "-map_metadata", "-1") // Remove unnecessary metadata
+	params = append(params, "-map_chapters", "-1") // Remove unnecessary metadata
 
 	if encoder.CrfSupported {
 		params = append(params,
@@ -149,14 +145,19 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 		if encoder.FfmpegValue != "ffv1" {
 			if encoder.Vendor == "nvidia" {
 				params = append(params, "-rc", "vbr")
+				params = append(params,
+					"-cq", fmt.Sprintf("%d", settings.Cq),
+					"-b:v", "0",
+				)
 			} else {
-				params = append(params, "-rc", "cq")
+				// AMD
+				params = append(params,
+					"-quality", "quality",
+					"-qp_i", fmt.Sprintf("%d", settings.Cq),
+					"-qp_p", fmt.Sprintf("%d", settings.Cq),
+				)
 			}
 
-			params = append(params,
-				"-cq", fmt.Sprintf("%d", settings.Cq),
-				"-b:v", "0",
-			)
 		}
 	}
 
