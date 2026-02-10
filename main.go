@@ -108,11 +108,11 @@ var (
 
 func main() {
 	checkDebugParam()
-	loaded := loadSettings()
-	preventSleep()
-
 	window := g.NewMasterWindow("Anime4K-GUI", 1800, 950, g.MasterWindowFlagsNotResizable)
 	searchHardwareAcceleration()
+
+	loaded := loadSettings()
+	preventSleep()
 
 	if loaded && settings.UseSavedPosition {
 		window.SetPos(settings.PositionX, settings.PositionY)
