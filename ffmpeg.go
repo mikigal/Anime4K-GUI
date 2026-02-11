@@ -116,6 +116,14 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 	encoder := availableEncoders[settings.Encoder]
 	videoCodec = encoder.FfmpegValue
 
+	width := resolution.Width
+	height := resolution.Height
+
+	if settings.Resolution == 8 {
+		width = int(settings.CustomResolutionWidth)
+		height = int(settings.CustomResolutionHeight)
+	}
+
 	params := []string{
 		"-hide_banner", // Hide banner with FFMPEG version
 		"-y",           // Override output file
@@ -125,7 +133,7 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 		"-i", fmt.Sprintf("%s", anime.Path), // Path to input file
 		"-init_hw_device", "vulkan",
 		"-vf", fmt.Sprintf("libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,format=%s",
-			resolution.Width, resolution.Height, shader.Path, anime.PixelFormat),
+			width, height, shader.Path, anime.PixelFormat),
 
 		"-c:a", "copy", // Copy all audio streams
 		"-c:s", "copy?", // Copy all subtitles streams, ignore if format is not supported

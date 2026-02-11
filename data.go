@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
@@ -59,6 +60,10 @@ const (
 )
 
 func (res *Resolution) Format() string {
+	if res.Width == 0 && res.Height == 0 {
+		return "Custom"
+	}
+
 	if !res.Panoramic {
 		return fmt.Sprintf("%dx%d (4:3)", res.Width, res.Height)
 	}

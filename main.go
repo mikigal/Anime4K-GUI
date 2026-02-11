@@ -36,6 +36,8 @@ var (
 		{1920, 1080, true},
 		{2560, 1440, true},
 		{3840, 2160, true},
+
+		{0, 0, false}, // Custom resolution
 	}
 
 	shaders = []Shader{
@@ -45,7 +47,7 @@ var (
 		{"Anime4K Mode B+B", "shaders/Anime4K_ModeB_B.glsl"},
 		{"Anime4K Mode C", "shaders/Anime4K_ModeC.glsl"},
 		{"Anime4K Mode C+A", "shaders/Anime4K_ModeC_A.glsl"},
-		{"Anime4K SRGAN UUL", "shaders/Anime4K_SRGAN_UUL.glsl"}
+		{"Anime4K SRGAN UUL", "shaders/Anime4K_SRGAN_UUL.glsl"},
 		{"FSRCNNX x2", "shaders/FSRCNNX_x2_16-0-4-1.glsl"},
 	}
 
@@ -71,16 +73,18 @@ var (
 
 	// Settings
 	settings = Settings{
-		UseSavedPosition: true,
-		Resolution:       5,
-		Shaders:          0,
-		Encoder:          0,
-		Crf:              18,
-		Cq:               18,
-		OutputFormat:     2,
-		CpuThreads:       int32(runtime.NumCPU()),
-		DebugMode:        false,
-		Version:          version,
+		UseSavedPosition:       true,
+		Resolution:             5,
+		CustomResolutionWidth:  1920,
+		CustomResolutionHeight: 1080,
+		Shaders:                0,
+		Encoder:                0,
+		Crf:                    18,
+		Cq:                     18,
+		OutputFormat:           2,
+		CpuThreads:             int32(runtime.NumCPU()),
+		DebugMode:              false,
+		Version:                version,
 	}
 
 	// GUI pointers

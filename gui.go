@@ -38,11 +38,6 @@ var bottomProgressPos float32 = 120
 var bottomSpeedPos float32 = 110
 
 func loop(window *g.MasterWindow) {
-	resolutionsNames := make([]string, len(resolutions))
-	for index, res := range resolutions {
-		resolutionsNames[index] = res.Format()
-	}
-
 	shadersNames := make([]string, len(shaders))
 	for index, shader := range shaders {
 		shadersNames[index] = shader.Name
@@ -61,11 +56,8 @@ func loop(window *g.MasterWindow) {
 				},
 				g.Layout{
 					g.Label("Settings"),
-					g.Label(""),
 
-					g.Label("Target resolution"),
-					g.Combo("##", resolutionsNames[settings.Resolution], resolutionsNames, &settings.Resolution).Size(400),
-					g.Label(""),
+					targetResolutionWidget(),
 
 					g.Label("Shaders"),
 					g.Tooltip(shadersTooltip),
@@ -128,6 +120,35 @@ func loop(window *g.MasterWindow) {
 	)
 
 	settings.PositionX, settings.PositionY = window.GetPos()
+}
+
+func targetResolutionWidget() g.Layout {
+	resolutionsNames := make([]string, len(resolutions))
+	for index, res := range resolutions {
+		resolutionsNames[index] = res.Format()
+	}
+
+	if settings.Resolution != 8 {
+		return g.Layout{
+			g.Label("Target resolution"),
+			g.Combo("##", resolutionsNames[settings.Resolution], resolutionsNames, &settings.Resolution).Size(400),
+			g.Label(""),
+		}
+	}
+
+	return g.Layout{
+		g.Label("Target resolution"),
+		g.Combo("##", resolutionsNames[settings.Resolution], resolutionsNames, &settings.Resolution).Size(400),
+		g.Label(""),
+		g.Label("Custom resolution"),
+		g.Row(
+			g.Label("                           "),
+			g.InputInt(&settings.CustomResolutionWidth).Size(70),
+			g.Label(" x "),
+			g.InputInt(&settings.CustomResolutionHeight).Size(70),
+		),
+		g.Label(""),
+	}
 }
 
 func crfCqWidget() g.Layout {
