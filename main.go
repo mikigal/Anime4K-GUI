@@ -45,6 +45,7 @@ var (
 		{"Anime4K Mode B+B", "shaders/Anime4K_ModeB_B.glsl"},
 		{"Anime4K Mode C", "shaders/Anime4K_ModeC.glsl"},
 		{"Anime4K Mode C+A", "shaders/Anime4K_ModeC_A.glsl"},
+		{"Anime4K SRGAN UUL", "shaders/Anime4K_SRGAN_UUL.glsl"}
 		{"FSRCNNX x2", "shaders/FSRCNNX_x2_16-0-4-1.glsl"},
 	}
 
