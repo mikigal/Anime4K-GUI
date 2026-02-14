@@ -12,7 +12,6 @@ namespace Upscaler {
         const bool CqSupport;
         const bool VideoToolboxCqSupport;
         const bool ThreadsLimitSupported;
-        const std::vector<std::string> HwaccelParams;
         const std::vector<std::string> Params;
         const std::vector<std::string> ThreadsLimitParams;
         bool Available = false;

@@ -30,7 +30,6 @@
       "cq_supported": false,
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": true,
-      "hwaccel_params": [],
       "params": ["-preset slow", "-crf {CRF}"],
       "threads_limit_params": ["-threads {THREADS}"]
     },
@@ -43,7 +42,6 @@
       "cq_supported": true,
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": false,
-      "hwaccel_params": ["-hwaccel_device cuda", "-hwaccel_output_format cuda"],
       "params": ["-preset slow", "-rc vbr", "-b:v 0", "-cq {CQ}"],
       "threads_limit_params": []
     },
@@ -56,8 +54,7 @@
       "cq_supported": true,
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": false,
-      "hwaccel_params": [],
-      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality", "-profile main"],
+      "params": ["-qp_i {CQ}", "-qp_p {CQ}", "-usage transcoding", "-quality quality", "-profile main"],
       "threads_limit_params": []
     },
     {
@@ -69,7 +66,6 @@
       "cq_supported": false,
       "videotoolbox_cq_supported": true,
       "threads_limit_supported": false,
-      "hwaccel_params": [],
       "params": ["-q:v {VIDEOTOOLBOX_CQ}"],
       "threads_limit_params": []
     },
@@ -83,7 +79,6 @@
       "cq_supported": false,
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": true,
-      "hwaccel_params": [],
       "params": ["-preset slow", "-crf {CRF}"],
       "threads_limit_params": ["-x265-params pools={THREADS}"]
     },
@@ -96,7 +91,6 @@
       "cq_supported": true,
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": false,
-      "hwaccel_params": ["-hwaccel_device cuda", "-hwaccel_output_format cuda"],
       "params": ["-preset slow", "-rc vbr", "-b:v 0", "-cq {CQ}"],
       "threads_limit_params": []
     },
@@ -109,8 +103,7 @@
       "cq_supported": true,
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": false,
-      "hwaccel_params": [],
-      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality", "-profile main"],
+      "params": ["-qp_i {CQ}", "-qp_p {CQ}", "-usage transcoding", "-quality quality", "-profile main"],
       "threads_limit_params": []
     },
     {
@@ -122,7 +115,6 @@
       "cq_supported": false,
       "videotoolbox_cq_supported": true,
       "threads_limit_supported": false,
-      "hwaccel_params": [],
       "params": ["-q:v {APPLE_CQ}"],
       "threads_limit_params": []
     },
@@ -136,7 +128,6 @@
       "cq_supported": false,
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": true,
-      "hwaccel_params": [],
       "params": ["-crf {CRF}"],
       "threads_limit_params": ["-svtav1-params pin={THREADS}"]
     },
@@ -149,7 +140,6 @@
       "cq_supported": true,
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": false,
-      "hwaccel_params": ["-hwaccel_device cuda", "-hwaccel_output_format cuda"],
       "params": ["-rc vbr", "-b:v 0", "-cq {CQ}"],
       "threads_limit_params": []
     },
@@ -162,8 +152,7 @@
       "cq_supported": true,
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": false,
-      "hwaccel_params": [],
-      "params": ["-rc cqp", "-qp {CQ}", "-usage transcoding", "-quality quality"],
+      "params": ["-qp_i {CQ}", "-qp_p {CQ}", "-usage transcoding", "-quality quality"],
       "threads_limit_params": ["-threads"]
     },
     {
@@ -175,11 +164,9 @@
       "cq_supported": false,
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": true,
-      "hwaccel_params": [],
       "params": [],
       "threads_limit_params": ["-threads {THREADS}"]
     }
   ],
-  "output_formats": ["MP4", "AVI", "MKV"],
-  "codec_blacklist": ["mjpeg", "png"]
+  "output_formats": ["MP4", "AVI", "MKV"]
 }

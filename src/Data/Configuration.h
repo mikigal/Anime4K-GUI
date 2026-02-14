@@ -16,7 +16,6 @@ namespace Upscaler {
         std::vector<Resolution> Resolutions;
         std::vector<Shader> Shaders;
         std::vector<std::string> OutputFormats;
-        std::vector<std::string> CodecBlacklist;
 
         void Load();
 

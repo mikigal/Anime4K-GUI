@@ -37,16 +37,12 @@ namespace Upscaler {
                 item.at("cq_supported"),
                 item.at("videotoolbox_cq_supported"),
                 item.at("threads_limit_supported"),
-                item.at("hwaccel_params").get<std::vector<std::string> >(),
                 item.at("params").get<std::vector<std::string> >(),
                 item.at("threads_limit_params").get<std::vector<std::string> >()
             );
             Encoders.push_back(encoder);
         }
         Instance->GetLogger().Debug("Loaded {} encoders", Encoders.size());
-
-        CodecBlacklist = json["codec_blacklist"].get<std::vector<std::string> >();
-        Instance->GetLogger().Debug("Loaded {} blacklisted codecs", CodecBlacklist.size());
 
         OutputFormats = json["output_formats"].get<std::vector<std::string> >();
         Instance->GetLogger().Debug("Loaded {} output formats", OutputFormats.size());
