@@ -13,7 +13,7 @@ import (
 	g "github.com/AllenDang/giu"
 )
 
-const version = "1.2.8"
+const version = "1.2.9"
 
 var (
 	supportedInput = []string{".mp4", ".avi", ".mkv"}
