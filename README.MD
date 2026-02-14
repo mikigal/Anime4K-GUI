@@ -93,8 +93,7 @@ If you want to compile project by yourself you have to download **GPL** FFMPEG b
 Project can be built using MinGW64 UCRT v12 or newer due to Giu requirements
 
 ## Limitations
-1. If Input files contain subtitles streams you must use MKV as output format due to other MK4/AVI limitations
-2. HDR videos are supported only with AV1 output codec
+HDR videos are supported only with AV1 output codec
 
 ## Special Thanks
 

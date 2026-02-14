@@ -135,9 +135,16 @@ func buildUpscalingParams(anime Anime, resolution Resolution, shader Shader, out
 		"-vf", fmt.Sprintf("libplacebo=w=%d:h=%d:upscaler=ewa_lanczos:custom_shader_path=%s,format=%s",
 			width, height, shader.Path, anime.PixelFormat),
 
+		"-dn",          // Remove data streams
 		"-c:a", "copy", // Copy all audio streams
-		"-c:s", "copy?", // Copy all subtitles streams, ignore if format is not supported
 	)
+
+	// Remove subtitles if output container does not support them
+	if outputFormats[settings.OutputFormat] == "mkv" {
+		params = append(params, "-c:s", "copy")
+	} else {
+		params = append(params, "-sn")
+	}
 
 	params = append(params, "-map", "0:v?")        // Map video streams if exists
 	params = append(params, "-map", "0:a?")        // Map audio streams if exists
