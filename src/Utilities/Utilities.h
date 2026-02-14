@@ -44,7 +44,7 @@ namespace Upscaler {
             return oss.str();
         }
 
-        static int ToMegabytes(long bytes) {
+        static int ToMegabytes(uintmax_t bytes) {
             return bytes / 1024 / 1024;
         }
 
@@ -58,6 +58,22 @@ namespace Upscaler {
 
             fs::path newPath = parent / (stem + "_upscaled" + ext);
             return newPath.string();
+        }
+
+
+       template<typename T>
+       static std::string ReplaceAll(std::string str, const std::string& from, const T& value) {
+            std::ostringstream oss;
+            oss << value;
+            std::string to = oss.str();
+            size_t pos = 0;
+
+            while ((pos = str.find(from, pos)) != std::string::npos) {
+                str.replace(pos, from.length(), to);
+                pos += to.length();
+            }
+
+            return str;
         }
 
 

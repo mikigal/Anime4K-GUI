@@ -12,7 +12,7 @@ namespace Upscaler {
     struct Video {
         std::string Name;
         int Duration;
-        long Size;
+        uintmax_t Size;
         int Width;
         int Height;
         int FrameRate;

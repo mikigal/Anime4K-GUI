@@ -30,7 +30,7 @@ namespace Upscaler {
             return;
         }
 
-        long size = std::filesystem::file_size(filePath);
+        uintmax_t size = std::filesystem::file_size(filePath);
 
         int height;
         int width;
@@ -45,7 +45,7 @@ namespace Upscaler {
             if (stream["codec_type"] == "video") {
                 height = stream["height"].get<int>();
                 width = stream["width"].get<int>();
-                duration = std::stof(stream["duration"].get<std::string>());
+                duration = std::stof(json["format"]["duration"].get<std::string>());
                 pixelFormat = stream["pix_fmt"].get<std::string>();
 
                 std::vector<std::string> frameRateSplit = Utilities::Split(stream["avg_frame_rate"].get<std::string>(), "/");

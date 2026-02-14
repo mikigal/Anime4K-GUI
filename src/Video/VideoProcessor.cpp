@@ -8,8 +8,13 @@ namespace Upscaler {
 
     void VideoProcessor::StartProcessing() {
         std::vector<Video>& videos = Instance->GetVideoLoader().m_Videos;
-        if (videos.empty() || std::any_of(videos.begin(), videos.end(),
-                [](const Video& v){ return v.Status != STATUS_FINISHED; })) {
+        for (Video& video : videos) {
+            std::cout << video.Name << std::endl;
+            std::cout << video.Status << std::endl;
+        }
+
+        if (videos.empty() || std::ranges::all_of(videos,
+            [](const Video& v){ return v.Status == STATUS_FINISHED; })) {
             Instance->GetLogger().Error("There's no videos to be upscaled");
             return;
         }
@@ -38,19 +43,53 @@ namespace Upscaler {
             Video& video = videos[i];
             video.Status = STATUS_PROCESSING;
 
-            if (video.HasSubtitlesStream && outputFormat != "mkv") {
-                Instance->GetLogger().Error("Vide {} contains subtitles stream, only MKV supports it", video.Name);
-                video.Status = STATUS_FAILED;
-                continue;
-            }
-
-            std::string outputPath = Utilities::AddUpscaledSuffix(video.Path);
-
             Instance->GetLogger().Info("Processing video: {} ({} / {})", video.Name, i + 1, videos.size());
-
+            std::string command = BuildFFmpegCommand(encoder, resolution, shader, video, outputFormat);
+            Instance->GetLogger().Info("Command: {}", command);
         }
 
         Processing = false;
+    }
+
+    std::string VideoProcessor::BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
+        std::string command = "ffmpeg.exe "; // FFMPEG exec path
+        command += "-hide_banner "; // Hide FFMPEG's banner
+        command += "-y "; // Override output file
+        command += std::format("-i \"{}\" ", video.Path); // Path to input video
+        command += "-init_hw_device vulkan "; // Use Vulkan
+        command += std::format("-vf libplacebo=w={}:h={}:upscaler=ewa_lanczos:custom_shader_path={},format={} ", // libplacebo filter setup
+            resolution.Width, resolution.Height, shader.Path, video.PixelFormat);
+        command += "-dn "; // Remove data streams
+
+
+        command += outputFormat == "mkv" ? "-c:s copy " : "-sn "; // If output container is MKV copy subtitles steam, otherwise remove it
+        command += "-c:a copy "; // Copy audio stream
+        command += "-map 0:v? "; // Map all video streams if exists
+        command += "-map 0:a? "; // Map all audio streams if exists
+        command += "-map 0:s? "; // Map all subtitlies streams if exists
+        command += "-map_metadata -1 "; // Do not copy metadata
+        command += "-map_chapters -1 "; // Do not copy chapter information
+        command += std::format("-c:v {} ", encoder.Value); // Set video encoder
+
+        // Apply encoder specific parameters
+        // If encoder does not support some placeholder it will be ignored
+        for (const std::string& parameter : encoder.Params) {
+            std::string replaced = Utilities::ReplaceAll(parameter, "{CRF}", Instance->GetRenderer().SelectedCrf);
+            replaced = Utilities::ReplaceAll(replaced, "{CQ}", Instance->GetRenderer().SelectedCq);
+            replaced = Utilities::ReplaceAll(replaced, "{VIDEOTOOLBOX_CQ}", Instance->GetRenderer().SelectedCq);
+            command += replaced + " ";
+        }
+
+        // Apply encoder specific parameters
+        // If encoder does not support thread limiting it will be ignored
+        for (const std::string& parameter : encoder.ThreadsLimitParams) {
+           command += Utilities::ReplaceAll(parameter, "{THREADS}", Instance->GetRenderer().SelectedCpuThreads) + " ";
+        }
+
+        // Add output file path
+        command += std::format("\"{}\"", Utilities::AddUpscaledSuffix(video.Path));
+
+        return command;
     }
 
     void VideoProcessor::CancelProcessing() {

@@ -153,7 +153,7 @@
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": false,
       "params": ["-qp_i {CQ}", "-qp_p {CQ}", "-usage transcoding", "-quality quality"],
-      "threads_limit_params": ["-threads"]
+      "threads_limit_params": []
     },
     {
       "name": "FFV1 (CPU)",
