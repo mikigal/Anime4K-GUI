@@ -115,7 +115,8 @@ namespace Upscaler {
     }
 
     std::string VideoProcessor::BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
-        std::string command = "ffmpeg.exe "; // FFMPEG exec path
+        std::filesystem::path ffmpegPath = std::filesystem::path("ffmpeg") / "ffmpeg";
+        std::string command = std::format("{} ", ffmpegPath.string()); // FFMPEG exec path
         command += "-hide_banner "; // Hide FFMPEG's banner
         command += "-y "; // Override output file
         command += std::format("-i \"{}\" ", video.Path); // Path to input video

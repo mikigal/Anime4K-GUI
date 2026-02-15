@@ -14,8 +14,9 @@ namespace Upscaler {
         std::filesystem::path filePath = std::filesystem::path(path);
         std::string jsonString = "";
 
+        std::filesystem::path ffprobePath = std::filesystem::path("ffmpeg") / "ffprobe";
         TinyProcessLib::Process process(
-            std::format("ffprobe -v quiet -print_format json -show_format -show_streams \"{}\"", filePath.string()), "",
+            std::format("{} -v quiet -print_format json -show_format -show_streams \"{}\"", ffprobePath.string(), filePath.string()), "",
             [&jsonString](const char* bytes, size_t n) {
                 jsonString.append(bytes, n);
             },
