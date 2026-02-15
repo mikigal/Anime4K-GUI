@@ -84,7 +84,7 @@ namespace Upscaler {
         Instance->GetLogger().Warn("NVIDIA GPUs on Linux are supported only with nvidia-open drivers. If you encounter any issues make sure you use correct drivers");
 #endif
         Instance->GetLogger().Debug("Available encoders:");
-        for (Encoder& encoder : Instance->GetConfiguration().Encoders) {
+        for (Encoder& encoder : Instance->GetData().Encoders) {
             if (encoder.Vendor == "cpu") {
                 encoder.Available = true;
             }

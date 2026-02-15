@@ -1,6 +1,6 @@
 ﻿#include "Renderer.h"
 #include "pch.h"
-#include "Data/Configuration.h"
+#include "Data/Data.h"
 #include "Utilities/AssetLoader.h"
 #include "Utilities/Logger.h"
 #include "App.h"
@@ -198,15 +198,15 @@ namespace Upscaler {
     }
 
     bool Renderer::Init() {
-        for (Shader& shader: Instance->GetConfiguration().Shaders) {
+        for (Shader& shader: Instance->GetData().Shaders) {
             m_ShadersNames.push_back(shader.Name.c_str());
         }
 
-        for (Resolution& resolution: Instance->GetConfiguration().Resolutions) {
+        for (Resolution& resolution: Instance->GetData().Resolutions) {
             m_ResolutionsNames.push_back(resolution.VisibleName.c_str());
         }
 
-        for (Encoder& encoder: Instance->GetConfiguration().Encoders) {
+        for (Encoder& encoder: Instance->GetData().Encoders) {
             if (!encoder.Available) {
                 continue;
             }
@@ -214,7 +214,7 @@ namespace Upscaler {
             m_EncodersNames.push_back(encoder.Name.c_str());
         }
 
-        for (std::string& outputFormat: Instance->GetConfiguration().OutputFormats) {
+        for (std::string& outputFormat: Instance->GetData().OutputFormats) {
             m_OutputFormatsNames.push_back(outputFormat.c_str());
         }
 
@@ -340,7 +340,7 @@ namespace Upscaler {
 
     // Look by names as SelectedEncoder is index of currently available encoders
     Encoder& Renderer::GetSelectedEncoder() {
-        for (Encoder& encoder : Instance->GetConfiguration().Encoders) {
+        for (Encoder& encoder : Instance->GetData().Encoders) {
             if (encoder.Name == m_EncodersNames[SelectedEncoder]) {
                 return encoder;
             }
@@ -350,15 +350,15 @@ namespace Upscaler {
     }
 
     Resolution& Renderer::GetSelectedResolution() {
-        return Instance->GetConfiguration().Resolutions[SelectedResolution];
+        return Instance->GetData().Resolutions[SelectedResolution];
     }
 
     Shader& Renderer::GetSelectedShader() {
-        return Instance->GetConfiguration().Shaders[SelectedShader];
+        return Instance->GetData().Shaders[SelectedShader];
     }
 
     std::string& Renderer::GetSelectedOutputFormat() {
-        return Instance->GetConfiguration().OutputFormats[SelectedOutputFormat];
+        return Instance->GetData().OutputFormats[SelectedOutputFormat];
     }
 
     void Renderer::ApplyStyle() {

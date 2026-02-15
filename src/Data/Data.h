@@ -9,7 +9,7 @@
 namespace Upscaler {
     class App;
 
-    class Configuration {
+    class Data {
     public:
         App* Instance;
         std::vector<Encoder> Encoders;
@@ -19,7 +19,7 @@ namespace Upscaler {
 
         void Load();
 
-        Configuration(App* instance)
+        Data(App* instance)
             : Instance(instance) {
         }
     };

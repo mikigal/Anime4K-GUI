@@ -9,7 +9,7 @@ namespace Upscaler {
         GetLogger().Debug("Initialized logger");
 
         m_AssetLoader.Load("assets", "pak");
-        m_Configuration.Load();
+        m_Data.Load();
 
         m_VideoProcessor.ValidateFFmpeg();
         m_GpuDetector.AnalyzeAvailableEncoders();

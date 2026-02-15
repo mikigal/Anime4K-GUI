@@ -1,10 +1,10 @@
-#include "Configuration.h"
+#include "Data.h"
 #include <pch.h>
 #include "App.h"
 #include "Utilities/AssetLoader.h"
 
 namespace Upscaler {
-    void Configuration::Load() {
+    void Data::Load() {
         AssetLoader::AssetData data = Instance->GetAssetLoader().GetFileData("data.json");
         nlohmann::json json = nlohmann::json::parse(data.begin(), data.end());
 
