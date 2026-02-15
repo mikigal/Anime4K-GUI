@@ -249,7 +249,7 @@ namespace Upscaler {
         }
 
         std::string version = Utilities::Split(output, "Copyright")[0];
-        Instance->GetLogger().Info("{}\n", version);
+        Instance->GetLogger().Debug("{}\n", version);
         if (output.find("enable-libplacebo") == std::string::npos) {
             Instance->GetLogger().Critical("Your FFMPEG build does not include libplacebo, application will NOT work");
             Instance->GetLogger().Critical("Details about your FFMPEG: \n{}", output);

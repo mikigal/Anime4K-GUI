@@ -71,12 +71,12 @@ namespace Upscaler {
 
         // Check for iGPU
         if (nvidia && amd) {
-            Instance->GetLogger().Info("Found AMD iGPU, ignoring it");
+            Instance->GetLogger().Debug("Found AMD iGPU, ignoring it");
             amd = false;
         }
 
         if (nvidia && intel || amd && intel) {
-            Instance->GetLogger().Info("Found Intel iGPU, ignoring it");
+            Instance->GetLogger().Debug("Found Intel iGPU, ignoring it");
             intel = false;
         }
 
