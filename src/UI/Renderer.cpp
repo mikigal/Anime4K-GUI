@@ -111,22 +111,22 @@ namespace Upscaler {
     }
     void Renderer::RenderSettings() {
         ImGui::Begin("Settings");
-        RendererUtilities::ComboWithLabel("Target resolution", nullptr, "##resolution", &SelectedResolution, m_ResolutionsNames);
-        RendererUtilities::ComboWithLabel("Shaders", ShadersTooltip, "##shaders", &SelectedShader, m_ShadersNames);
-        RendererUtilities::ComboWithLabel("Encoder", EncoderTooltip, "##encoders", &SelectedEncoder, m_EncodersNames);
+        RendererUtilities::ComboWithLabel("Target resolution", nullptr, "##resolution", &Instance->GetConfiguration().Resolution, m_ResolutionsNames);
+        RendererUtilities::ComboWithLabel("Shaders", ShadersTooltip, "##shaders", &Instance->GetConfiguration().Shader, m_ShadersNames);
+        RendererUtilities::ComboWithLabel("Encoder", EncoderTooltip, "##encoders", &Instance->GetConfiguration().Encoder, m_EncodersNames);
 
         Encoder selectedEncoder = GetSelectedEncoder();
         if (selectedEncoder.CrfSupport) {
-            RendererUtilities::NumberInput("Constant Rate Factor (CRF)", CrfTooltip, "##crf", &SelectedCrf, 1, 51);
+            RendererUtilities::NumberInput("Constant Rate Factor (CRF)", CrfTooltip, "##crf", &Instance->GetConfiguration().Crf, 1, 51);
         }
         if (selectedEncoder.CqSupport) {
-            RendererUtilities::NumberInput("Constant Quality (CQ)", CqTooltip, "##cq", &SelectedCq, 1, 51);
+            RendererUtilities::NumberInput("Constant Quality (CQ)", CqTooltip, "##cq", &Instance->GetConfiguration().Cq, 1, 51);
         }
         if (selectedEncoder.VideoToolboxCqSupport) {
-            RendererUtilities::NumberInput("Constant Quality (CQ)", nullptr, "##cq", &SelectedCq, 1, 100);
+            RendererUtilities::NumberInput("Constant Quality (CQ)", nullptr, "##cq", &Instance->GetConfiguration().Cq, 1, 100);
         }
         if (selectedEncoder.ThreadsLimitSupported) {
-            RendererUtilities::NumberInput("CPU threads", CpuThreadsTooltip, "##cpuThreads", &SelectedCpuThreads, 1, std::thread::hardware_concurrency());
+            RendererUtilities::NumberInput("CPU threads", CpuThreadsTooltip, "##cpuThreads", &Instance->GetConfiguration().CpuThreads, 1, std::thread::hardware_concurrency());
         }
 
         // Not implemented yet
@@ -134,10 +134,10 @@ namespace Upscaler {
         //     RendererUtilities::NumberInput("Concurrent jobs", ConcurrentJobsTooltip, "##concurrentJobs", &SelectedConcurrentJobs, 1, 4);
         // }
 
-        RendererUtilities::ComboWithLabel("Output formats", OutputFormatTooltip, "##output_formats", &SelectedOutputFormat, m_OutputFormatsNames);
+        RendererUtilities::ComboWithLabel("Output formats", OutputFormatTooltip, "##output_formats", &Instance->GetConfiguration().OutputFormat, m_OutputFormatsNames);
 
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", DebugModeTooltip);
-        ImGui::Checkbox("Debug mode", &SelectedDebugMode);
+        ImGui::Checkbox("Debug mode", &Instance->GetConfiguration().DebugMode);
         ImGui::Dummy(ImVec2(0, 10));
 
         if (CriticalError) {
@@ -341,24 +341,24 @@ namespace Upscaler {
     // Look by names as SelectedEncoder is index of currently available encoders
     Encoder& Renderer::GetSelectedEncoder() {
         for (Encoder& encoder : Instance->GetData().Encoders) {
-            if (encoder.Name == m_EncodersNames[SelectedEncoder]) {
+            if (encoder.Name == m_EncodersNames[Instance->GetConfiguration().Encoder]) {
                 return encoder;
             }
         }
 
-        throw std::runtime_error("Encoder " + std::string(m_EncodersNames[SelectedEncoder]) + " does not exist");
+        throw std::runtime_error("Encoder " + std::string(m_EncodersNames[Instance->GetConfiguration().Encoder]) + " does not exist");
     }
 
     Resolution& Renderer::GetSelectedResolution() {
-        return Instance->GetData().Resolutions[SelectedResolution];
+        return Instance->GetData().Resolutions[Instance->GetConfiguration().Resolution];
     }
 
     Shader& Renderer::GetSelectedShader() {
-        return Instance->GetData().Shaders[SelectedShader];
+        return Instance->GetData().Shaders[Instance->GetConfiguration().Shader];
     }
 
     std::string& Renderer::GetSelectedOutputFormat() {
-        return Instance->GetData().OutputFormats[SelectedOutputFormat];
+        return Instance->GetData().OutputFormats[Instance->GetConfiguration().OutputFormat];
     }
 
     void Renderer::ApplyStyle() {

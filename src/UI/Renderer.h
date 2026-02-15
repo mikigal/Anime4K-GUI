@@ -47,17 +47,6 @@ namespace Upscaler {
         ImFont* m_Font;
         App* Instance;
 
-        // UI pointers
-        int SelectedResolution = 0;
-        int SelectedShader = 0;
-        int SelectedEncoder = 0;
-        int SelectedCrf = 18;
-        int SelectedCq = 18;
-        int SelectedCpuThreads = std::thread::hardware_concurrency();
-        int SelectedOutputFormat = 0;
-        int SelectedConcurrentJobs = 1;
-        bool SelectedDebugMode = false;
-
         static std::string Logs;
 
         bool CriticalError = false;

@@ -1,5 +1,5 @@
-#ifndef ANIME4K_GUI_UPSCALINGSTATUS_H
-#define ANIME4K_GUI_UPSCALINGSTATUS_H
+#ifndef UPSCALING_STATUS_H
+#define UPSCALING_STATUS_H
 
 namespace Upscaler {
     enum UpscalingStatus {
@@ -14,4 +14,4 @@ namespace Upscaler {
 
 
 
-#endif
+#endif // UPSCALING_STATUS_H

@@ -10,10 +10,6 @@ namespace Upscaler {
 
     void VideoProcessor::StartBatchProcessing() {
         std::vector<Video>& videos = Instance->GetVideoLoader().m_Videos;
-        for (Video& video : videos) {
-            std::cout << video.Name << std::endl;
-            std::cout << video.Status << std::endl;
-        }
 
         if (videos.empty() || std::ranges::all_of(videos,
             [](const Video& v){ return v.Status == STATUS_FINISHED; })) {
@@ -141,16 +137,16 @@ namespace Upscaler {
         // Apply encoder specific parameters
         // If encoder does not support some placeholder it will be ignored
         for (const std::string& parameter : encoder.Params) {
-            std::string replaced = Utilities::ReplaceAll(parameter, "{CRF}", Instance->GetRenderer().SelectedCrf);
-            replaced = Utilities::ReplaceAll(replaced, "{CQ}", Instance->GetRenderer().SelectedCq);
-            replaced = Utilities::ReplaceAll(replaced, "{VIDEOTOOLBOX_CQ}", Instance->GetRenderer().SelectedCq);
+            std::string replaced = Utilities::ReplaceAll(parameter, "{CRF}", Instance->GetConfiguration().Crf);
+            replaced = Utilities::ReplaceAll(replaced, "{CQ}", Instance->GetConfiguration().Cq);
+            replaced = Utilities::ReplaceAll(replaced, "{VIDEOTOOLBOX_CQ}", Instance->GetConfiguration().Cq);
             command += replaced + " ";
         }
 
         // Apply encoder specific parameters
         // If encoder does not support thread limiting it will be ignored
         for (const std::string& parameter : encoder.ThreadsLimitParams) {
-           command += Utilities::ReplaceAll(parameter, "{THREADS}", Instance->GetRenderer().SelectedCpuThreads) + " ";
+           command += Utilities::ReplaceAll(parameter, "{THREADS}", Instance->GetConfiguration().CpuThreads) + " ";
         }
 
         // Add output file path

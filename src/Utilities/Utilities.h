@@ -2,7 +2,7 @@
 #define UTILITIES_H
 #include <pch.h>
 
-#include "Data/UpscalingStatus.hpp"
+#include "Data/UpscalingStatus.h"
 
 #ifdef _WIN32
 #include "WindowsUtilities.h"

@@ -1,5 +1,5 @@
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#ifndef DATA_H
+#define DATA_H
 #include <pch.h>
 
 #include "Encoder.h"
@@ -25,4 +25,4 @@ namespace Upscaler {
     };
 }
 
-#endif //CONFIGURATION_H
+#endif // DATA_H
