@@ -2,10 +2,10 @@
 #define ANIME4K_GUI_VIDEOPROCESSOR_H
 
 namespace Upscaler {
-    struct Video;
-    struct Shader;
-    struct Resolution;
-    struct Encoder;
+    class Video;
+    class Shader;
+    class Resolution;
+    class Encoder;
     class App;
 
     class VideoProcessor {

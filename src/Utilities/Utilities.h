@@ -2,6 +2,8 @@
 #define UTILITIES_H
 #include <pch.h>
 
+#include "Data/UpscalingStatus.hpp"
+
 #ifdef _WIN32
 #include "WindowsUtilities.h"
 #endif
@@ -44,8 +46,20 @@ namespace Upscaler {
             return oss.str();
         }
 
-        static int ToMegabytes(uintmax_t bytes) {
-            return bytes / 1024 / 1024;
+        static std::string ToMegabytes(uintmax_t bytes) {
+            double bytesPerMb = 1024.0 * 1024.0;
+            double bytesPerGb = 1024.0 * 1024.0 * 1024.0;
+
+            std::ostringstream oss;
+            if (bytes >= static_cast<uintmax_t>(bytesPerGb)) {
+                double gb = bytes / bytesPerGb;
+                oss << std::fixed << std::setprecision(2) << gb << " GB";
+                return oss.str();
+            }
+
+            double mb = bytes / bytesPerMb;
+            oss << std::fixed << std::setprecision(0) << mb << " MB";
+            return oss.str();
         }
 
         static std::string AddUpscaledSuffix(std::string& pathStr) {
@@ -74,6 +88,23 @@ namespace Upscaler {
             }
 
             return str;
+        }
+
+        static std::string FormatStatus(int upscalingStatus) {
+            switch (upscalingStatus) {
+                case 0:
+                    return "Not started";
+                case 1:
+                    return "Waiting";
+                case 2:
+                    return "Processing";
+                case 3:
+                    return "Failed";
+                case 4:
+                    return "Finished";
+                default:
+                     return "Unknown";
+            }
         }
 
 

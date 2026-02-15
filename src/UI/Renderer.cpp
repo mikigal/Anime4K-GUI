@@ -61,15 +61,17 @@ namespace Upscaler {
                 ImGui::TableNextColumn();
                 RendererUtilities::CenteredText("%s", Utilities::FormatTime(video.Duration).c_str());
                 ImGui::TableNextColumn();
-                RendererUtilities::CenteredText("%d MB", Utilities::ToMegabytes(video.Size));
+                RendererUtilities::CenteredText("%s", Utilities::ToMegabytes(video.Size).c_str());
                 ImGui::TableNextColumn();
-                RenderProgress(video.Progress);
+                RenderProgress(video.Progress.load());
                 ImGui::TableNextColumn();
-                RendererUtilities::CenteredText(video.Eta == -1 ? "-" : Utilities::FormatTime(video.Eta).c_str());
+                int eta = video.Eta.load();
+                RendererUtilities::CenteredText(eta == -1 ? "-" : Utilities::FormatTime(eta).c_str());
                 ImGui::TableNextColumn();
-                RendererUtilities::CenteredText(video.Speed == -1 ? "-" : "%.2fx", video.Speed);
+                float speed = video.Speed.load();
+                RendererUtilities::CenteredText(speed == -1.0f ? "-" : "%.2fx", speed);
                 ImGui::TableNextColumn();
-                RendererUtilities::CenteredText("%s", video.Status.c_str());
+                RendererUtilities::CenteredText("%s", Utilities::FormatStatus(video.Status.load()).c_str());
 
                 ImGui::TableNextColumn();
                 ImGui::PushID(i);
@@ -151,7 +153,7 @@ namespace Upscaler {
                                   ImVec2(-FLT_MIN, 220), ImGuiInputTextFlags_ReadOnly);
         ImGui::End();
     }
-    void Renderer::RenderProgress( float progress) {
+    void Renderer::RenderProgress(float progress) {
         float cellWidth = ImGui::GetContentRegionAvail().x;
         float height = 18.0f;
 

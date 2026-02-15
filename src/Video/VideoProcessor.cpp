@@ -3,6 +3,8 @@
 #include "App.h"
 #include "pch.h"
 #include "Utilities/Utilities.h"
+#include <chrono>
+#include <thread>
 
 namespace Upscaler {
 
@@ -43,12 +45,27 @@ namespace Upscaler {
             Video& video = videos[i];
             video.Status = STATUS_PROCESSING;
 
+            // std::thread([&video]() {
+            //     while (video.Status == STATUS_PROCESSING) {
+            //         float current = video.Progress.load();
+            //         float next = current + 0.01f;
+            //         if (next >= 1.0f) {
+            //             video.Progress.store(1.0f);
+            //             video.Status = STATUS_FINISHED;
+            //             break;
+            //         }
+            //         video.Progress.store(next);
+            //         std::this_thread::sleep_for(std::chrono::seconds(1));
+            //     }
+            // }).detach();
+
             Instance->GetLogger().Info("Processing video: {} ({} / {})", video.Name, i + 1, videos.size());
             std::string command = BuildFFmpegCommand(encoder, resolution, shader, video, outputFormat);
             Instance->GetLogger().Info("Command: {}", command);
         }
 
         Processing = false;
+
     }
 
     std::string VideoProcessor::BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {

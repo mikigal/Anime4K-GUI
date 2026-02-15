@@ -15,7 +15,7 @@ namespace Upscaler {
         std::string jsonString = "";
 
         TinyProcessLib::Process process(
-            "ffprobe -v quiet -print_format json -show_format -show_streams " + filePath.string(), "",
+            std::format("ffprobe -v quiet -print_format json -show_format -show_streams \"{}\"", filePath.string()), "",
             [&jsonString](const char* bytes, size_t n) {
                 jsonString.append(bytes, n);
             },

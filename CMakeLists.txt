@@ -66,6 +66,7 @@ add_executable(Anime4K_GUI src/main.cpp
         src/UI/RendererUtilities.h
         src/Video/VideoProcessor.cpp
         src/Video/VideoProcessor.h
+        src/Data/UpscalingStatus.hpp
 )
 
 add_dependencies(${PROJECT_NAME} pack_assets)

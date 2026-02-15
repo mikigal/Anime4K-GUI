@@ -2,13 +2,19 @@
 #define RESOLUTION_H
 #include <format>
 #include <pch.h>
+#include <utility>
 
 namespace Upscaler {
-    struct Resolution {
-        const int Width;
-        const int Height;
-        const std::string AspectRatio;
-        const std::string VisibleName = std::format("{}x{} ({})", Width, Height, AspectRatio);
+    class Resolution {
+    public:
+        int Width;
+        int Height;
+        std::string AspectRatio;
+        std::string VisibleName;
+
+        Resolution(int width, int height, std::string aspectRatio)
+            : Width(width), Height(height), AspectRatio(std::move(aspectRatio)),
+              VisibleName(std::format("{}x{} ({})", width, height, AspectRatio)) {}
     };
 }
 
