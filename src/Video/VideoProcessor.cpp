@@ -98,20 +98,24 @@ namespace Upscaler {
 
         // Wait for the process to finish
         int exitCode = process.get_exit_status();
+        video.UpscalingProcess = nullptr;
         Instance->GetLogger().Debug("ffmpeg exited with code {}", exitCode);
 
-        // Don't print error if user cancelled processing (then exitcode == 2)
+        // Process exited with error and user didn't cancel processing (then exitcode == 2)
         if (exitCode != 0 && !CancelRequested) {
             Instance->GetLogger().Error("An error occurred while executing ffmpeg, exit code: {}", exitCode);
+            video.Status = STATUS_FAILED;
+            video.Eta = -1;
+            video.Speed = -1;
+            video.Progress = 0;
             return;
         }
 
         // Update UI
-        video.UpscalingProcess = nullptr;
-        video.Status = STATUS_FINISHED;
+        video.Status = CancelRequested ? STATUS_CANCELLED : STATUS_FINISHED;
+        video.Progress = CancelRequested ? 0 : 1;
         video.Eta = -1;
         video.Speed = -1;
-        video.Progress = 1;
     }
 
     std::string VideoProcessor::BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
@@ -192,13 +196,8 @@ namespace Upscaler {
                 continue;
             }
 
+            // UI is updated in VideoProcessor::StartVideoProcessing after process is killed
             video.UpscalingProcess->kill();
-
-            // Update UI
-            video.Status = STATUS_CANCELLED;
-            video.Progress = 0;
-            video.Speed = -1;
-            video.Eta = -1;
         }
     }
 
@@ -222,10 +221,11 @@ namespace Upscaler {
     }
 
     void VideoProcessor::ValidateFFmpeg() {
+        std::filesystem::path ffmpegPath = std::filesystem::path("ffmpeg") / "ffmpeg";
         std::string output;
 
         TinyProcessLib::Process process(
-            "ffmpeg -version", "",
+            std::format("{} -version", ffmpegPath.string()), "",
             [&output](const char* bytes, size_t n) {
                 output.append(bytes, n);
             },
