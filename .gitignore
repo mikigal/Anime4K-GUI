@@ -1,4 +1,6 @@
-﻿.venv
+﻿ffmpeg/*.exe
+
+.venv
 
 ### C++ ###
 # Prerequisites
