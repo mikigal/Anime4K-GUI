@@ -7,7 +7,7 @@ namespace Upscaler {
     class App;
 
     inline constexpr const char* ShadersTooltip =
-        "Check the project's GitHub page if you're not sure what to choose";
+        "Check Anime4K GitHub page if you're not sure what to choose";
 
     inline constexpr const char* EncoderTooltip =
         "Codec for encoding output file. In most cases GPU based are faster, use CPU mainly if you have slow GPU\n"
@@ -26,13 +26,13 @@ namespace Upscaler {
         "\n\nIf you're not sure what to enter, try 18 (default)";
 
     inline constexpr const char* OutputFormatTooltip =
-        "If your input file contains subtitles streams you must use MKV as output format due to other formats limitations";
+        "In most cases you want to pick MKV due to best compatibility";
 
     inline constexpr const char* CpuThreadsTooltip =
         "How many of CPU threads FFMPEG will use \nYou may limit it to make your system more responsive wile using CPU based encoder";
 
     inline constexpr const char* DebugModeTooltip =
-        "Show more detailed logs, useful for troubleshooting and debugging";
+        "Show more detailed logs including ffmpeg details, useful for troubleshooting and debugging. App restart is required";
 
     inline constexpr const char* ConcurrentJobsTooltip =
         "Number of simultaneous video upscaling jobs to run.\n"

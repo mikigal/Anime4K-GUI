@@ -135,8 +135,8 @@ namespace Upscaler {
 
         RendererUtilities::ComboWithLabel("Output formats", OutputFormatTooltip, "##output_formats", &Instance->GetConfiguration().m_OutputFormat, Instance->GetData().GetOutputFormatsNames());
 
-        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", DebugModeTooltip);
         ImGui::Checkbox("Debug mode", &Instance->GetConfiguration().m_DebugMode);
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", DebugModeTooltip);
         ImGui::Dummy(ImVec2(0, 10));
 
         if (Instance->HasCriticalError()) {
