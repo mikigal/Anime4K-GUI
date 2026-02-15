@@ -7,7 +7,8 @@ namespace Upscaler {
         STATUS_WAITING,
         STATUS_PROCESSING,
         STATUS_FAILED,
-        STATUS_FINISHED
+        STATUS_FINISHED,
+        STATUS_CANCELLED
     };
 }
 

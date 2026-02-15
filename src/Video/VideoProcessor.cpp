@@ -30,28 +30,35 @@ namespace Upscaler {
         Instance->GetLogger().Debug("Selected resolution: {}", resolution.VisibleName);
         Instance->GetLogger().Debug("Selected shader: {}", shader.Name);
 
-        Processing = true;
         for (Video& video : videos) {
             if (video.Status != STATUS_FINISHED) {
                 video.Status = STATUS_WAITING;
             }
         }
 
-        for (int i = 0; i < videos.size(); i++) {
-            if (videos[i].Status == STATUS_FINISHED) {
-                continue;
+        std::thread([&videos, &encoder, &resolution, &shader, &outputFormat, this]() {
+            for (int i = 0; i < videos.size(); i++) {
+
+                // User cancelled processing, ffmpeg process was already killed so stop this thread
+                if (this->CancelRequested) {
+                    CancelRequested = false;
+                    return;
+                }
+
+                if (videos[i].Status == STATUS_FINISHED) {
+                    continue;
+                }
+
+                Video& video = videos[i];
+
+                Instance->GetLogger().Info("Processing video: {} ({} / {})", video.Name, i + 1, videos.size());
+                StartVideoProcessing(encoder, resolution, shader, video, outputFormat);
             }
-
-            Video& video = videos[i];
-
-            Instance->GetLogger().Info("Processing video: {} ({} / {})", video.Name, i + 1, videos.size());
-            StartVideoProcessing(encoder, resolution, shader, video, outputFormat);
-        }
-
-        Processing = false;
+        }).detach();
 
     }
 
+    // It's already called in new thread from VideoProcessor::StartBatchProcessing()
     void VideoProcessor::StartVideoProcessing(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
         std::string command = BuildFFmpegCommand(encoder, resolution, shader, video, outputFormat);
         Instance->GetLogger().Info("Command: {}", command);
@@ -59,47 +66,52 @@ namespace Upscaler {
         video.Status = STATUS_PROCESSING;
         video.Progress = 0;
 
-        std::thread([&video, command, this]() {
+        TinyProcessLib::Process process(command, "",
+        [](const char* bytes, size_t n) {
+            // For some reason ffmpeg outputs everything into stderr
+        },
+        [this, &video](const char* bytes, size_t n) {
+            std::string line = std::string(bytes, n);
 
-            TinyProcessLib::Process process(command, "",
-            [](const char* bytes, size_t n) {
-                // For some reason ffmpeg outputs everything into stderr
-            },
-            [this, &video](const char* bytes, size_t n) {
-                std::string line = std::string(bytes, n);
-
-                if (!line.starts_with("frame=")) {
-                    Instance->GetRenderer().Logs += line + "\n";
-                    return;
-                }
-
-                std::string frameStr = GetStatusFromLine(line, "frame");
-                std::string speedStr = GetStatusFromLine(line, "speed");
-
-                try {
-                    int frame = std::stoi(frameStr);
-                    video.Progress = (frame / static_cast<float>(video.TotalFrames));
-                    video.Speed = std::stof(Utilities::ReplaceAll(speedStr, "x", ""));
-                    video.Eta = ((video.TotalFrames - frame) / video.FrameRate) / video.Speed;
-                } catch (const std::exception& e) {
-                    // FFMPEG sometimes don't show all values, so we can just ignore parsing errors
-                }
-            });
-
-            int exitCode = process.get_exit_status();
-            Instance->GetLogger().Debug("ffmpeg exited with code {}", exitCode);
-
-            if (exitCode != 0) {
-                Instance->GetLogger().Error("An error occurred while executing ffmpeg, exit code: {}", exitCode);
+            // Print details about file in logs
+            if (!line.starts_with("frame=")) {
+                Instance->GetRenderer().Logs += line + "\n";
                 return;
             }
 
+            // Extract progress information from ffmpeg's output
+            std::string frameStr = GetStatusFromLine(line, "frame");
+            std::string speedStr = GetStatusFromLine(line, "speed");
+
             // Update UI
-            video.Status = STATUS_FINISHED;
-            video.Eta = -1;
-            video.Speed = -1;
-            video.Progress = 1;
-        }).detach();
+            try {
+                int frame = std::stoi(frameStr);
+                video.Progress = (frame / static_cast<float>(video.TotalFrames));
+                video.Speed = std::stof(Utilities::ReplaceAll(speedStr, "x", ""));
+                video.Eta = ((video.TotalFrames - frame) / video.FrameRate) / video.Speed;
+            } catch (const std::exception& e) {
+                // FFMPEG sometimes don't show all values, so we can just ignore parsing errors
+            }
+        });
+
+        video.UpscalingProcess = &process;
+
+        // Wait for the process to finish
+        int exitCode = process.get_exit_status();
+        Instance->GetLogger().Debug("ffmpeg exited with code {}", exitCode);
+
+        // Don't print error if user cancelled processing (then exitcode == 2)
+        if (exitCode != 0 && !CancelRequested) {
+            Instance->GetLogger().Error("An error occurred while executing ffmpeg, exit code: {}", exitCode);
+            return;
+        }
+
+        // Update UI
+        video.UpscalingProcess = nullptr;
+        video.Status = STATUS_FINISHED;
+        video.Eta = -1;
+        video.Speed = -1;
+        video.Progress = 1;
     }
 
     std::string VideoProcessor::BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
@@ -164,11 +176,48 @@ namespace Upscaler {
     }
 
     void VideoProcessor::CancelProcessing() {
+        if (std::any_of(Instance->GetVideoLoader().m_Videos.begin(),
+                        Instance->GetVideoLoader().m_Videos.end(),
+                        [](const Video& video) {
+                            return video.Status == STATUS_PROCESSING;
+                        }))
+        {
+            Instance->GetLogger().Info("Cancelling processing...");
+            CancelRequested = true;
+        }
 
+        for (Video& video : Instance->GetVideoLoader().m_Videos) {
+            if (video.Status != STATUS_PROCESSING) {
+                continue;
+            }
+
+            video.UpscalingProcess->kill();
+
+            // Update UI
+            video.Status = STATUS_CANCELLED;
+            video.Progress = 0;
+            video.Speed = -1;
+            video.Eta = -1;
+        }
     }
 
     void VideoProcessor::HandleButton() {
-        StartBatchProcessing();
+        if (!IsProcessing()) {
+            StartBatchProcessing();
+            return;
+        }
+
+        CancelProcessing();
+    }
+
+    bool VideoProcessor::IsProcessing() {
+        for (Video& video : Instance->GetVideoLoader().m_Videos) {
+            if (video.Status == STATUS_PROCESSING) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     void VideoProcessor::ValidateFFmpeg() {

@@ -82,10 +82,18 @@ namespace Upscaler {
                 ImGui::SetCursorPosY(
                     cursorPos.y + (ImGui::GetTextLineHeightWithSpacing() - ImGui::GetFrameHeight()) * 0.5f);
 
+                if (video.Status == STATUS_PROCESSING) {
+                    ImGui::BeginDisabled();
+                }
+
                 if (ImGui::Button("Remove")) {
                     Instance->GetLogger().Info("Removed file {}", video.Name);
                     Instance->GetVideoLoader().m_Videos.erase(Instance->GetVideoLoader().m_Videos.begin() + i);
                     i--;
+                }
+
+                if (video.Status == STATUS_PROCESSING) {
+                    ImGui::EndDisabled();
                 }
 
                 ImGui::PopID();
@@ -134,7 +142,7 @@ namespace Upscaler {
         if (CriticalError) {
             ImGui::BeginDisabled();
         }
-        if (ImGui::Button(Instance->GetVideoProcessor().Processing ? "Cancel" : "Start", ImVec2(300, 30))) {
+        if (ImGui::Button(Instance->GetVideoProcessor().IsProcessing() ? "Cancel" : "Start", ImVec2(300, 30))) {
             Instance->GetVideoProcessor().HandleButton();
         }
         if (CriticalError) {

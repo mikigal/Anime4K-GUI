@@ -102,6 +102,8 @@ namespace Upscaler {
                     return "Failed";
                 case 4:
                     return "Finished";
+                case 5:
+                    return "Cancelled";
                 default:
                      return "Unknown";
             }

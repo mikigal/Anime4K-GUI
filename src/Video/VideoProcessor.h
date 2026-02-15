@@ -11,8 +11,8 @@ namespace Upscaler {
     class VideoProcessor {
     public:
         App* Instance;
-        TinyProcessLib::Process* Process = nullptr;
-        bool Processing = false;
+        std::thread Worker;
+        std::atomic<bool> CancelRequested;
 
         std::string GetStatusFromLine(std::string& line, const std::string& field);
         void ValidateFFmpeg();
@@ -21,6 +21,7 @@ namespace Upscaler {
         void StartVideoProcessing(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat);
         void CancelProcessing();
         std::string BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat);
+        bool IsProcessing();
 
         VideoProcessor(App* instance)
             : Instance(instance) {
