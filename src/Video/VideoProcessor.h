@@ -14,11 +14,12 @@ namespace Upscaler {
         TinyProcessLib::Process* Process = nullptr;
         bool Processing = false;
 
+        std::string GetStatusFromLine(std::string& line, const std::string& field);
         void ValidateFFmpeg();
         void HandleButton();
-        void StartProcessing();
+        void StartBatchProcessing();
+        void StartVideoProcessing(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat);
         void CancelProcessing();
-        void StartFFmpegProcess();
         std::string BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat);
 
         VideoProcessor(App* instance)

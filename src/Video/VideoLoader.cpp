@@ -26,7 +26,7 @@ namespace Upscaler {
         int exitCode = process.get_exit_status();
         Instance->GetLogger().Debug("ffprobe exited with code {}", exitCode);
         if (exitCode != 0) {
-            Instance->GetLogger().Error("Can not analyze file, an error occurred while executing ffprobe");
+            Instance->GetLogger().Error("Can not analyze file, an error occurred while executing ffprobe, exit code: {}", exitCode);
             return;
         }
 

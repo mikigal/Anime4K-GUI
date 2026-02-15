@@ -8,7 +8,7 @@
 
 namespace Upscaler {
 
-    void VideoProcessor::StartProcessing() {
+    void VideoProcessor::StartBatchProcessing() {
         std::vector<Video>& videos = Instance->GetVideoLoader().m_Videos;
         for (Video& video : videos) {
             std::cout << video.Name << std::endl;
@@ -43,29 +43,63 @@ namespace Upscaler {
             }
 
             Video& video = videos[i];
-            video.Status = STATUS_PROCESSING;
-
-            // std::thread([&video]() {
-            //     while (video.Status == STATUS_PROCESSING) {
-            //         float current = video.Progress.load();
-            //         float next = current + 0.01f;
-            //         if (next >= 1.0f) {
-            //             video.Progress.store(1.0f);
-            //             video.Status = STATUS_FINISHED;
-            //             break;
-            //         }
-            //         video.Progress.store(next);
-            //         std::this_thread::sleep_for(std::chrono::seconds(1));
-            //     }
-            // }).detach();
 
             Instance->GetLogger().Info("Processing video: {} ({} / {})", video.Name, i + 1, videos.size());
-            std::string command = BuildFFmpegCommand(encoder, resolution, shader, video, outputFormat);
-            Instance->GetLogger().Info("Command: {}", command);
+            StartVideoProcessing(encoder, resolution, shader, video, outputFormat);
         }
 
         Processing = false;
 
+    }
+
+    void VideoProcessor::StartVideoProcessing(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
+        std::string command = BuildFFmpegCommand(encoder, resolution, shader, video, outputFormat);
+        Instance->GetLogger().Info("Command: {}", command);
+
+        video.Status = STATUS_PROCESSING;
+        video.Progress = 0;
+
+        std::thread([&video, command, this]() {
+
+            TinyProcessLib::Process process(command, "",
+            [](const char* bytes, size_t n) {
+                // For some reason ffmpeg outputs everything into stderr
+            },
+            [this, &video](const char* bytes, size_t n) {
+                std::string line = std::string(bytes, n);
+
+                if (!line.starts_with("frame=")) {
+                    Instance->GetRenderer().Logs += line + "\n";
+                    return;
+                }
+
+                std::string frameStr = GetStatusFromLine(line, "frame");
+                std::string speedStr = GetStatusFromLine(line, "speed");
+
+                try {
+                    int frame = std::stoi(frameStr);
+                    video.Progress = (frame / static_cast<float>(video.TotalFrames));
+                    video.Speed = std::stof(Utilities::ReplaceAll(speedStr, "x", ""));
+                    video.Eta = ((video.TotalFrames - frame) / video.FrameRate) / video.Speed;
+                } catch (const std::exception& e) {
+                    // FFMPEG sometimes don't show all values, so we can just ignore parsing errors
+                }
+            });
+
+            int exitCode = process.get_exit_status();
+            Instance->GetLogger().Debug("ffmpeg exited with code {}", exitCode);
+
+            if (exitCode != 0) {
+                Instance->GetLogger().Error("An error occurred while executing ffmpeg, exit code: {}", exitCode);
+                return;
+            }
+
+            // Update UI
+            video.Status = STATUS_FINISHED;
+            video.Eta = -1;
+            video.Speed = -1;
+            video.Progress = 1;
+        }).detach();
     }
 
     std::string VideoProcessor::BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
@@ -109,16 +143,32 @@ namespace Upscaler {
         return command;
     }
 
+    std::string VideoProcessor::GetStatusFromLine(std::string& line, const std::string& field) {
+        const std::string token = field + "=";
+        const size_t pos = line.find(token);
+
+        if (pos == std::string::npos)
+            return {};
+
+        size_t i = pos + token.size();
+
+        while (i < line.size() && std::isspace(static_cast<unsigned char>(line[i])))
+            ++i;
+
+        size_t j = i;
+
+        while (j < line.size() && !std::isspace(static_cast<unsigned char>(line[j])))
+            ++j;
+
+        return line.substr(i, j - i);
+    }
+
     void VideoProcessor::CancelProcessing() {
 
     }
 
     void VideoProcessor::HandleButton() {
-        StartProcessing();
-    }
-
-    void VideoProcessor::StartFFmpegProcess() {
-
+        StartBatchProcessing();
     }
 
     void VideoProcessor::ValidateFFmpeg() {
