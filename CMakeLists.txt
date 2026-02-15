@@ -116,4 +116,14 @@ if(WIN32)
                 WIN32_EXECUTABLE TRUE
         )
     endif ()
+
+    set(FFMPEG_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ffmpeg)
+    add_custom_command(
+            TARGET Anime4K_GUI
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${FFMPEG_DIRECTORY}
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/ffmpeg/ffmpeg.exe ${FFMPEG_DIRECTORY}/ffmpeg.exe
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/ffmpeg/ffprobe.exe ${FFMPEG_DIRECTORY}/ffprobe.exe
+            COMMENT "Copy ffmpeg binaries to output directory"
+    )
 endif()
