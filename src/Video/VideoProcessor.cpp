@@ -119,8 +119,7 @@ namespace Upscaler {
     }
 
     std::string VideoProcessor::BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
-        std::filesystem::path ffmpegPath = std::filesystem::path("ffmpeg") / "ffmpeg";
-        std::string command = std::format("{} ", ffmpegPath.string()); // FFMPEG exec path
+        std::string command = std::format("{} ", Utilities::GetFFmpegPath()); // FFMPEG exec path
         command += "-hide_banner "; // Hide FFMPEG's banner
         command += "-y "; // Override output file
         command += std::format("-i \"{}\" ", video.Path); // Path to input video
@@ -221,11 +220,10 @@ namespace Upscaler {
     }
 
     void VideoProcessor::ValidateFFmpeg() {
-        std::filesystem::path ffmpegPath = std::filesystem::path("ffmpeg") / "ffmpeg";
         std::string output;
 
         TinyProcessLib::Process process(
-            std::format("{} -version", ffmpegPath.string()), "",
+            std::format("{} -version", Utilities::GetFFmpegPath()), "",
             [&output](const char* bytes, size_t n) {
                 output.append(bytes, n);
             },

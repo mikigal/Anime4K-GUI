@@ -109,6 +109,25 @@ namespace Upscaler {
             }
         }
 
+        static std::string GetFFmpegPath() {
+#ifdef _WIN32
+            std::filesystem::path ffmpegPath = std::filesystem::path("ffmpeg") / "ffmpeg.exe";
+            return ffmpegPath.string();
+#else
+            // Use ffmpeg from path
+            return "ffmpeg";
+#endif
+        }
+
+        static std::string GetFFprobePath() {
+#ifdef _WIN32
+            std::filesystem::path ffprobePath = std::filesystem::path("ffmpeg") / "ffprobe.exe";
+            return ffprobePath.string();
+#else
+            // Use ffprobe from path
+            return "ffprobe";
+#endif
+        }
 
         static void PreventSleep(Logger& logger) {
 #ifdef _WIN32
