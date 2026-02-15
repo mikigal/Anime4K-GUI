@@ -19,8 +19,8 @@ namespace Upscaler {
             [&jsonString](const char* bytes, size_t n) {
                 jsonString.append(bytes, n);
             },
-            [](const char* bytes, size_t n) {
-                std::cout << "An error occurred while executing ffprobe, stderr: " << std::string(bytes, n) << std::endl;
+            [this](const char* bytes, size_t n) {
+                Instance->GetLogger().Info("An error occurred while executing ffprobe, stderr: {}", std::string(bytes, n));
             });
 
         int exitCode = process.get_exit_status();

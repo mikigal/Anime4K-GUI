@@ -12,7 +12,7 @@
 namespace Upscaler {
     class App {
     private:
-        Configuration m_Configuration;
+        Configuration m_Configuration{this};
         AssetLoader m_AssetLoader{this};
         VideoLoader m_VideoLoader{this};
         VideoProcessor m_VideoProcessor{this};

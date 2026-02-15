@@ -5,7 +5,9 @@
 
 namespace Upscaler {
     void App::Init() {
-        m_Logger.Init(true);
+        m_Configuration.Load();
+        m_Logger.Init(m_Configuration.DebugMode);
+
         GetLogger().Debug("Initialized logger");
 
         m_AssetLoader.Load("assets", "pak");
@@ -23,6 +25,7 @@ namespace Upscaler {
         }
 
         m_VideoProcessor.CancelProcessing();
+        m_Configuration.Save();
         m_Renderer.Terminate();
         m_Logger.Shutdown();
     }

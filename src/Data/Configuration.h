@@ -4,8 +4,12 @@
 #include <pch.h>
 
 namespace Upscaler {
+    class App;
+
     class Configuration {
     public:
+        App* Instance;
+
         int Resolution = 0;
         int Shader = 0;
         int Encoder = 0;
@@ -15,6 +19,16 @@ namespace Upscaler {
         int OutputFormat = 0;
         int ConcurrentJobs = 1;
         bool DebugMode = false;
+
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(Configuration, Resolution, Shader, Encoder, Crf, Cq, CpuThreads, OutputFormat,
+            ConcurrentJobs, DebugMode)
+
+        void Load();
+        void Save();
+
+        Configuration(App* instance)
+            : Instance(instance) {
+        }
     };
 }
 

@@ -129,7 +129,7 @@ namespace Upscaler {
 #elif defined(__linux__)
         FILE* pipe = popen("lspci", "r");
         if (!pipe) {
-            std::cout << "can't execute lspci" << std::endl;
+            Instance->GetLogger().Error("Could not execute lspci");
             return gpus;
         }
 
@@ -144,7 +144,7 @@ namespace Upscaler {
 
             int secondColon = line.find(':', line.find(':') + 1);
             if (secondColon == std::string::npos) {
-                std::cout << "weird lspci entry " << line << std::endl;
+                Instance->GetLogger().Warn("weird lspci entry {}", line)
             }
 
             std::string description = line.substr(secondColon + 1);
