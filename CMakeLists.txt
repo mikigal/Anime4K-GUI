@@ -42,6 +42,8 @@ include_directories(lib/json)
 include_directories(lib/tiny-process-library)
 include_directories(src)
 
+
+
 add_executable(Anime4K_GUI src/main.cpp
         src/pch.h
         src/Utilities/WindowsUtilities.h
@@ -101,4 +103,11 @@ endif()
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE dwmapi setupapi)
     target_sources(Anime4K_GUI PRIVATE resources/appicon.rc)
+
+    # Show console in Release mode
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set_target_properties(Anime4K_GUI PROPERTIES
+                WIN32_EXECUTABLE TRUE
+        )
+    endif ()
 endif()
