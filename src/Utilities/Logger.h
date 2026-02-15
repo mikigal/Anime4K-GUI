@@ -8,7 +8,15 @@
 
 namespace Upscaler {
     class Logger {
+    private:
+        App* Instance;
+        std::string m_Logs;
     public:
+
+        Logger(App* instance)
+            : Instance(instance) {
+        }
+
         void Init(bool debug) {
             spdlog::set_pattern("[%H:%M:%S] [%^%l%$] %v");
             spdlog::set_default_logger(spdlog::stdout_color_mt("UpscalerLogger"));
@@ -24,7 +32,7 @@ namespace Upscaler {
             spdlog::info(message, std::forward<Args>(args)...);
             if (spdlog::should_log(spdlog::level::info)) {
                 std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
-                Renderer::Logs += fmt::format("[{}] [info] {}\n", GetFormattedTime(), formattedMessage);
+                m_Logs += fmt::format("[{}] [info] {}\n", GetFormattedTime(), formattedMessage);
             }
         }
 
@@ -33,7 +41,7 @@ namespace Upscaler {
             spdlog::warn(message, std::forward<Args>(args)...);
             if (spdlog::should_log(spdlog::level::warn)) {
                 std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
-                Renderer::Logs += fmt::format("[{}] [warn] {}\n", GetFormattedTime(), formattedMessage);
+                m_Logs += fmt::format("[{}] [warn] {}\n", GetFormattedTime(), formattedMessage);
             }
         }
 
@@ -42,7 +50,7 @@ namespace Upscaler {
             spdlog::error(message, std::forward<Args>(args)...);
             if (spdlog::should_log(spdlog::level::err)) {
                 std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
-                Renderer::Logs += fmt::format("[{}] [error] {}\n", GetFormattedTime(), formattedMessage);
+                m_Logs += fmt::format("[{}] [error] {}\n", GetFormattedTime(), formattedMessage);
             }
         }
 
@@ -51,7 +59,7 @@ namespace Upscaler {
             spdlog::critical(message, std::forward<Args>(args)...);
             if (spdlog::should_log(spdlog::level::critical)) {
                 std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
-                Renderer::Logs += fmt::format("[{}] [critical] {}\n", GetFormattedTime(), formattedMessage);
+                m_Logs += fmt::format("[{}] [critical] {}\n", GetFormattedTime(), formattedMessage);
             }
         }
 
@@ -60,7 +68,7 @@ namespace Upscaler {
             spdlog::trace(message, std::forward<Args>(args)...);
             if (spdlog::should_log(spdlog::level::trace)) {
                 std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
-                Renderer::Logs += fmt::format("[{}] [trace] {}\n", GetFormattedTime(), formattedMessage);
+                m_Logs += fmt::format("[{}] [trace] {}\n", GetFormattedTime(), formattedMessage);
             }
         }
 
@@ -69,7 +77,7 @@ namespace Upscaler {
             spdlog::debug(message, std::forward<Args>(args)...);
             if (spdlog::should_log(spdlog::level::debug)) {
                 std::string formattedMessage = fmt::format(message, std::forward<Args>(args)...);
-                Renderer::Logs += fmt::format("[{}] [debug] {}\n", GetFormattedTime(), formattedMessage);
+                m_Logs += fmt::format("[{}] [debug] {}\n", GetFormattedTime(), formattedMessage);
             }
         }
 
@@ -101,6 +109,14 @@ namespace Upscaler {
             char timeBuffer[9]; // "HH:MM:SS"
             std::strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", &tm);
             return std::string(timeBuffer);
+        }
+
+        std::string GetLogs() const {
+            return m_Logs;
+        }
+
+        void AppendLogs(std::string line) {
+            m_Logs += line;
         }
     };
 } // namespace Upscaler

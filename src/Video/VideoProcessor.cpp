@@ -9,26 +9,26 @@
 namespace Upscaler {
 
     void VideoProcessor::StartBatchProcessing() {
-        std::vector<Video>& videos = Instance->GetVideoLoader().m_Videos;
+        std::vector<Video>& videos = Instance->GetVideoLoader().GetVideos();
 
         if (videos.empty() || std::ranges::all_of(videos,
-            [](const Video& v){ return v.Status == STATUS_FINISHED; })) {
+            [](Video& v){ return v.GetStatus() == STATUS_FINISHED; })) {
             Instance->GetLogger().Error("There's no videos to be upscaled");
             return;
         }
 
-        Encoder& encoder = Instance->GetRenderer().GetSelectedEncoder();
-        Resolution& resolution = Instance->GetRenderer().GetSelectedResolution();
-        Shader& shader = Instance->GetRenderer().GetSelectedShader();
-        std::string& outputFormat = Instance->GetRenderer().GetSelectedOutputFormat();
+        Encoder& encoder = Instance->GetConfiguration().GetSelectedEncoder();
+        Resolution& resolution = Instance->GetConfiguration().GetSelectedResolution();
+        Shader& shader = Instance->GetConfiguration().GetSelectedShader();
+        std::string& outputFormat = Instance->GetConfiguration().GetSelectedOutputFormat();
 
-        Instance->GetLogger().Debug("Selected encoder: {}", encoder.Name);
-        Instance->GetLogger().Debug("Selected resolution: {}", resolution.VisibleName);
-        Instance->GetLogger().Debug("Selected shader: {}", shader.Name);
+        Instance->GetLogger().Debug("Selected encoder: {}", encoder.GetName());
+        Instance->GetLogger().Debug("Selected resolution: {}", resolution.GetVisibleName());
+        Instance->GetLogger().Debug("Selected shader: {}", shader.GetName());
 
         for (Video& video : videos) {
-            if (video.Status != STATUS_FINISHED) {
-                video.Status = STATUS_WAITING;
+            if (video.GetStatus() != STATUS_FINISHED) {
+                video.SetStatus(STATUS_WAITING);
             }
         }
 
@@ -36,18 +36,18 @@ namespace Upscaler {
             for (int i = 0; i < videos.size(); i++) {
 
                 // User cancelled processing, ffmpeg process was already killed so stop this thread
-                if (this->CancelRequested) {
-                    CancelRequested = false;
+                if (this->m_CancelRequested) {
+                    m_CancelRequested = false;
                     return;
                 }
 
-                if (videos[i].Status == STATUS_FINISHED) {
+                if (videos[i].GetStatus() == STATUS_FINISHED) {
                     continue;
                 }
 
                 Video& video = videos[i];
 
-                Instance->GetLogger().Info("Processing video: {} ({} / {})", video.Name, i + 1, videos.size());
+                Instance->GetLogger().Info("Processing video: {} ({} / {})", video.GetName(), i + 1, videos.size());
                 StartVideoProcessing(encoder, resolution, shader, video, outputFormat);
             }
         }).detach();
@@ -59,10 +59,10 @@ namespace Upscaler {
         std::string command = BuildFFmpegCommand(encoder, resolution, shader, video, outputFormat);
         Instance->GetLogger().Info("Command: {}", command);
 
-        video.Status = STATUS_PROCESSING;
-        video.Progress = 0;
+        video.SetStatus(STATUS_PROCESSING);
+        video.SetProgress(0);
 
-        TinyProcessLib::Process process(command, "",
+        TinyProcessLib::Process* process = new TinyProcessLib::Process(command, "",
         [](const char* bytes, size_t n) {
             // For some reason ffmpeg outputs everything into stderr
         },
@@ -71,7 +71,7 @@ namespace Upscaler {
 
             // Print details about file in logs
             if (!line.starts_with("frame=")) {
-                Instance->GetRenderer().Logs += line + "\n";
+                Instance->GetLogger().AppendLogs(line + "\n");
                 return;
             }
 
@@ -82,46 +82,47 @@ namespace Upscaler {
             // Update UI
             try {
                 int frame = std::stoi(frameStr);
-                video.Progress = (frame / static_cast<float>(video.TotalFrames));
-                video.Speed = std::stof(Utilities::ReplaceAll(speedStr, "x", ""));
-                video.Eta = ((video.TotalFrames - frame) / video.FrameRate) / video.Speed;
+                video.SetProgress(frame / static_cast<float>(video.GetTotalFrames()));
+                video.SetSpeed(std::stof(Utilities::ReplaceAll(speedStr, "x", "")));
+                video.SetEta(((video.GetTotalFrames() - frame) / video.GetFrameRate()) / video.GetSpeed());
             } catch (const std::exception& e) {
                 // FFMPEG sometimes don't show all values, so we can just ignore parsing errors
             }
         });
 
-        video.UpscalingProcess = &process;
+        video.SetUpscalingProcess(process);
 
         // Wait for the process to finish
-        int exitCode = process.get_exit_status();
-        video.UpscalingProcess = nullptr;
+        int exitCode = process->get_exit_status();
+        delete process;
+        video.SetUpscalingProcess(nullptr);
         Instance->GetLogger().Debug("ffmpeg exited with code {}", exitCode);
 
         // Process exited with error and user didn't cancel processing (then exitcode == 2)
-        if (exitCode != 0 && !CancelRequested) {
+        if (exitCode != 0 && !m_CancelRequested) {
             Instance->GetLogger().Error("An error occurred while executing ffmpeg, exit code: {}", exitCode);
-            video.Status = STATUS_FAILED;
-            video.Eta = -1;
-            video.Speed = -1;
-            video.Progress = 0;
+            video.SetStatus(STATUS_FAILED);
+            video.SetProgress(0);
+            video.SetEta(-1);
+            video.SetSpeed(-1);
             return;
         }
 
         // Update UI
-        video.Status = CancelRequested ? STATUS_CANCELLED : STATUS_FINISHED;
-        video.Progress = CancelRequested ? 0 : 1;
-        video.Eta = -1;
-        video.Speed = -1;
+        video.SetStatus(m_CancelRequested ? STATUS_CANCELLED : STATUS_FINISHED);
+        video.SetProgress(m_CancelRequested ? 0 : 1);
+        video.SetEta(-1);
+        video.SetSpeed(-1);
     }
 
     std::string VideoProcessor::BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
         std::string command = std::format("{} ", Utilities::GetFFmpegPath()); // FFMPEG exec path
         command += "-hide_banner "; // Hide FFMPEG's banner
         command += "-y "; // Override output file
-        command += std::format("-i \"{}\" ", video.Path); // Path to input video
+        command += std::format("-i \"{}\" ", video.GetPath()); // Path to input video
         command += "-init_hw_device vulkan "; // Use Vulkan
         command += std::format("-vf libplacebo=w={}:h={}:upscaler=ewa_lanczos:custom_shader_path={},format={} ", // libplacebo filter setup
-            resolution.Width, resolution.Height, shader.Path, video.PixelFormat);
+            resolution.GetWidth(), resolution.GetHeight(), shader.GetPath(), video.GetPixelFormat());
         command += "-dn "; // Remove data streams
 
 
@@ -132,25 +133,25 @@ namespace Upscaler {
         command += "-map 0:s? "; // Map all subtitlies streams if exists
         command += "-map_metadata -1 "; // Do not copy metadata
         command += "-map_chapters -1 "; // Do not copy chapter information
-        command += std::format("-c:v {} ", encoder.Value); // Set video encoder
+        command += std::format("-c:v {} ", encoder.GetValue()); // Set video encoder
 
         // Apply encoder specific parameters
         // If encoder does not support some placeholder it will be ignored
-        for (const std::string& parameter : encoder.Params) {
-            std::string replaced = Utilities::ReplaceAll(parameter, "{CRF}", Instance->GetConfiguration().Crf);
-            replaced = Utilities::ReplaceAll(replaced, "{CQ}", Instance->GetConfiguration().Cq);
-            replaced = Utilities::ReplaceAll(replaced, "{VIDEOTOOLBOX_CQ}", Instance->GetConfiguration().Cq);
+        for (const std::string& parameter : encoder.GetParams()) {
+            std::string replaced = Utilities::ReplaceAll(parameter, "{CRF}", Instance->GetConfiguration().m_Crf);
+            replaced = Utilities::ReplaceAll(replaced, "{CQ}", Instance->GetConfiguration().m_Cq);
+            replaced = Utilities::ReplaceAll(replaced, "{VIDEOTOOLBOX_CQ}", Instance->GetConfiguration().m_Cq);
             command += replaced + " ";
         }
 
         // Apply encoder specific parameters
         // If encoder does not support thread limiting it will be ignored
-        for (const std::string& parameter : encoder.ThreadsLimitParams) {
-           command += Utilities::ReplaceAll(parameter, "{THREADS}", Instance->GetConfiguration().CpuThreads) + " ";
+        for (const std::string& parameter : encoder.GetThreadsLimitParams()) {
+           command += Utilities::ReplaceAll(parameter, "{THREADS}", Instance->GetConfiguration().m_CpuThreads) + " ";
         }
 
         // Add output file path
-        command += std::format("\"{}\"", Utilities::AddUpscaledSuffix(video.Path));
+        command += std::format("\"{}\"", Utilities::AddUpscaledSuffix(video.GetPath()));
 
         return command;
     }
@@ -176,23 +177,23 @@ namespace Upscaler {
     }
 
     void VideoProcessor::CancelProcessing() {
-        if (std::any_of(Instance->GetVideoLoader().m_Videos.begin(),
-                        Instance->GetVideoLoader().m_Videos.end(),
-                        [](const Video& video) {
-                            return video.Status == STATUS_PROCESSING;
+        if (std::any_of(Instance->GetVideoLoader().GetVideos().begin(),
+                        Instance->GetVideoLoader().GetVideos().end(),
+                        [](Video& video) {
+                            return video.GetStatus() == STATUS_PROCESSING;
                         }))
         {
             Instance->GetLogger().Info("Cancelling processing...");
-            CancelRequested = true;
+            m_CancelRequested = true;
         }
 
-        for (Video& video : Instance->GetVideoLoader().m_Videos) {
-            if (video.Status != STATUS_PROCESSING) {
+        for (Video& video : Instance->GetVideoLoader().GetVideos()) {
+            if (video.GetStatus() != STATUS_PROCESSING) {
                 continue;
             }
 
-            // UI is updated in VideoProcessor::StartVideoProcessing after process is killed
-            video.UpscalingProcess->kill();
+            // UI is updated and pointer is deleted in VideoProcessor::StartVideoProcessing after process is killed
+            video.GetUpscalingProcess()->kill();
         }
     }
 
@@ -206,8 +207,8 @@ namespace Upscaler {
     }
 
     bool VideoProcessor::IsProcessing() {
-        for (Video& video : Instance->GetVideoLoader().m_Videos) {
-            if (video.Status == STATUS_PROCESSING) {
+        for (Video& video : Instance->GetVideoLoader().GetVideos()) {
+            if (video.GetStatus() == STATUS_PROCESSING) {
                 return true;
             }
         }
@@ -238,7 +239,7 @@ namespace Upscaler {
 #elif __APPLE__
                 Instance->GetLogger().Critical("Please install FFMPEG using brew package manager and make sure it's available in $PATH\n");
 #endif
-                Instance->GetRenderer().CriticalError = true;
+                Instance->SetCriticalError(true);
             });
 
         int exitCode = process.get_exit_status();
@@ -252,7 +253,7 @@ namespace Upscaler {
         if (output.find("enable-libplacebo") == std::string::npos) {
             Instance->GetLogger().Critical("Your FFMPEG build does not include libplacebo, application will NOT work");
             Instance->GetLogger().Critical("Details about your FFMPEG: \n{}", output);
-            Instance->GetRenderer().CriticalError = true;
+            Instance->SetCriticalError(true);
         }
     }
 

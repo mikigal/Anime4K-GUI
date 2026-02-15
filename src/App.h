@@ -19,7 +19,10 @@ namespace Upscaler {
         Data m_Data{this};
         Renderer m_Renderer{this};
         GpuDetector m_GpuDetector{this};
-        Logger m_Logger;
+        Logger m_Logger{this};
+
+        bool m_CriticalError = false;
+
 
     public:
         void Init();
@@ -32,6 +35,14 @@ namespace Upscaler {
         Renderer& GetRenderer() { return m_Renderer; }
         GpuDetector& GetGpuDetector() { return m_GpuDetector; }
         Logger& GetLogger() { return m_Logger; }
+
+        [[nodiscard]] bool HasCriticalError() const {
+            return m_CriticalError;
+        }
+
+        void SetCriticalError(bool criticalError) {
+            m_CriticalError = criticalError;
+        }
     };
 }
 

@@ -28,5 +28,6 @@
 #include <stdexcept>
 #include <vector>
 #include <functional>
+#include <memory>
 
 #endif //PCH_H

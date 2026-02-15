@@ -7,7 +7,6 @@ namespace Upscaler {
     class App;
     class AssetLoader {
     public:
-        App* Instance;
         typedef std::vector<char> AssetData;
 
         void Load(const std::string& filename, const std::string& ext);
@@ -19,6 +18,7 @@ namespace Upscaler {
         }
 
     private:
+        App* Instance;
         std::unordered_map<std::string, AssetData> m_Files;
     };
 } // namespace Upscaler

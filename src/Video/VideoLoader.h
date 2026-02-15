@@ -6,14 +6,19 @@ namespace Upscaler {
     class App;
 
     class VideoLoader {
-    public:
+    private:
         App* Instance;
         std::vector<Video> m_Videos;
 
+    public:
         void LoadVideo(std::string& path);
 
         VideoLoader(App* instance)
             : Instance(instance) {
+        }
+
+        [[nodiscard]] std::vector<Video>& GetVideos() {
+            return m_Videos;
         }
     };
 }

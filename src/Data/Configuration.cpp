@@ -32,4 +32,27 @@ namespace Upscaler {
         file << json.dump(4);
         file.close();
     }
+
+    // Look by names as SelectedEncoder is index of currently available encoders
+    Encoder& Configuration::GetSelectedEncoder() const {
+        for (Encoder& encoder : Instance->GetData().GetEncoders()) {
+            if (encoder.GetName() == Instance->GetData().GetEncodersNames()[m_Encoder]) {
+                return encoder;
+            }
+        }
+
+        throw std::runtime_error("Encoder " + std::string(Instance->GetData().GetEncodersNames()[Instance->GetConfiguration().m_Encoder]) + " does not exist");
+    }
+
+    Resolution& Configuration::GetSelectedResolution() const {
+        return Instance->GetData().GetResolutions()[m_Resolution];
+    }
+
+    Shader& Configuration::GetSelectedShader() const {
+        return Instance->GetData().GetShaders()[m_Shader];
+    }
+
+    std::string& Configuration::GetSelectedOutputFormat() const {
+        return Instance->GetData().GetOutputFormats()[m_OutputFormat];
+    }
 }

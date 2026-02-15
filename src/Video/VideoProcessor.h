@@ -9,19 +9,19 @@ namespace Upscaler {
     class App;
 
     class VideoProcessor {
-    public:
+    private:
         App* Instance;
-        std::thread Worker;
-        std::atomic<bool> CancelRequested;
-
+        std::atomic<bool> m_CancelRequested;
         std::string GetStatusFromLine(std::string& line, const std::string& field);
+        std::string BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat);
+        void StartVideoProcessing(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat);
+
+    public:
         void ValidateFFmpeg();
         void HandleButton();
         void StartBatchProcessing();
-        void StartVideoProcessing(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat);
-        void CancelProcessing();
-        std::string BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat);
         bool IsProcessing();
+        void CancelProcessing();
 
         VideoProcessor(App* instance)
             : Instance(instance) {

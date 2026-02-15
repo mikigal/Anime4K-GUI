@@ -62,7 +62,7 @@ namespace Upscaler {
             return oss.str();
         }
 
-        static std::string AddUpscaledSuffix(std::string& pathStr) {
+        static std::string AddUpscaledSuffix(std::string pathStr) {
             namespace fs = std::filesystem;
 
             fs::path path(pathStr);
@@ -92,17 +92,17 @@ namespace Upscaler {
 
         static std::string FormatStatus(int upscalingStatus) {
             switch (upscalingStatus) {
-                case 0:
+                case STATUS_NOT_STARTED:
                     return "Not started";
-                case 1:
+                case STATUS_WAITING:
                     return "Waiting";
-                case 2:
+                case STATUS_PROCESSING:
                     return "Processing";
-                case 3:
+                case STATUS_FAILED:
                     return "Failed";
-                case 4:
+                case STATUS_FINISHED:
                     return "Finished";
-                case 5:
+                case STATUS_CANCELLED:
                     return "Cancelled";
                 default:
                      return "Unknown";

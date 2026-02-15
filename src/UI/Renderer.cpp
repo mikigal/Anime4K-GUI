@@ -16,7 +16,6 @@
 #define WINDOW_HEIGHT 800
 
 namespace Upscaler {
-    std::string Renderer::Logs;
     std::vector<std::string> Renderer::m_DroppedFiles;
 
     void Renderer::RenderUI() {
@@ -48,30 +47,30 @@ namespace Upscaler {
             ImGui::TableSetupColumn("Action");
             ImGui::TableHeadersRow();
 
-            for (int i = 0; i < Instance->GetVideoLoader().m_Videos.size(); ++i) {
-                Video& video = Instance->GetVideoLoader().m_Videos[i];
+            for (int i = 0; i < Instance->GetVideoLoader().GetVideos().size(); ++i) {
+                Video& video = Instance->GetVideoLoader().GetVideos()[i];
                 ImGui::TableNextRow();
 
                 ImGui::TableNextColumn();
                 RendererUtilities::CenteredText("%d", i + 1);
                 ImGui::TableNextColumn();
-                RendererUtilities::CenteredText("%s", video.Name.c_str());
+                RendererUtilities::CenteredText("%s", video.GetName().c_str());
                 ImGui::TableNextColumn();
-                RendererUtilities::CenteredText("%dx%d", video.Width, video.Height);
+                RendererUtilities::CenteredText("%dx%d", video.GetWidth(), video.GetHeight());
                 ImGui::TableNextColumn();
-                RendererUtilities::CenteredText("%s", Utilities::FormatTime(video.Duration).c_str());
+                RendererUtilities::CenteredText("%s", Utilities::FormatTime(video.GetDuration()).c_str());
                 ImGui::TableNextColumn();
-                RendererUtilities::CenteredText("%s", Utilities::ToMegabytes(video.Size).c_str());
+                RendererUtilities::CenteredText("%s", Utilities::ToMegabytes(video.GetSize()).c_str());
                 ImGui::TableNextColumn();
-                RenderProgress(video.Progress.load());
+                RenderProgress(video.GetProgress());
                 ImGui::TableNextColumn();
-                int eta = video.Eta.load();
+                int eta = video.GetEta();
                 RendererUtilities::CenteredText(eta == -1 ? "-" : Utilities::FormatTime(eta).c_str());
                 ImGui::TableNextColumn();
-                float speed = video.Speed.load();
+                float speed = video.GetSpeed();
                 RendererUtilities::CenteredText(speed == -1.0f ? "-" : "%.2fx", speed);
                 ImGui::TableNextColumn();
-                RendererUtilities::CenteredText("%s", Utilities::FormatStatus(video.Status.load()).c_str());
+                RendererUtilities::CenteredText("%s", Utilities::FormatStatus(video.GetStatus()).c_str());
 
                 ImGui::TableNextColumn();
                 ImGui::PushID(i);
@@ -82,17 +81,17 @@ namespace Upscaler {
                 ImGui::SetCursorPosY(
                     cursorPos.y + (ImGui::GetTextLineHeightWithSpacing() - ImGui::GetFrameHeight()) * 0.5f);
 
-                if (video.Status == STATUS_PROCESSING) {
+                if (video.GetStatus() == STATUS_PROCESSING) {
                     ImGui::BeginDisabled();
                 }
 
                 if (ImGui::Button("Remove")) {
-                    Instance->GetLogger().Info("Removed file {}", video.Name);
-                    Instance->GetVideoLoader().m_Videos.erase(Instance->GetVideoLoader().m_Videos.begin() + i);
+                    Instance->GetLogger().Info("Removed file {}", video.GetName());
+                    Instance->GetVideoLoader().GetVideos().erase(Instance->GetVideoLoader().GetVideos().begin() + i);
                     i--;
                 }
 
-                if (video.Status == STATUS_PROCESSING) {
+                if (video.GetStatus() == STATUS_PROCESSING) {
                     ImGui::EndDisabled();
                 }
 
@@ -111,22 +110,22 @@ namespace Upscaler {
     }
     void Renderer::RenderSettings() {
         ImGui::Begin("Settings");
-        RendererUtilities::ComboWithLabel("Target resolution", nullptr, "##resolution", &Instance->GetConfiguration().Resolution, m_ResolutionsNames);
-        RendererUtilities::ComboWithLabel("Shaders", ShadersTooltip, "##shaders", &Instance->GetConfiguration().Shader, m_ShadersNames);
-        RendererUtilities::ComboWithLabel("Encoder", EncoderTooltip, "##encoders", &Instance->GetConfiguration().Encoder, m_EncodersNames);
+        RendererUtilities::ComboWithLabel("Target resolution", nullptr, "##resolution", &Instance->GetConfiguration().m_Resolution, Instance->GetData().GetResolutionsNames());
+        RendererUtilities::ComboWithLabel("Shaders", ShadersTooltip, "##shaders", &Instance->GetConfiguration().m_Shader, Instance->GetData().GetShadersNames());
+        RendererUtilities::ComboWithLabel("Encoder", EncoderTooltip, "##encoders", &Instance->GetConfiguration().m_Encoder, Instance->GetData().GetEncodersNames());
 
-        Encoder selectedEncoder = GetSelectedEncoder();
-        if (selectedEncoder.CrfSupport) {
-            RendererUtilities::NumberInput("Constant Rate Factor (CRF)", CrfTooltip, "##crf", &Instance->GetConfiguration().Crf, 1, 51);
+        Encoder selectedEncoder = Instance->GetConfiguration().GetSelectedEncoder();
+        if (selectedEncoder.GetCrfSupport()) {
+            RendererUtilities::NumberInput("Constant Rate Factor (CRF)", CrfTooltip, "##crf", &Instance->GetConfiguration().m_Crf, 1, 51);
         }
-        if (selectedEncoder.CqSupport) {
-            RendererUtilities::NumberInput("Constant Quality (CQ)", CqTooltip, "##cq", &Instance->GetConfiguration().Cq, 1, 51);
+        if (selectedEncoder.GetCqSupport()) {
+            RendererUtilities::NumberInput("Constant Quality (CQ)", CqTooltip, "##cq", &Instance->GetConfiguration().m_Cq, 1, 51);
         }
-        if (selectedEncoder.VideoToolboxCqSupport) {
-            RendererUtilities::NumberInput("Constant Quality (CQ)", nullptr, "##cq", &Instance->GetConfiguration().Cq, 1, 100);
+        if (selectedEncoder.GetVideoToolboxCqSupport()) {
+            RendererUtilities::NumberInput("Constant Quality (CQ)", nullptr, "##cq", &Instance->GetConfiguration().m_Cq, 1, 100);
         }
-        if (selectedEncoder.ThreadsLimitSupported) {
-            RendererUtilities::NumberInput("CPU threads", CpuThreadsTooltip, "##cpuThreads", &Instance->GetConfiguration().CpuThreads, 1, std::thread::hardware_concurrency());
+        if (selectedEncoder.GetThreadsLimitSupport()) {
+            RendererUtilities::NumberInput("CPU threads", CpuThreadsTooltip, "##cpuThreads", &Instance->GetConfiguration().m_CpuThreads, 1, std::thread::hardware_concurrency());
         }
 
         // Not implemented yet
@@ -134,19 +133,19 @@ namespace Upscaler {
         //     RendererUtilities::NumberInput("Concurrent jobs", ConcurrentJobsTooltip, "##concurrentJobs", &SelectedConcurrentJobs, 1, 4);
         // }
 
-        RendererUtilities::ComboWithLabel("Output formats", OutputFormatTooltip, "##output_formats", &Instance->GetConfiguration().OutputFormat, m_OutputFormatsNames);
+        RendererUtilities::ComboWithLabel("Output formats", OutputFormatTooltip, "##output_formats", &Instance->GetConfiguration().m_OutputFormat, Instance->GetData().GetOutputFormatsNames());
 
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", DebugModeTooltip);
-        ImGui::Checkbox("Debug mode", &Instance->GetConfiguration().DebugMode);
+        ImGui::Checkbox("Debug mode", &Instance->GetConfiguration().m_DebugMode);
         ImGui::Dummy(ImVec2(0, 10));
 
-        if (CriticalError) {
+        if (Instance->HasCriticalError()) {
             ImGui::BeginDisabled();
         }
         if (ImGui::Button(Instance->GetVideoProcessor().IsProcessing() ? "Cancel" : "Start", ImVec2(300, 30))) {
             Instance->GetVideoProcessor().HandleButton();
         }
-        if (CriticalError) {
+        if (Instance->HasCriticalError()) {
             if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
                 ImGui::SetTooltip("%s", "Can not start upscaling due to critical error. \nCcheck logs for more details");
             }
@@ -157,7 +156,7 @@ namespace Upscaler {
     }
     void Renderer::RenderLogs() {
         ImGui::Begin("Logs");
-        std::string logsDisplayBuffer = Logs + '\0';
+        std::string logsDisplayBuffer = Instance->GetLogger().GetLogs() + '\0';
         ImGui::InputTextMultiline("##logs", logsDisplayBuffer.data(), logsDisplayBuffer.size(),
                                   ImVec2(-FLT_MIN, 220), ImGuiInputTextFlags_ReadOnly);
         ImGui::End();
@@ -198,26 +197,6 @@ namespace Upscaler {
     }
 
     bool Renderer::Init() {
-        for (Shader& shader: Instance->GetData().Shaders) {
-            m_ShadersNames.push_back(shader.Name.c_str());
-        }
-
-        for (Resolution& resolution: Instance->GetData().Resolutions) {
-            m_ResolutionsNames.push_back(resolution.VisibleName.c_str());
-        }
-
-        for (Encoder& encoder: Instance->GetData().Encoders) {
-            if (!encoder.Available) {
-                continue;
-            }
-
-            m_EncodersNames.push_back(encoder.Name.c_str());
-        }
-
-        for (std::string& outputFormat: Instance->GetData().OutputFormats) {
-            m_OutputFormatsNames.push_back(outputFormat.c_str());
-        }
-
         InitializeWindow();
 
         ImGui::CreateContext();
@@ -336,29 +315,6 @@ namespace Upscaler {
                 m_DroppedFiles.push_back(path);
             }
         }
-    }
-
-    // Look by names as SelectedEncoder is index of currently available encoders
-    Encoder& Renderer::GetSelectedEncoder() {
-        for (Encoder& encoder : Instance->GetData().Encoders) {
-            if (encoder.Name == m_EncodersNames[Instance->GetConfiguration().Encoder]) {
-                return encoder;
-            }
-        }
-
-        throw std::runtime_error("Encoder " + std::string(m_EncodersNames[Instance->GetConfiguration().Encoder]) + " does not exist");
-    }
-
-    Resolution& Renderer::GetSelectedResolution() {
-        return Instance->GetData().Resolutions[Instance->GetConfiguration().Resolution];
-    }
-
-    Shader& Renderer::GetSelectedShader() {
-        return Instance->GetData().Shaders[Instance->GetConfiguration().Shader];
-    }
-
-    std::string& Renderer::GetSelectedOutputFormat() {
-        return Instance->GetData().OutputFormats[Instance->GetConfiguration().OutputFormat];
     }
 
     void Renderer::ApplyStyle() {

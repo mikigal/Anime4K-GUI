@@ -6,15 +6,15 @@
 namespace Upscaler {
     void App::Init() {
         m_Configuration.Load();
-        m_Logger.Init(m_Configuration.DebugMode);
-
+        m_Logger.Init(m_Configuration.m_DebugMode);
         GetLogger().Debug("Initialized logger");
 
         m_AssetLoader.Load("assets", "pak");
         m_Data.Load();
 
-        m_VideoProcessor.ValidateFFmpeg();
         m_GpuDetector.AnalyzeAvailableEncoders();
+        m_VideoProcessor.ValidateFFmpeg();
+        m_Data.LoadNames();
 
         Utilities::PreventSleep(m_Logger);
 

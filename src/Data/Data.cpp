@@ -14,18 +14,18 @@ namespace Upscaler {
                 item.at("height"),
                 item.at("aspect_ratio")
             );
-            Resolutions.push_back(resolution);
+            m_Resolutions.push_back(resolution);
         }
-        Instance->GetLogger().Debug("Loaded {} resolutions", Resolutions.size());
+        Instance->GetLogger().Debug("Loaded {} resolutions", m_Resolutions.size());
 
         for (nlohmann::basic_json<>& item: json["shaders"]) {
             Shader shader(
                 item.at("name"),
                 item.at("path")
             );
-            Shaders.push_back(shader);
+            m_Shaders.push_back(shader);
         }
-        Instance->GetLogger().Debug("Loaded {} shaders", Shaders.size());
+        Instance->GetLogger().Debug("Loaded {} shaders", m_Shaders.size());
 
         for (nlohmann::basic_json<>& item: json["encoders"]) {
             Encoder encoder(
@@ -40,13 +40,35 @@ namespace Upscaler {
                 item.at("params").get<std::vector<std::string> >(),
                 item.at("threads_limit_params").get<std::vector<std::string> >()
             );
-            Encoders.push_back(encoder);
+            m_Encoders.push_back(encoder);
         }
-        Instance->GetLogger().Debug("Loaded {} encoders", Encoders.size());
+        Instance->GetLogger().Debug("Loaded {} encoders", m_Encoders.size());
 
-        OutputFormats = json["output_formats"].get<std::vector<std::string> >();
-        Instance->GetLogger().Debug("Loaded {} output formats", OutputFormats.size());
+        m_OutputFormats = json["output_formats"].get<std::vector<std::string> >();
+        Instance->GetLogger().Debug("Loaded {} output formats", m_OutputFormats.size());
 
-        Instance->GetLogger().Debug("Loaded application config");
+        Instance->GetLogger().Debug("Loaded application data");
+    }
+
+    void Data::LoadNames() {
+        for (Shader& shader : Instance->GetData().GetShaders()) {
+            m_ShadersNames.push_back(shader.GetName().c_str());
+        }
+
+        for (Resolution& resolution : Instance->GetData().GetResolutions()) {
+            m_ResolutionsNames.push_back(resolution.GetVisibleName().c_str());
+        }
+
+        for (std::string& outputFormat : Instance->GetData().GetOutputFormats()) {
+            m_OutputFormatsNames.push_back(outputFormat.c_str());
+        }
+
+        for (Encoder& encoder : Instance->GetData().GetEncoders()) {
+            if (!encoder.IsAvailable()) {
+                continue;
+            }
+
+            m_EncodersNames.push_back(encoder.GetName().c_str());
+        }
     }
 }

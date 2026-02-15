@@ -88,29 +88,28 @@ namespace Upscaler {
         Instance->GetLogger().Warn("NVIDIA GPUs on Linux are supported only with nvidia-open drivers. If you encounter any issues make sure you use correct drivers");
 #endif
         Instance->GetLogger().Debug("Available encoders:");
-        for (Encoder& encoder : Instance->GetData().Encoders) {
-            if (encoder.Vendor == "cpu") {
-                encoder.Available = true;
+        for (Encoder& encoder : Instance->GetData().GetEncoders()) {
+            if (encoder.GetVendor() == "cpu") {
+                encoder.SetAvailable(true);
             }
 
-            if (encoder.Vendor == "nvidia" && nvidia && (encoder.Type != "av1" || (encoder.Type == "av1" && av1Supported))) {
-                encoder.Available = true;
+            if (encoder.GetVendor() == "nvidia" && nvidia && (encoder.GetType() != "av1" || (encoder.GetType() == "av1" && av1Supported))) {
+                encoder.SetAvailable(true);
             }
 
-            if (encoder.Vendor == "amd" && amd && (encoder.Type != "av1" || (encoder.Type == "av1" && av1Supported))) {
-                encoder.Available = true;
+            if (encoder.GetVendor() == "amd" && amd && (encoder.GetType() != "av1" || (encoder.GetType() == "av1" && av1Supported))) {
+                encoder.SetAvailable(true);
             }
 
-            if (encoder.Vendor == "apple" && apple) {
-                encoder.Available = true;
+            if (encoder.GetVendor() == "apple" && apple) {
+                encoder.SetAvailable(true);
             }
 
-            if (encoder.Available) {
-                Instance->GetLogger().Debug("  - {}", encoder.Name);
+            if (encoder.IsAvailable()) {
+                Instance->GetLogger().Debug("  - {}", encoder.GetName());
             }
         }
     }
-
 
     std::vector<std::string> GpuDetector::FindGPUs() {
         std::vector<std::string> gpus;

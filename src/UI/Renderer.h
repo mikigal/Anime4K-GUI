@@ -2,7 +2,6 @@
 #define RENDERER_H
 #include "Data/Encoder.h"
 #include "Data/Resolution.h"
-#include "Data/Shader.h"
 
 namespace Upscaler {
     class App;
@@ -43,31 +42,12 @@ namespace Upscaler {
         "Note: Anime4K is compute-heavy. Increasing concurrent jobs beyond 2 may reduce total speed on most cards.";
 
     class Renderer {
-    public:
-        ImFont* m_Font;
+    private:
         App* Instance;
 
-        static std::string Logs;
-
-        bool CriticalError = false;
-
-        bool Init();
-        void Terminate();
-        Resolution& GetSelectedResolution();
-        Encoder& GetSelectedEncoder();
-        Shader& GetSelectedShader();
-        std::string& GetSelectedOutputFormat();
-
-        Renderer(App* instance)
-            : Instance(instance) {
-        }
-
-    private:
+        ImFont* m_Font = nullptr;
         GLFWwindow* m_Window = nullptr;
-        std::vector<const char*> m_ShadersNames;
-        std::vector<const char*> m_ResolutionsNames;
-        std::vector<const char*> m_EncodersNames;
-        std::vector<const char*> m_OutputFormatsNames;
+
 
         static std::vector<std::string> m_DroppedFiles;
 
@@ -80,6 +60,14 @@ namespace Upscaler {
         void InitializeWindow();
         void ApplyStyle();
         static void DropCallback(GLFWwindow*, int, const char**);
+
+    public:
+        bool Init();
+        void Terminate();
+
+        Renderer(App* instance)
+            : Instance(instance) {
+        }
     };
 } // Upscaler
 
