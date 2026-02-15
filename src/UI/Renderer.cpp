@@ -129,9 +129,10 @@ namespace Upscaler {
             RendererUtilities::NumberInput("CPU threads", CpuThreadsTooltip, "##cpuThreads", &SelectedCpuThreads, 1, std::thread::hardware_concurrency());
         }
 
-        if (selectedEncoder.Vendor != "cpu") {
-            RendererUtilities::NumberInput("Concurrent jobs", ConcurrentJobsTooltip, "##concurrentJobs", &SelectedConcurrentJobs, 1, 4);
-        }
+        // Not implemented yet
+        // if (selectedEncoder.Vendor != "cpu") {
+        //     RendererUtilities::NumberInput("Concurrent jobs", ConcurrentJobsTooltip, "##concurrentJobs", &SelectedConcurrentJobs, 1, 4);
+        // }
 
         RendererUtilities::ComboWithLabel("Output formats", OutputFormatTooltip, "##output_formats", &SelectedOutputFormat, m_OutputFormatsNames);
 
