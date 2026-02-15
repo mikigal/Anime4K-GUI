@@ -99,6 +99,6 @@ if (APPLE)
 endif()
 
 if(WIN32)
-    target_link_libraries(${PROJECT_NAME} PRIVATE dwmapi)
+    target_link_libraries(${PROJECT_NAME} PRIVATE dwmapi setupapi)
     target_sources(Anime4K_GUI PRIVATE resources/appicon.rc)
 endif()

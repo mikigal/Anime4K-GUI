@@ -6,9 +6,13 @@
 #include "pch.h"
 #include "Data/Encoder.h"
 #include "Utilities/Logger.h"
+#include "Utilities/Utilities.h"
 
 #if defined(_WIN32)
     #include <windows.h>
+    #include <devguid.h>
+    #include <setupapi.h>
+    #pragma comment(lib, "setupapi.lib")
 #elif defined(__linux__)
     #include <cstdio>
     #include <memory>
@@ -112,20 +116,26 @@ namespace Upscaler {
         std::vector<std::string> gpus;
 
 #if defined(_WIN32)
-        DISPLAY_DEVICE dd;
-        dd.cb = sizeof(dd);
-        int deviceIndex = 0;
 
-        while (EnumDisplayDevices(nullptr, deviceIndex, &dd, 0)) {
-            if (dd.StateFlags & DISPLAY_DEVICE_ACTIVE || dd.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) {
-                std::string model = dd.DeviceString;
-                std::string deviceID = dd.DeviceID;
-                std::string vendor = GetVendorFromDeviceID(deviceID);
-                gpus.push_back(vendor + " " + model);
-            }
-            deviceIndex++;
+        HDEVINFO hDevInfo = SetupDiGetClassDevsW(&GUID_DEVCLASS_DISPLAY,nullptr,nullptr,DIGCF_PRESENT);
+
+        if (hDevInfo == INVALID_HANDLE_VALUE) {
+            Instance->GetLogger().Error("Could not get GPUs list");
+            return gpus;
         }
 
+        SP_DEVINFO_DATA devInfoData;
+        devInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
+
+        for (DWORD i = 0; SetupDiEnumDeviceInfo(hDevInfo, i, &devInfoData); i++) {
+            std::wstring name = GetDevicePropertyString(hDevInfo, devInfoData, SPDRP_DEVICEDESC);
+            std::wstring vendor = GetDevicePropertyString(hDevInfo, devInfoData, SPDRP_MFG);
+
+            std::string nameString = std::string(name.begin(), name.end());
+            gpus.push_back(nameString);
+        }
+
+        SetupDiDestroyDeviceInfoList(hDevInfo);
 #elif defined(__linux__)
         FILE* pipe = popen("lspci", "r");
         if (!pipe) {
@@ -194,4 +204,14 @@ namespace Upscaler {
 
         return "UnknownVendor";
     }
+
+#ifdef _WIN32
+    std::wstring GpuDetector::GetDevicePropertyString(HDEVINFO hDevInfo, SP_DEVINFO_DATA& devInfoData, DWORD property) {
+        wchar_t buffer[1024];
+        DWORD size = 0;
+        return SetupDiGetDeviceRegistryPropertyW(hDevInfo, &devInfoData, property, nullptr, (PBYTE)buffer,
+            sizeof(buffer), &size) ? buffer : L"";
+    }
+#endif
+
 }
