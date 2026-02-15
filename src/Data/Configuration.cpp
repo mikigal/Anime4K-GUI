@@ -9,14 +9,22 @@ namespace Upscaler {
 
     void Configuration::Load() {
         if (!std::filesystem::exists(CONFIG_NAME)) {
-            this->Instance->GetLogger().Debug("No configuration file found, saving default file");
+            Instance->GetLogger().Debug("No configuration file found, saving default file");
             Save();
             return;
         }
 
         std::ifstream file(CONFIG_NAME);
-        nlohmann::json json = nlohmann::json::parse(file);
-        json.get_to(*this);
+
+        try {
+            nlohmann::json json = nlohmann::json::parse(file);
+            json.get_to(*this);
+        } catch (std::exception& e) {
+            Instance->GetLogger().Debug("If the file is corrupted, or new version included new fields, saving default config again");
+            Save();
+            Load();
+        }
+
         file.close();
     }
 
