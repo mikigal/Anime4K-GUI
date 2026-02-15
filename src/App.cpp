@@ -22,6 +22,7 @@ namespace Upscaler {
             return;
         }
 
+        m_VideoProcessor.CancelProcessing();
         m_Renderer.Terminate();
         m_Logger.Shutdown();
     }

@@ -13,7 +13,7 @@
 #endif
 
 #define WINDOW_WIDTH 1600
-#define WINDOW_HEIGHT 740
+#define WINDOW_HEIGHT 800
 
 namespace Upscaler {
     std::string Renderer::Logs;
