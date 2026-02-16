@@ -77,12 +77,6 @@ add_dependencies(${PROJECT_NAME} pack_assets)
 target_precompile_headers(${PROJECT_NAME} PRIVATE src/pch.h)
 target_link_libraries(${PROJECT_NAME} PRIVATE glad glfw imgui freetype spdlog tiny-process-library)
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/shaders"
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders"
-)
-
 if (APPLE)
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework IOKit")
     target_link_libraries(${PROJECT_NAME} PRIVATE "-framework Cocoa")
@@ -98,6 +92,27 @@ if (APPLE)
 
     target_sources(${PROJECT_NAME} PRIVATE ${ASSETS_FILE})
     target_sources(${PROJECT_NAME} PRIVATE ${ICNS_FILE})
+
+    add_custom_command(TARGET Anime4K_GUI POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/ffmpeg/macos"
+            "$<TARGET_BUNDLE_CONTENT_DIR:Anime4K_GUI>/Resources"
+            COMMENT "Copy FFMPEG to .app/Resources directory"
+    )
+
+    add_custom_command(TARGET Anime4K_GUI POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/shaders"
+            "$<TARGET_BUNDLE_CONTENT_DIR:Anime4K_GUI>/Resources/shaders"
+            COMMENT "Copy shaders to Resources directory"
+    )
+
+    add_custom_command(TARGET Anime4K_GUI POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E remove
+            "${CMAKE_BINARY_DIR}/bin/assets.pak"
+            COMMENT "Copy shaders to Resources directory"
+    )
+
 endif()
 
 if(WIN32)
@@ -122,8 +137,15 @@ if(WIN32)
             TARGET Anime4K_GUI
             POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E make_directory ${FFMPEG_DIRECTORY}
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/ffmpeg/ffmpeg.exe ${FFMPEG_DIRECTORY}/ffmpeg.exe
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/ffmpeg/ffprobe.exe ${FFMPEG_DIRECTORY}/ffprobe.exe
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/ffmpeg/windows/ffmpeg.exe ${FFMPEG_DIRECTORY}/ffmpeg.exe
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/ffmpeg/windows/ffprobe.exe ${FFMPEG_DIRECTORY}/ffprobe.exe
             COMMENT "Copy ffmpeg binaries to output directory"
+    )
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/shaders"
+            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders"
+            COMMENT "Copy shaders to output directory"
     )
 endif()

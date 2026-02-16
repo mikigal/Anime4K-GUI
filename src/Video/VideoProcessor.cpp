@@ -242,7 +242,7 @@ namespace Upscaler {
 #elif __linux__
                 Instance->GetLogger().Critical("Please install FFMPEG using your package manager and make sure it's available in $PATH\n");
 #elif __APPLE__
-                Instance->GetLogger().Critical("Please install FFMPEG using brew package manager and make sure it's available in $PATH\n");
+                Instance->GetLogger().Critical("Could not find FFMPEG bundled in .app\n");
 #endif
                 Instance->SetCriticalError(true);
             });

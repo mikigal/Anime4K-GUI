@@ -8,6 +8,10 @@
 #include "WindowsUtilities.h"
 #endif
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 namespace Upscaler {
     class Utilities {
     public:
@@ -109,23 +113,50 @@ namespace Upscaler {
             }
         }
 
+
+#ifdef __APPLE__
+        static std::string GetAppBundlePath() {
+            CFBundleRef mainBundle = CFBundleGetMainBundle();
+            if (!mainBundle)
+                return "";
+
+            CFURLRef bundleURL = CFBundleCopyBundleURL(mainBundle);
+            if (!bundleURL)
+                return "";
+
+            char path[PATH_MAX];
+            if (!CFURLGetFileSystemRepresentation(bundleURL, true, (UInt8*)path, PATH_MAX))
+            {
+                CFRelease(bundleURL);
+            }
+
+            CFRelease(bundleURL);
+            return std::string(path);
+        }
+#endif
+
         static std::string GetFFmpegPath() {
 #ifdef _WIN32
             std::filesystem::path ffmpegPath = std::filesystem::path("ffmpeg") / "ffmpeg.exe";
             return ffmpegPath.string();
+#elifdef  __APPLE__
+            return GetAppBundlePath() + "/Contents/Resources/ffmpeg";
 #else
             // Use ffmpeg from path
             return "ffmpeg";
 #endif
         }
 
+
         static std::string GetFFprobePath() {
 #ifdef _WIN32
             std::filesystem::path ffprobePath = std::filesystem::path("ffmpeg") / "ffprobe.exe";
             return ffprobePath.string();
+#elifdef  __APPLE__
+            return GetAppBundlePath() + "/Contents/Resources/ffprobe";
 #else
             // Use ffprobe from path
-            return "ffprobe";
+            return "ffrpboe";
 #endif
         }
 
