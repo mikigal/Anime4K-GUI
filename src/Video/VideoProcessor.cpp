@@ -71,7 +71,7 @@ namespace Upscaler {
 
             // Print details about file in logs
             if (!line.starts_with("frame=")) {
-                Instance->GetLogger().AppendLogs(line + "\n");
+                Instance->GetLogger().AppendLogs(line);
                 return;
             }
 
