@@ -81,7 +81,7 @@ namespace Upscaler {
                 ImGui::SetCursorPosY(
                     cursorPos.y + (ImGui::GetTextLineHeightWithSpacing() - ImGui::GetFrameHeight()) * 0.5f);
 
-                if (video.GetStatus() == STATUS_PROCESSING) {
+                if (Instance->GetVideoProcessor().IsProcessing()) {
                     ImGui::BeginDisabled();
                 }
 
@@ -91,7 +91,7 @@ namespace Upscaler {
                     i--;
                 }
 
-                if (video.GetStatus() == STATUS_PROCESSING) {
+                if (Instance->GetVideoProcessor().IsProcessing()) {
                     ImGui::EndDisabled();
                 }
 
@@ -110,6 +110,10 @@ namespace Upscaler {
     }
     void Renderer::RenderSettings() {
         ImGui::Begin("Settings");
+        if (Instance->GetVideoProcessor().IsProcessing()) {
+            ImGui::BeginDisabled();
+        }
+
         RendererUtilities::ComboWithLabel("Target resolution", nullptr, "##resolution", &Instance->GetConfiguration().m_Resolution, Instance->GetData().GetResolutionsNames());
         RendererUtilities::ComboWithLabel("Shaders", ShadersTooltip, "##shaders", &Instance->GetConfiguration().m_Shader, Instance->GetData().GetShadersNames());
         RendererUtilities::ComboWithLabel("Encoder", EncoderTooltip, "##encoders", &Instance->GetConfiguration().m_Encoder, Instance->GetData().GetEncodersNames());
@@ -138,6 +142,10 @@ namespace Upscaler {
         ImGui::Checkbox("Debug mode", &Instance->GetConfiguration().m_DebugMode);
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", DebugModeTooltip);
         ImGui::Dummy(ImVec2(0, 10));
+
+        if (Instance->GetVideoProcessor().IsProcessing()) {
+            ImGui::EndDisabled();
+        }
 
         if (Instance->HasCriticalError()) {
             ImGui::BeginDisabled();
