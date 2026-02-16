@@ -115,7 +115,7 @@
       "cq_supported": false,
       "videotoolbox_cq_supported": true,
       "threads_limit_supported": false,
-      "params": ["-q:v {APPLE_CQ}"],
+      "params": ["-q:v {VIDEOTOOLBOX_CQ}"],
       "threads_limit_params": []
     },
 

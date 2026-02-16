@@ -120,7 +120,12 @@ namespace Upscaler {
         command += "-hide_banner "; // Hide FFMPEG's banner
         command += "-y "; // Override output file
         command += std::format("-i \"{}\" ", video.GetPath()); // Path to input video
-        command += "-init_hw_device vulkan "; // Use Vulkan
+
+        // Use Vulkan only on Windows and Linux
+#ifndef __APPLE__
+        command += "-init_hw_device vulkan ";
+#endif
+
         command += std::format("-vf libplacebo=w={}:h={}:upscaler=ewa_lanczos:custom_shader_path={},format={} ", // libplacebo filter setup
             resolution.GetWidth(), resolution.GetHeight(), shader.GetPath(), video.GetPixelFormat());
         command += "-dn "; // Remove data streams
