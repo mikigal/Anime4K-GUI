@@ -33,6 +33,10 @@ namespace Upscaler {
         }
 
         static std::string FormatTime(int totalSeconds) {
+            if (totalSeconds <= 0) {
+                return "00:00";
+            }
+
             int hours = totalSeconds / 3600;
             int minutes = (totalSeconds % 3600) / 60;
             int seconds = totalSeconds % 60;
