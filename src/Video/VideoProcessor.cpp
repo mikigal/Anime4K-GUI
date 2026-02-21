@@ -57,7 +57,7 @@ namespace Upscaler {
     // It's already called in new thread from VideoProcessor::StartBatchProcessing()
     void VideoProcessor::StartVideoProcessing(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
         std::string command = BuildFFmpegCommand(encoder, resolution, shader, video, outputFormat);
-        Instance->GetLogger().Info("Command: {}", command);
+        Instance->GetLogger().Debug("Command: {}", command);
 
         video.SetStatus(STATUS_PROCESSING);
         video.SetProgress(0);
@@ -71,7 +71,7 @@ namespace Upscaler {
 
             // Print details about file in logs
             if (!line.starts_with("frame=")) {
-                Instance->GetLogger().AppendLogs(line);
+                Instance->GetLogger().Debug("FFMPEG logs: {}", line);
                 return;
             }
 

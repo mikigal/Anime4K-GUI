@@ -114,10 +114,6 @@ namespace Upscaler {
         std::string GetLogs() const {
             return m_Logs;
         }
-
-        void AppendLogs(std::string line) {
-            m_Logs += line;
-        }
     };
 } // namespace Upscaler
 
