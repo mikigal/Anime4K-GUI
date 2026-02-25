@@ -130,13 +130,22 @@ namespace Upscaler {
             resolution.GetWidth(), resolution.GetHeight(), shader.GetPath(), video.GetPixelFormat());
         command += "-dn "; // Remove data streams
 
+        if (outputFormat == "MKV") {
+            // Subtitles and attachments streams are supported in MKV, so we can just copy them without re-encoding
+            // Metadata are required for attachments to work properly in MKV, so we need to copy it
+            command += "-c:s copy "; // Don't re-encode subtitles stream
+            command += "-map 0:s? "; // Map all subtitles streams if exists
+            command += "-map 0:t? "; // Map all attachments if exists
+        }
+        else {
+            // Remove metadata, and don't map subtitles and attachments streams, they are not supported in other containers
+            command += "-sn "; // Remove subtitles streams
+            command += "-map_metadata -1 "; // Remove metadata
+        }
 
-        command += outputFormat == "MKV" ? "-c:s copy " : "-sn "; // If output container is MKV copy subtitles steam, otherwise remove it
-        command += "-c:a copy "; // Copy audio stream
+        command += "-c:a copy "; // Don't re-encode audio streams
         command += "-map 0:v? "; // Map all video streams if exists
         command += "-map 0:a? "; // Map all audio streams if exists
-        command += "-map 0:s? "; // Map all subtitlies streams if exists
-        command += "-map_metadata -1 "; // Do not copy metadata
         command += "-map_chapters -1 "; // Do not copy chapter information
         command += std::format("-c:v {} ", encoder.GetValue()); // Set video encoder
 
