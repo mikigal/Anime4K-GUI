@@ -26,7 +26,7 @@ namespace Upscaler {
         "\n\nIf you're not sure what to enter, try 18 (default)";
 
     inline constexpr const char* OutputFormatTooltip =
-        "In most cases you want to pick MKV due to best compatibility";
+        "In most cases you want to pick MKV due to best compatibility\nOnly MKV supports subtitles and attachments streams";
 
     inline constexpr const char* CpuThreadsTooltip =
         "How many of CPU threads FFMPEG will use \nYou may limit it to make your system more responsive wile using CPU based encoder";
