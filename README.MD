@@ -90,7 +90,8 @@ If you want to compile project by yourself you have to download **GPL** FFMPEG b
 Project can be built using MinGW64 UCRT v12 or newer due to Giu requirements
 
 ## Limitations
-HDR videos are supported only with AV1 output codec
+- Videos with subtitles streams are supported only with MKV output format, otherswise subtitles will be removed from output file.
+- HDR videos are supported only with AV1 output codec
 
 ## Special Thanks
 
