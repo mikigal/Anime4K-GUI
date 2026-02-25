@@ -131,7 +131,7 @@ namespace Upscaler {
         command += "-dn "; // Remove data streams
 
 
-        command += outputFormat == "mkv" ? "-c:s copy " : "-sn "; // If output container is MKV copy subtitles steam, otherwise remove it
+        command += outputFormat == "MKV" ? "-c:s copy " : "-sn "; // If output container is MKV copy subtitles steam, otherwise remove it
         command += "-c:a copy "; // Copy audio stream
         command += "-map 0:v? "; // Map all video streams if exists
         command += "-map 0:a? "; // Map all audio streams if exists
