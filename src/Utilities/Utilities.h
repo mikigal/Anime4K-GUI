@@ -117,6 +117,10 @@ namespace Upscaler {
             }
         }
 
+        static bool IsEmpty(std::string str) {
+            return str.empty() || std::all_of(str.begin(), str.end(), [](unsigned char c){ return std::isspace(c); });
+        }
+
 
 #ifdef __APPLE__
         static std::string GetAppBundlePath() {

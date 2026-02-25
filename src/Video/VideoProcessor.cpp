@@ -70,7 +70,7 @@ namespace Upscaler {
             std::string line = std::string(bytes, n);
 
             // Print details about file in logs
-            if (!line.starts_with("frame=")) {
+            if (!line.starts_with("frame=") && !Utilities::IsEmpty(line)) {
                 Instance->GetLogger().Debug("FFMPEG logs: {}", line);
                 return;
             }
