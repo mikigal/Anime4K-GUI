@@ -16,32 +16,35 @@ namespace Upscaler {
         int m_FrameRate;
         int m_TotalFrames;
         bool m_HasSubtitlesStream;
-        std::vector<std::string> m_StreamCodecs;
         std::string m_PixelFormat;
         std::string m_Path;
         std::atomic<int> m_Status;
         std::atomic<float> m_Progress;
         std::atomic<int> m_Eta;
         std::atomic<float> m_Speed;
-        TinyProcessLib::Process* m_UpscalingProcess;
+        TinyProcessLib::Process *m_UpscalingProcess;
 
     public:
         Video(std::string name, int duration, uintmax_t size, int width, int height, int frameRate,
-              int totalFrames, bool hasSubtitlesStream, std::vector<std::string> streamCodecs,
-              std::string pixelFormat, std::string path, int status, float progress, int eta, float speed, TinyProcessLib::Process* upscalingProcess)
+              int totalFrames, bool hasSubtitlesStream, std::string pixelFormat, std::string path,
+              int status, float progress, int eta, float speed, TinyProcessLib::Process *upscalingProcess)
             : m_Name(std::move(name)), m_Duration(duration), m_Size(size), m_Width(width), m_Height(height),
               m_FrameRate(frameRate), m_TotalFrames(totalFrames), m_HasSubtitlesStream(hasSubtitlesStream),
-              m_StreamCodecs(std::move(streamCodecs)), m_PixelFormat(std::move(pixelFormat)),
-              m_Path(std::move(path)), m_Status(status), m_Progress(progress), m_Eta(eta), m_Speed(speed), m_UpscalingProcess(upscalingProcess) {}
+              m_PixelFormat(std::move(pixelFormat)),
+              m_Path(std::move(path)), m_Status(status), m_Progress(progress), m_Eta(eta), m_Speed(speed),
+              m_UpscalingProcess(upscalingProcess) {
+        }
 
-        Video(const Video& other)
-            : m_Name(other.GetName()), m_Duration(other.GetDuration()), m_Size(other.GetSize()), m_Width(other.GetWidth()),
-              m_Height(other.GetHeight()), m_FrameRate(other.GetFrameRate()), m_TotalFrames(other.GetTotalFrames()),
-              m_HasSubtitlesStream(other.HasSubtitlesSteam()), m_StreamCodecs(other.GetStreamCodecs()),
+        Video(const Video &other)
+            : m_Name(other.GetName()), m_Duration(other.GetDuration()), m_Size(other.GetSize()),
+              m_Width(other.GetWidth()), m_Height(other.GetHeight()), m_FrameRate(other.GetFrameRate()),
+              m_TotalFrames(other.GetTotalFrames()), m_HasSubtitlesStream(other.HasSubtitlesSteam()),
               m_PixelFormat(other.GetPixelFormat()), m_Path(other.GetPath()), m_Status(other.GetStatus()),
-              m_Progress(other.GetProgress()), m_Eta(other.GetEta()), m_Speed(other.GetSpeed()), m_UpscalingProcess(other.GetUpscalingProcess()) {}
+              m_Progress(other.GetProgress()), m_Eta(other.GetEta()), m_Speed(other.GetSpeed()),
+              m_UpscalingProcess(other.GetUpscalingProcess()) {
+        }
 
-        Video& operator=(const Video& other) {
+        Video &operator=(const Video &other) {
             if (this != &other) {
                 m_Name = other.GetName();
                 m_Duration = other.GetDuration();
@@ -51,7 +54,6 @@ namespace Upscaler {
                 m_FrameRate = other.GetFrameRate();
                 m_TotalFrames = other.GetTotalFrames();
                 m_HasSubtitlesStream = other.HasSubtitlesSteam();
-                m_StreamCodecs = other.GetStreamCodecs();
                 m_PixelFormat = other.GetPixelFormat();
                 m_Path = other.GetPath();
                 m_Status.store(other.GetStatus());
@@ -63,15 +65,16 @@ namespace Upscaler {
             return *this;
         }
 
-        Video(const Video&& other) noexcept
-            : m_Name(std::move(other.GetName())), m_Duration(other.GetDuration()), m_Size(other.GetSize()), m_Width(other.GetWidth()),
-              m_Height(other.GetHeight()), m_FrameRate(other.GetFrameRate()), m_TotalFrames(other.GetTotalFrames()),
-              m_HasSubtitlesStream(other.HasSubtitlesSteam()), m_StreamCodecs(std::move(other.GetStreamCodecs())),
+        Video(const Video &&other) noexcept
+            : m_Name(std::move(other.GetName())), m_Duration(other.GetDuration()), m_Size(other.GetSize()),
+              m_Width(other.GetWidth()), m_Height(other.GetHeight()), m_FrameRate(other.GetFrameRate()),
+              m_TotalFrames(other.GetTotalFrames()), m_HasSubtitlesStream(other.HasSubtitlesSteam()),
               m_PixelFormat(std::move(other.GetPixelFormat())), m_Path(std::move(other.GetPath())),
               m_Status(other.GetStatus()), m_Progress(other.GetProgress()), m_Eta(other.GetEta()),
-              m_Speed(other.GetSpeed()), m_UpscalingProcess(other.GetUpscalingProcess()) {}
+              m_Speed(other.GetSpeed()), m_UpscalingProcess(other.GetUpscalingProcess()) {
+        }
 
-        Video& operator=(const Video&& other) noexcept {
+        Video &operator=(const Video &&other) noexcept {
             if (this != &other) {
                 m_Name = std::move(other.GetName());
                 m_Duration = other.GetDuration();
@@ -81,7 +84,6 @@ namespace Upscaler {
                 m_FrameRate = other.GetFrameRate();
                 m_TotalFrames = other.GetTotalFrames();
                 m_HasSubtitlesStream = other.HasSubtitlesSteam();
-                m_StreamCodecs = std::move(other.GetStreamCodecs());
                 m_PixelFormat = std::move(other.GetPixelFormat());
                 m_Path = std::move(other.GetPath());
                 m_Status.store(other.GetStatus());
@@ -125,14 +127,6 @@ namespace Upscaler {
             return m_HasSubtitlesStream;
         }
 
-        [[nodiscard]] std::vector<std::string>& GetStreamCodecs() {
-            return m_StreamCodecs;
-        }
-
-        [[nodiscard]] const std::vector<std::string>& GetStreamCodecs() const {
-            return m_StreamCodecs;
-        }
-
         [[nodiscard]] std::string GetPixelFormat() const {
             return m_PixelFormat;
         }
@@ -157,7 +151,7 @@ namespace Upscaler {
             return m_Speed.load();
         }
 
-        [[nodiscard]] TinyProcessLib::Process* GetUpscalingProcess() const {
+        [[nodiscard]] TinyProcessLib::Process *GetUpscalingProcess() const {
             return m_UpscalingProcess;
         }
 
@@ -177,7 +171,7 @@ namespace Upscaler {
             m_Speed.store(speed);
         }
 
-        void SetUpscalingProcess(TinyProcessLib::Process* upscalingProcess) {
+        void SetUpscalingProcess(TinyProcessLib::Process *upscalingProcess) {
             m_UpscalingProcess = upscalingProcess;
         }
     };

@@ -38,33 +38,41 @@ namespace Upscaler {
         int frameRate;
         int totalFrames;
         std::string pixelFormat;
-        std::vector<std::string> streamCodecs;
+        bool hasSubtitlesStream = false;
 
-        nlohmann::json json = nlohmann::json::parse(jsonString);
-        for (nlohmann::basic_json<> stream: json["streams"]) {
-            if (stream["codec_type"] == "video") {
-                height = stream["height"].get<int>();
-                width = stream["width"].get<int>();
-                duration = std::stof(json["format"]["duration"].get<std::string>());
-                pixelFormat = stream["pix_fmt"].get<std::string>();
+        try {
+            nlohmann::json json = nlohmann::json::parse(jsonString);
+            for (nlohmann::basic_json<> stream: json["streams"]) {
+                if (stream["codec_type"] == "subtitle") {
+                    hasSubtitlesStream = true;
+                }
 
-                std::vector<std::string> frameRateSplit = Utilities::Split(stream["avg_frame_rate"].get<std::string>(), "/");
-                float base = std::stof(frameRateSplit[0]);
-                float divider = std::stof(frameRateSplit[1]);
-                frameRate = base / divider;
+                if (stream["codec_type"] == "video") {
+                    height = stream["height"].get<int>();
+                    width = stream["width"].get<int>();
+                    duration = std::stof(json["format"]["duration"].get<std::string>());
+                    pixelFormat = stream["pix_fmt"].get<std::string>();
+
+                    std::vector<std::string> frameRateSplit = Utilities::Split(stream["avg_frame_rate"].get<std::string>(), "/");
+                    float base = std::stof(frameRateSplit[0]);
+                    float divider = std::stof(frameRateSplit[1]);
+                    frameRate = base / divider;
+                }
             }
 
-            streamCodecs.push_back(stream["codec_name"].get<std::string>());
+            totalFrames = frameRate * duration;
+            Video video(filePath.filename().string(), duration, size, width, height, frameRate, totalFrames, hasSubtitlesStream,
+                        pixelFormat, filePath.string(), STATUS_NOT_STARTED, 0, -1, -1, nullptr);
+
+            long endMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+            Instance->GetLogger().Info("Loaded video {} metadata, took {}ms", filePath.string(), endMillis - startMillis);
+
+            m_Videos.push_back(video);
+        } catch (std::exception& e) {
+            Instance->GetLogger().Error("Could not analyze file {} using ffprobe, probably it's corrupted", filePath.filename().string());
+            Instance->GetLogger().Debug("Exception: {}", e.what());
         }
 
-        totalFrames = frameRate * duration;
-        Video video(filePath.filename().string(), duration, size, width, height, frameRate, totalFrames, false,
-                    streamCodecs, pixelFormat, filePath.string(), STATUS_NOT_STARTED, 0, -1, -1, nullptr);
-
-        long endMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        Instance->GetLogger().Info("Loaded video {} metadata, took {}ms", filePath.string(), endMillis - startMillis);
-
-        m_Videos.push_back(video);
     }
 }

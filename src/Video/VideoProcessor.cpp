@@ -56,6 +56,11 @@ namespace Upscaler {
 
     // It's already called in new thread from VideoProcessor::StartBatchProcessing()
     void VideoProcessor::StartVideoProcessing(Video& video) {
+        if (video.HasSubtitlesSteam() && Instance->GetConfiguration().GetSelectedOutputFormat() != "MKV") {
+            Instance->GetLogger().Warn("Video {} has subtitles stream, but selected output format {} does not support it, subtitles will be removed. Consider using MKV to keep subtitles",
+                video.GetName(), Instance->GetConfiguration().GetSelectedOutputFormat());
+        }
+
         std::string command = BuildFFmpegCommand(video);
         Instance->GetLogger().Debug("Command: {}", command);
 
