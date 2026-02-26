@@ -3,7 +3,7 @@
 #include "Hardware/GpuDetector.h"
 #include "Utilities/Utilities.h"
 
-#define VERSION "2.0.1"
+#define VERSION "2.1.0"
 
 namespace Upscaler {
     void App::Init() {

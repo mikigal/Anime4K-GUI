@@ -8,7 +8,9 @@
     { "width": 2880, "height": 2160, "aspect_ratio": "4:3" },
     { "width": 1920, "height": 1440, "aspect_ratio": "4:3" },
     { "width": 1440, "height": 1080, "aspect_ratio": "4:3" },
-    { "width": 1024, "height": 768, "aspect_ratio": "4:3" }
+    { "width": 1024, "height": 768, "aspect_ratio": "4:3" },
+
+    { "width": 0, "height": 0, "aspect_ratio": "" }
   ],
   "shaders": [
     { "name": "Anime4K Mode A", "path": "shaders/Anime4K_ModeA.glsl" },

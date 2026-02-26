@@ -32,7 +32,7 @@ namespace Upscaler {
             }
         }
 
-        std::thread([&videos, &encoder, &resolution, &shader, &outputFormat, this]() {
+        std::thread([&videos, this]() {
             for (int i = 0; i < videos.size(); i++) {
 
                 // User cancelled processing, ffmpeg process was already killed so stop this thread
@@ -48,15 +48,15 @@ namespace Upscaler {
                 Video& video = videos[i];
 
                 Instance->GetLogger().Info("Processing video: {} ({} / {})", video.GetName(), i + 1, videos.size());
-                StartVideoProcessing(encoder, resolution, shader, video, outputFormat);
+                StartVideoProcessing(video);
             }
         }).detach();
 
     }
 
     // It's already called in new thread from VideoProcessor::StartBatchProcessing()
-    void VideoProcessor::StartVideoProcessing(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
-        std::string command = BuildFFmpegCommand(encoder, resolution, shader, video, outputFormat);
+    void VideoProcessor::StartVideoProcessing(Video& video) {
+        std::string command = BuildFFmpegCommand(video);
         Instance->GetLogger().Debug("Command: {}", command);
 
         video.SetStatus(STATUS_PROCESSING);
@@ -115,7 +115,10 @@ namespace Upscaler {
         video.SetSpeed(-1);
     }
 
-    std::string VideoProcessor::BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat) {
+    std::string VideoProcessor::BuildFFmpegCommand(Video& video) {
+        Encoder& encoder = Instance->GetConfiguration().GetSelectedEncoder();
+        std::array<int, 2> resolutionValues = Instance->GetConfiguration().GetSelectedResolutionValues();
+
         std::string command = std::format("{} ", Utilities::GetFFmpegPath()); // FFMPEG exec path
         command += "-hide_banner "; // Hide FFMPEG's banner
         command += "-y "; // Override output file
@@ -126,11 +129,12 @@ namespace Upscaler {
         command += "-init_hw_device vulkan ";
 #endif
 
+
         command += std::format("-vf libplacebo=w={}:h={}:upscaler=ewa_lanczos:custom_shader_path={},format={} ", // libplacebo filter setup
-            resolution.GetWidth(), resolution.GetHeight(), shader.GetPath(), video.GetPixelFormat());
+            resolutionValues[0], resolutionValues[1], Instance->GetConfiguration().GetSelectedShader().GetPath(), video.GetPixelFormat());
         command += "-dn "; // Remove data streams
 
-        if (outputFormat == "MKV") {
+        if (Instance->GetConfiguration().GetSelectedOutputFormat() == "MKV") {
             // Subtitles and attachments streams are supported in MKV, so we can just copy them without re-encoding
             // Metadata are required for attachments to work properly in MKV, so we need to copy it
             command += "-c:s copy "; // Don't re-encode subtitles stream
@@ -165,7 +169,7 @@ namespace Upscaler {
         }
 
         // Add output file path
-        command += std::format("\"{}\"", Utilities::AddUpscaledSuffix(video.GetPath()));
+        command += std::format("\"{}\"", Utilities::AddUpscaledSuffix(video.GetPath(), Instance->GetConfiguration().GetSelectedOutputFormat()));
 
         return command;
     }

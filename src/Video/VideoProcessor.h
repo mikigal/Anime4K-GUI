@@ -13,8 +13,8 @@ namespace Upscaler {
         App* Instance;
         std::atomic<bool> m_CancelRequested;
         std::string GetStatusFromLine(std::string& line, const std::string& field);
-        std::string BuildFFmpegCommand(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat);
-        void StartVideoProcessing(Encoder& encoder, Resolution& resolution, Shader& shader, Video& video, std::string& outputFormat);
+        std::string BuildFFmpegCommand(Video& video);
+        void StartVideoProcessing(Video& vide);
 
     public:
         void ValidateFFmpeg();

@@ -26,6 +26,9 @@ namespace Upscaler {
         int m_ConcurrentJobs = 1;
         bool m_DebugMode = false;
 
+        int m_CustomWidth = 3840;
+        int m_CustomHeight = 2160;
+
         void Load();
         void Save();
 
@@ -34,13 +37,14 @@ namespace Upscaler {
         }
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(Configuration, m_Resolution, m_Shader, m_Encoder, m_Crf, m_Cq, m_CpuThreads, m_OutputFormat,
-            m_ConcurrentJobs, m_DebugMode)
+            m_ConcurrentJobs, m_DebugMode, m_CustomWidth, m_CustomHeight)
 
 
         Resolution& GetSelectedResolution() const;
         Encoder& GetSelectedEncoder() const;
         Shader& GetSelectedShader() const;
         std::string& GetSelectedOutputFormat() const;
+        std::array<int, 2> GetSelectedResolutionValues() const;
     };
 }
 

@@ -115,6 +115,11 @@ namespace Upscaler {
         }
 
         RendererUtilities::ComboWithLabel("Target resolution", nullptr, "##resolution", &Instance->GetConfiguration().m_Resolution, Instance->GetData().GetResolutionsNames());
+
+        if (Instance->GetConfiguration().GetSelectedResolution().IsCustom()) {
+            RenderCustomResolution();
+        }
+
         RendererUtilities::ComboWithLabel("Shaders", ShadersTooltip, "##shaders", &Instance->GetConfiguration().m_Shader, Instance->GetData().GetShadersNames());
         RendererUtilities::ComboWithLabel("Encoder", EncoderTooltip, "##encoders", &Instance->GetConfiguration().m_Encoder, Instance->GetData().GetEncodersNames());
 
@@ -202,6 +207,24 @@ namespace Upscaler {
             ImGui::GetColorU32(ImGuiCol_Text),
             percentText.c_str()
         );
+    }
+
+    void Renderer::RenderCustomResolution() {
+        ImGui::Text("Custom resolution");
+        ImGui::SetNextItemWidth(137);
+        ImGui::InputInt("##custom_width", &Instance->GetConfiguration().m_CustomWidth, 0, 0);
+        ImGui::SameLine();
+        ImGui::Text(" x" );
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(137);
+        ImGui::InputInt("##custom_height", &Instance->GetConfiguration().m_CustomHeight, 0, 0);
+        ImGui::Spacing();
+
+        if (Instance->GetConfiguration().m_CustomWidth < 1) Instance->GetConfiguration().m_CustomWidth = 1;
+        if (Instance->GetConfiguration().m_CustomWidth > 99999) Instance->GetConfiguration().m_CustomWidth = 99999;
+
+        if (Instance->GetConfiguration().m_CustomHeight < 1) Instance->GetConfiguration().m_CustomHeight = 1;
+        if (Instance->GetConfiguration().m_CustomHeight > 99999) Instance->GetConfiguration().m_CustomHeight = 99999;
     }
 
     bool Renderer::Init() {

@@ -63,4 +63,13 @@ namespace Upscaler {
     std::string& Configuration::GetSelectedOutputFormat() const {
         return Instance->GetData().GetOutputFormats()[m_OutputFormat];
     }
+
+    std::array<int, 2> Configuration::GetSelectedResolutionValues() const {
+        Resolution& resolution = GetSelectedResolution();
+        if (resolution.IsCustom()) {
+            return {m_CustomWidth, m_CustomHeight};
+        }
+
+        return {resolution.GetWidth(), resolution.GetHeight()};
+    }
 }

@@ -70,15 +70,16 @@ namespace Upscaler {
             return oss.str();
         }
 
-        static std::string AddUpscaledSuffix(std::string pathStr) {
+        static std::string AddUpscaledSuffix(std::string pathStr, std::string extension) {
             namespace fs = std::filesystem;
 
             fs::path path(pathStr);
             fs::path parent = path.parent_path();
             std::string stem = path.stem().string();
-            std::string ext = path.extension().string();
 
-            fs::path newPath = parent / (stem + "_upscaled" + ext);
+            std::string extensionLower = extension;
+            std::ranges::transform(extensionLower, extensionLower.begin(), ::tolower);
+            fs::path newPath = parent / (stem + "_upscaled." + extensionLower);
             return newPath.string();
         }
 

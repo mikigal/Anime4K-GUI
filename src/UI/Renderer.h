@@ -56,6 +56,7 @@ namespace Upscaler {
         void RenderSettings();
         void RenderLogs();
         void RenderProgress(float);
+        void RenderCustomResolution();
 
         void InitializeWindow();
         void ApplyStyle();
