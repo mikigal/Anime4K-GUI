@@ -87,7 +87,7 @@ namespace Upscaler {
             // Update UI
             try {
                 int frame = std::stoi(frameStr);
-                video.SetProgress(frame / static_cast<float>(video.GetTotalFrames()));
+                video.SetProgress(std::min(1.0f, frame / static_cast<float>(video.GetTotalFrames())));
                 video.SetSpeed(std::stof(Utilities::ReplaceAll(speedStr, "x", "")));
                 video.SetEta(((video.GetTotalFrames() - frame) / video.GetFrameRate()) / video.GetSpeed());
             } catch (const std::exception& e) {
