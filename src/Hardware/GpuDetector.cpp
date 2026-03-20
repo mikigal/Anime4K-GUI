@@ -71,13 +71,18 @@ namespace Upscaler {
 
         // Check for iGPU
         if (nvidia && amd) {
+#ifdef __linux__
             if (!std::filesystem::exists("/usr/bin/prime-run")) {
-                Instance->GetLogger().Debug("Found AMD iGPU, ignoring it");
+                Instance->GetLogger().Debug("Found AMD iGPU without prime offloading, ignoring it");
                 amd = false;
             }
             else {
                 Instance->GetLogger().Debug("Found AMD GPU and prime offloading");
             }
+#else
+            Instance->GetLogger().Debug("Found AMD GPU, ignoring it");
+            amd = false
+#endif
         }
 
         if (nvidia && intel || amd && intel) {
@@ -91,6 +96,10 @@ namespace Upscaler {
 
 #ifdef __linux__
         Instance->GetLogger().Warn("NVIDIA GPUs on Linux are supported only with nvidia-open drivers. If you encounter any issues make sure you use correct drivers");
+
+        if (amd) {
+            Instance->GetLogger().Critical("AMD (VAAPI) support is work in progress and will not work! Use CPU or NVENC based encoders");
+        }
 #endif
         Instance->GetLogger().Debug("Available encoders:");
         for (Encoder& encoder : Instance->GetData().GetEncoders()) {
@@ -102,8 +111,14 @@ namespace Upscaler {
                 encoder.SetAvailable(true);
             }
 
-            if (encoder.GetVendor() == "amd" && amd && (encoder.GetType() != "av1" || (encoder.GetType() == "av1" && av1Supported))) {
-                encoder.SetAvailable(true);
+            if (amd) {
+                if (encoder.GetVendor() == "vaapi" && Utilities::IsLinux()) {
+                    encoder.SetAvailable(true);
+                }
+
+                if (encoder.GetVendor() == "amd" && !Utilities::IsLinux() && encoder.GetType() != "av1" || (encoder.GetType() == "av1" && av1Supported)) {
+                    encoder.SetAvailable(true);
+                }
             }
 
             if (encoder.GetVendor() == "apple" && apple) {

@@ -122,6 +122,14 @@ namespace Upscaler {
             return str.empty() || std::all_of(str.begin(), str.end(), [](unsigned char c){ return std::isspace(c); });
         }
 
+        static bool IsLinux() {
+#ifdef __linux__
+            return true;
+#else
+            return false;
+#endif
+        }
+
 
 #ifdef __APPLE__
         static std::string GetAppBundlePath() {

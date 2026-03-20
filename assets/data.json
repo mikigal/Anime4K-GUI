@@ -60,6 +60,22 @@
       "threads_limit_params": []
     },
     {
+      "name": "H.264 VAAPI (AMD)",
+      "value": "h264_vaapi",
+      "vendor": "vaapi",
+      "type": "h264",
+      "crf_supported": false,
+      "cq_supported": true,
+      "videotoolbox_cq_supported": false,
+      "threads_limit_supported": false,
+      "params": [
+        "-rc_mode CQP",
+        "-qp {CQ}",
+        "-profile:v main"
+      ],
+      "threads_limit_params": []
+    },
+    {
       "name": "H.264 VideoToolbox (Apple)",
       "value": "h264_videotoolbox",
       "vendor": "apple",
@@ -109,6 +125,22 @@
       "threads_limit_params": []
     },
     {
+      "name": "H.265 VAAPI (AMD)",
+      "value": "hevc_vaapi",
+      "vendor": "vaapi",
+      "type": "h265",
+      "crf_supported": false,
+      "cq_supported": true,
+      "videotoolbox_cq_supported": false,
+      "threads_limit_supported": false,
+      "params": [
+        "-rc_mode CQP",
+        "-qp {CQ}",
+        "-profile:v main"
+      ],
+      "threads_limit_params": []
+    },
+    {
       "name": "H.265 VideoToolbox (Apple)",
       "value": "hevc_videotoolbox",
       "vendor": "apple",
@@ -155,6 +187,21 @@
       "videotoolbox_cq_supported": false,
       "threads_limit_supported": false,
       "params": ["-qp_i {CQ}", "-qp_p {CQ}", "-usage transcoding", "-quality quality"],
+      "threads_limit_params": []
+    },
+    {
+      "name": "AV1 VAAPI (AMD)",
+      "value": "av1_vaapi",
+      "vendor": "vaapi",
+      "type": "av1",
+      "crf_supported": false,
+      "cq_supported": true,
+      "videotoolbox_cq_supported": false,
+      "threads_limit_supported": false,
+      "params": [
+        "-rc_mode CQP",
+        "-qp {CQ}"
+      ],
       "threads_limit_params": []
     },
     {
