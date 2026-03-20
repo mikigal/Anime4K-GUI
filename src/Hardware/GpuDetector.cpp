@@ -71,8 +71,13 @@ namespace Upscaler {
 
         // Check for iGPU
         if (nvidia && amd) {
-            Instance->GetLogger().Debug("Found AMD iGPU, ignoring it");
-            //amd = false;
+            if (!std::filesystem::exists("/usr/bin/prime-run")) {
+                Instance->GetLogger().Debug("Found AMD iGPU, ignoring it");
+                amd = false;
+            }
+            else {
+                Instance->GetLogger().Debug("Found AMD GPU and prime offloading");
+            }
         }
 
         if (nvidia && intel || amd && intel) {
