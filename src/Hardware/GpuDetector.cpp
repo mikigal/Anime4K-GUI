@@ -72,7 +72,7 @@ namespace Upscaler {
         // Check for iGPU
         if (nvidia && amd) {
             Instance->GetLogger().Debug("Found AMD iGPU, ignoring it");
-            amd = false;
+            //amd = false;
         }
 
         if (nvidia && intel || amd && intel) {
@@ -153,7 +153,7 @@ namespace Upscaler {
 
             int secondColon = line.find(':', line.find(':') + 1);
             if (secondColon == std::string::npos) {
-                Instance->GetLogger().Warn("weird lspci entry {}", line)
+                Instance->GetLogger().Warn("weird lspci entry {}", line);
             }
 
             std::string description = line.substr(secondColon + 1);

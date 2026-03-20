@@ -165,7 +165,7 @@ namespace Upscaler {
             return GetAppBundlePath() + "/Contents/Resources/ffprobe";
 #else
             // Use ffprobe from path
-            return "ffrpboe";
+            return "ffprobe";
 #endif
         }
 
