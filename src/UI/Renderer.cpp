@@ -35,8 +35,8 @@ namespace Upscaler {
 
         if (ImGui::BeginTable("VideoTable##Persistent", 10, ImGuiTableFlags_BordersOuter | ImGuiTableFlags_RowBg |
                                                            ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable)) {
-            ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 40.0f);
-            ImGui::TableSetupColumn("Title", ImGuiTableColumnFlags_WidthFixed, 350.0f);
+            ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 40.0f * m_Scale);
+            ImGui::TableSetupColumn("Title", ImGuiTableColumnFlags_WidthFixed, 350.0f * m_Scale);
             ImGui::TableSetupColumn("Resolution");
             ImGui::TableSetupColumn("Length");
             ImGui::TableSetupColumn("Size");
@@ -75,7 +75,7 @@ namespace Upscaler {
                 ImGui::TableNextColumn();
                 ImGui::PushID(i);
 
-                float btnWidth = ImGui::CalcTextSize("Remove").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+                float btnWidth = ImGui::CalcTextSize("Remove").x + ImGui::GetStyle().FramePadding.x * 2.0f * m_Scale;
                 ImVec2 cursorPos = ImGui::GetCursorPos();
                 ImGui::SetCursorPosX(cursorPos.x + (ImGui::GetColumnWidth() - btnWidth) * 0.5f);
                 ImGui::SetCursorPosY(
@@ -114,39 +114,39 @@ namespace Upscaler {
             ImGui::BeginDisabled();
         }
 
-        RendererUtilities::ComboWithLabel("Target resolution", nullptr, "##resolution", &Instance->GetConfiguration().m_Resolution, Instance->GetData().GetResolutionsNames());
+        RendererUtilities::ComboWithLabel("Target resolution", nullptr, "##resolution", &Instance->GetConfiguration().m_Resolution, Instance->GetData().GetResolutionsNames(), m_Scale);
 
         if (Instance->GetConfiguration().GetSelectedResolution().IsCustom()) {
             RenderCustomResolution();
         }
 
-        RendererUtilities::ComboWithLabel("Shaders", ShadersTooltip, "##shaders", &Instance->GetConfiguration().m_Shader, Instance->GetData().GetShadersNames());
-        RendererUtilities::ComboWithLabel("Encoder", EncoderTooltip, "##encoders", &Instance->GetConfiguration().m_Encoder, Instance->GetData().GetEncodersNames());
+        RendererUtilities::ComboWithLabel("Shaders", ShadersTooltip, "##shaders", &Instance->GetConfiguration().m_Shader, Instance->GetData().GetShadersNames(), m_Scale);
+        RendererUtilities::ComboWithLabel("Encoder", EncoderTooltip, "##encoders", &Instance->GetConfiguration().m_Encoder, Instance->GetData().GetEncodersNames(), m_Scale);
 
         Encoder selectedEncoder = Instance->GetConfiguration().GetSelectedEncoder();
         if (selectedEncoder.GetCrfSupport()) {
-            RendererUtilities::NumberInput("Constant Rate Factor (CRF)", CrfTooltip, "##crf", &Instance->GetConfiguration().m_Crf, 1, 51);
+            RendererUtilities::NumberInput("Constant Rate Factor (CRF)", CrfTooltip, "##crf", &Instance->GetConfiguration().m_Crf, 1, 51, m_Scale);
         }
         if (selectedEncoder.GetCqSupport()) {
-            RendererUtilities::NumberInput("Constant Quality (CQ)", CqTooltip, "##cq", &Instance->GetConfiguration().m_Cq, 1, 51);
+            RendererUtilities::NumberInput("Constant Quality (CQ)", CqTooltip, "##cq", &Instance->GetConfiguration().m_Cq, 1, 51, m_Scale);
         }
         if (selectedEncoder.GetVideoToolboxCqSupport()) {
-            RendererUtilities::NumberInput("Constant Quality (CQ)", nullptr, "##cq", &Instance->GetConfiguration().m_Cq, 1, 100);
+            RendererUtilities::NumberInput("Constant Quality (CQ)", nullptr, "##cq", &Instance->GetConfiguration().m_Cq, 1, 100, m_Scale);
         }
         if (selectedEncoder.GetThreadsLimitSupport()) {
-            RendererUtilities::NumberInput("CPU threads", CpuThreadsTooltip, "##cpuThreads", &Instance->GetConfiguration().m_CpuThreads, 1, std::thread::hardware_concurrency());
+            RendererUtilities::NumberInput("CPU threads", CpuThreadsTooltip, "##cpuThreads", &Instance->GetConfiguration().m_CpuThreads, 1, std::thread::hardware_concurrency(), m_Scale);
         }
 
         // Not implemented yet
         // if (selectedEncoder.Vendor != "cpu") {
-        //     RendererUtilities::NumberInput("Concurrent jobs", ConcurrentJobsTooltip, "##concurrentJobs", &SelectedConcurrentJobs, 1, 4);
+        //     RendererUtilities::NumberInput("Concurrent jobs", ConcurrentJobsTooltip, "##concurrentJobs", &SelectedConcurrentJobs, 1, 4, m_Scale);
         // }
 
-        RendererUtilities::ComboWithLabel("Output formats", OutputFormatTooltip, "##output_formats", &Instance->GetConfiguration().m_OutputFormat, Instance->GetData().GetOutputFormatsNames());
+        RendererUtilities::ComboWithLabel("Output formats", OutputFormatTooltip, "##output_formats", &Instance->GetConfiguration().m_OutputFormat, Instance->GetData().GetOutputFormatsNames(), m_Scale);
 
         ImGui::Checkbox("Debug mode", &Instance->GetConfiguration().m_DebugMode);
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", DebugModeTooltip);
-        ImGui::Dummy(ImVec2(0, 10));
+        ImGui::Dummy(ImVec2(0, 10 * m_Scale));
 
         if (Instance->GetVideoProcessor().IsProcessing()) {
             ImGui::EndDisabled();
@@ -155,7 +155,7 @@ namespace Upscaler {
         if (Instance->HasCriticalError()) {
             ImGui::BeginDisabled();
         }
-        if (ImGui::Button(Instance->GetVideoProcessor().IsProcessing() ? "Cancel" : "Start", ImVec2(300, 30))) {
+        if (ImGui::Button(Instance->GetVideoProcessor().IsProcessing() ? "Cancel" : "Start", ImVec2(300 * m_Scale, 30 * m_Scale))) {
             Instance->GetVideoProcessor().HandleButton();
         }
         if (Instance->HasCriticalError()) {
@@ -171,18 +171,18 @@ namespace Upscaler {
         ImGui::Begin("Logs");
         std::string logsDisplayBuffer = Instance->GetLogger().GetLogs() + '\0';
         ImGui::InputTextMultiline("##logs", logsDisplayBuffer.data(), logsDisplayBuffer.size(),
-                                  ImVec2(-FLT_MIN, 220), ImGuiInputTextFlags_ReadOnly);
+                                  ImVec2(-FLT_MIN, 220.0f * m_Scale), ImGuiInputTextFlags_ReadOnly);
         ImGui::End();
     }
     void Renderer::RenderProgress(float progress) {
         float cellWidth = ImGui::GetContentRegionAvail().x;
-        float height = 18.0f;
+        float height = 18.0f * m_Scale;
 
         ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(35, 35, 50, 255));
         ImGui::PushStyleColor(ImGuiCol_PlotHistogram, IM_COL32(120, 100, 255, 255));
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 3.0f);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (3.0f * m_Scale));
         ImGui::ProgressBar(progress, ImVec2(cellWidth, height), "");
 
         ImGui::PopStyleVar();
@@ -211,12 +211,12 @@ namespace Upscaler {
 
     void Renderer::RenderCustomResolution() {
         ImGui::Text("Custom resolution");
-        ImGui::SetNextItemWidth(137);
+        ImGui::SetNextItemWidth(137.0f * m_Scale);
         ImGui::InputInt("##custom_width", &Instance->GetConfiguration().m_CustomWidth, 0, 0);
         ImGui::SameLine();
         ImGui::Text(" x" );
         ImGui::SameLine();
-        ImGui::SetNextItemWidth(137);
+        ImGui::SetNextItemWidth(137.0f * m_Scale);
         ImGui::InputInt("##custom_height", &Instance->GetConfiguration().m_CustomHeight, 0, 0);
         ImGui::Spacing();
 
@@ -297,6 +297,10 @@ namespace Upscaler {
     }
 
     void Renderer::InitializeWindow() {
+#ifdef _WIN32
+        SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+#endif
+
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -304,8 +308,24 @@ namespace Upscaler {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-        GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Anime4K-GUI",
-                                              nullptr, nullptr);
+        int width;
+        int height;
+#ifdef _WIN32
+        float xScale;
+        float yScale;
+
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        glfwGetMonitorContentScale(monitor, &xScale, &yScale);
+
+        width = (int)(WINDOW_WIDTH * xScale);
+        height = (int)(WINDOW_HEIGHT * yScale);
+        m_Scale = xScale;
+#else
+        width = WINDOW_WIDTH;
+        heigh; = WINDOW_HEIGHT;
+        m_Scale = 1.0f;
+#endif
+        GLFWwindow* window = glfwCreateWindow(width, height, "Anime4K-GUI", nullptr, nullptr);
         glfwSetDropCallback(window, DropCallback);
 
         if (window == nullptr) {
@@ -357,7 +377,7 @@ namespace Upscaler {
         config.PixelSnapH = true;
 
         AssetLoader::AssetData font = Instance->GetAssetLoader().GetFileData("OpenSans.ttf");
-        m_Font = io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), 18, &config, nullptr);
+        m_Font = io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), 18.0f * m_Scale, &config, nullptr);
         io.FontDefault = m_Font;
         io.Fonts->Build();
 
@@ -426,5 +446,10 @@ namespace Upscaler {
         style.ItemSpacing = ImVec2(8, 6);
         style.PopupBorderSize = 0.f;
         style.CellPadding = ImVec2(10, 4);
+        style.ScaleAllSizes(m_Scale);
+    }
+
+    float Renderer::GetScale() {
+        return m_Scale;
     }
 } // Upscaler

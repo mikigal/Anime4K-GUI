@@ -16,18 +16,18 @@ namespace Upscaler {
         }
 
         static void ComboWithLabel(const char* label, const char* tooltip, const char* id, int* current,
-                                      const std::vector<const char*>& items) {
+                                      const std::vector<const char*>& items, float scale) {
             ImGui::Text("%s", label);
             if (ImGui::IsItemHovered() && tooltip != nullptr) ImGui::SetTooltip("%s", tooltip);
-            ImGui::SetNextItemWidth(300);
+            ImGui::SetNextItemWidth(300.0f * scale);
             ImGui::Combo(id, current, items.data(), items.size());
             if (ImGui::IsItemHovered() && tooltip != nullptr) ImGui::SetTooltip("%s", tooltip);
             ImGui::Spacing();
         }
 
-        static void NumberInput(const char* label, const char* tooltip, const char* id, int* current, int min, int max) {
+        static void NumberInput(const char* label, const char* tooltip, const char* id, int* current, int min, int max, float scale) {
             ImGui::Text("%s", label);
-            ImGui::SetNextItemWidth(300);
+            ImGui::SetNextItemWidth(300.0f * scale);
             ImGui::InputInt(id, current);
             if (ImGui::IsItemHovered() && tooltip != nullptr) ImGui::SetTooltip("%s", tooltip);
             ImGui::Spacing();

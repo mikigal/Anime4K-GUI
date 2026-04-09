@@ -81,7 +81,7 @@ namespace Upscaler {
             }
 #else
             Instance->GetLogger().Debug("Found AMD GPU, ignoring it");
-            amd = false
+            amd = false;
 #endif
         }
 

@@ -47,7 +47,7 @@ namespace Upscaler {
 
         ImFont* m_Font = nullptr;
         GLFWwindow* m_Window = nullptr;
-
+        float m_Scale = 1.0f;
 
         static std::vector<std::string> m_DroppedFiles;
 
@@ -65,6 +65,7 @@ namespace Upscaler {
     public:
         bool Init();
         void Terminate();
+        float GetScale();
 
         Renderer(App* instance)
             : Instance(instance) {
