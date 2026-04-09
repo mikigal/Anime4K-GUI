@@ -322,7 +322,7 @@ namespace Upscaler {
         m_Scale = xScale;
 #else
         width = WINDOW_WIDTH;
-        heigh = WINDOW_HEIGHT;
+        height = WINDOW_HEIGHT;
         m_Scale = 1.0f;
 #endif
         GLFWwindow* window = glfwCreateWindow(width, height, "Anime4K-GUI", nullptr, nullptr);
