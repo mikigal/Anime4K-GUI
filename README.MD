@@ -82,17 +82,50 @@ To get more detailed logs enable `Debug Mode` in settings and restart applicatio
 Firstly try using CPU-based encoding. For some reason GPU acceleration may not work correctly with your graphics card. Due to limited access to hardware, most tests were done with NVIDIA graphics cards; compatibility with other GPUs may be worse. If you have compatibility problems with your GPU, please create an issue with application logs and your computer's specifications. <br>
 Issues regarding low output quality will be **instantly** closed. Problems like that are related to the original Anime4K shaders - I can recommend trying other shaders mode settings. <br>
 
-## Building and FFMPEG Distribution
-
-Due to GitHub maximum file limit I can not provide FFMPEG's binaries in this repository.
-
-If you want to compile project by yourself you have to download **GPL** FFMPEG build [here](https://github.com/BtbN/FFmpeg-Builds) and put `ffmpeg.exe` and `ffprobe.exe` into `resources/ffmpeg` directory.
-Project can be built using MinGW64 UCRT v12 or newer due to Giu requirements
-
 ## Limitations
 - Videos with subtitles streams are supported only with MKV output format, otherwise subtitles will be removed from output file.
 - HDR videos are supported only with AV1 output codec
 - Linux support is work in progress - for now works only with CPU and NVENC codecs. AMD (VAAPI) is not supported yet.
+
+## Building and FFmpeg Distribution
+
+### FFmpeg distribution
+Due to GitHub file size limits, FFmpeg binaries cannot be included in this repository.
+
+- **Windows**  
+  Download a **GPL** FFmpeg build from:  https://github.com/BtbN/FFmpeg-Builds  
+
+  Then place the following files in: `resources/ffmpeg/windows`
+  Required files:
+  - `ffmpeg.exe`
+  - `ffprobe.exe`
+
+- **Linux**  
+  Install FFmpeg using your distribution’s package manager. Before using it, ensure that the build includes `libplacebo`.
+
+- **macOS**  
+  Prebuilt FFmpeg binaries are provided in this repository. Homebrew packages are not used because they do not include `libplacebo`.
+
+### Build Requirements
+
+The following tools are required to build the project:
+
+- **CMake** (version 3.20 or newer)
+- **Python** (required for generating assets pack)
+- **C++ compiler**:
+  - Linux: `gcc`
+  - macOS: `clang` (via Xcode Command Line Tools)
+  - Windows: MSVC
+
+### Building the project
+
+Configure and build:
+
+```bash
+mkdir build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
 
 ## Special Thanks
 
