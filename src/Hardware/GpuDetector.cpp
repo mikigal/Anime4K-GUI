@@ -34,7 +34,8 @@ namespace Upscaler {
         bool amd = false;
         bool intel = false;
         bool apple = false;
-        bool av1Supported = false;
+        bool nvidiaAv1Supported = false;
+        bool amdAv1Supported = false;
         for (int i = 0; i < gpus.size(); i++) {
             std::string& gpu = gpus[i];
             Instance->GetLogger().Info("  {}. {} {}", i + 1, gpu, (i == gpus.size() - 1 ? "\n" : ""));
@@ -51,13 +52,13 @@ namespace Upscaler {
             if (gpu.find("amd") != std::string::npos) {
                 amd = true;
                 // Only RX 7000 and RX 9000 support AV1 encoding
-                av1Supported = gpu.find("rx 7") != std::string::npos || gpu.find("rx 9") != std::string::npos;
+                amdAv1Supported = gpu.find("rx 7") != std::string::npos || gpu.find("rx 9") != std::string::npos;
             }
 
             if (gpu.find("nvidia") != std::string::npos) {
                 nvidia = true;
                 // Only RTX 4000 and RTX 5000 support AV1 encoding
-                av1Supported = gpu.find("rtx 40") != std::string::npos || gpu.find("rtx 50") != std::string::npos;
+                nvidiaAv1Supported = gpu.find("rtx 40") != std::string::npos || gpu.find("rtx 50") != std::string::npos;
             }
 
             if (gpu.find("intel") != std::string::npos) {
@@ -107,7 +108,7 @@ namespace Upscaler {
                 encoder.SetAvailable(true);
             }
 
-            if (encoder.GetVendor() == "nvidia" && nvidia && (encoder.GetType() != "av1" || (encoder.GetType() == "av1" && av1Supported))) {
+            if (encoder.GetVendor() == "nvidia" && nvidia && (encoder.GetType() != "av1" || (encoder.GetType() == "av1" && nvidiaAv1Supported))) {
                 encoder.SetAvailable(true);
             }
 
@@ -116,7 +117,7 @@ namespace Upscaler {
                     encoder.SetAvailable(true);
                 }
 
-                if (encoder.GetVendor() == "amd" && !Utilities::IsLinux() && encoder.GetType() != "av1" || (encoder.GetType() == "av1" && av1Supported)) {
+                if (encoder.GetVendor() == "amd" && !Utilities::IsLinux() && encoder.GetType() != "av1" || (encoder.GetType() == "av1" && amdAv1Supported)) {
                     encoder.SetAvailable(true);
                 }
             }

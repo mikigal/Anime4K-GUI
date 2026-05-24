@@ -1,5 +1,5 @@
 ﻿ffmpeg/windows/*.exe
-
+build/
 .venv
 
 ### C++ ###
