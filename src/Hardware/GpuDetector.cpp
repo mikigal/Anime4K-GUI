@@ -36,8 +36,13 @@ namespace Upscaler {
         bool apple = false;
         bool nvidiaAv1Supported = false;
         bool amdAv1Supported = false;
+        // Original-cased names, kept separately from the lowercased detection strings below,
+        // so we can later tell FFmpeg's Vulkan device selector exactly which discrete GPU to use.
+        std::string nvidiaGpuName;
+        std::string amdGpuName;
         for (int i = 0; i < gpus.size(); i++) {
             std::string& gpu = gpus[i];
+            std::string originalCaseName = gpu;
             Instance->GetLogger().Info("  {}. {} {}", i + 1, gpu, (i == gpus.size() - 1 ? "\n" : ""));
             std::ranges::transform(gpu, gpu.begin(),
                                    [](const unsigned char c) { return std::tolower(c); });
@@ -51,12 +56,14 @@ namespace Upscaler {
 
             if (gpu.find("amd") != std::string::npos) {
                 amd = true;
+                amdGpuName = originalCaseName;
                 // Only RX 7000 and RX 9000 support AV1 encoding
                 amdAv1Supported = gpu.find("rx 7") != std::string::npos || gpu.find("rx 9") != std::string::npos;
             }
 
             if (gpu.find("nvidia") != std::string::npos) {
                 nvidia = true;
+                nvidiaGpuName = originalCaseName;
                 // Only RTX 4000 and RTX 5000 support AV1 encoding
                 nvidiaAv1Supported = gpu.find("rtx 40") != std::string::npos || gpu.find("rtx 50") != std::string::npos;
             }
@@ -93,6 +100,22 @@ namespace Upscaler {
 
         if (intel) {
             Instance->GetLogger().Warn("Found Intel dGPU which is not supported. Only CPU based encoders will be available");
+        }
+
+        // Vulkan-based shader upscaling (libplacebo) is initialized without pinning a
+        // specific GPU (see VideoProcessor::BuildFFmpegCommand), so on hybrid-GPU laptops
+        // the Vulkan loader may otherwise pick a weak integrated GPU first. Remember which
+        // discrete GPU we settled on above so that command can explicitly request it.
+        if (nvidia) {
+            m_PreferredVulkanDeviceName = nvidiaGpuName;
+        } else if (amd) {
+            m_PreferredVulkanDeviceName = amdGpuName;
+        } else {
+            m_PreferredVulkanDeviceName.clear();
+        }
+
+        if (!m_PreferredVulkanDeviceName.empty()) {
+            Instance->GetLogger().Debug("Preferred Vulkan device for shader upscaling: {}", m_PreferredVulkanDeviceName);
         }
 
 #ifdef __linux__
