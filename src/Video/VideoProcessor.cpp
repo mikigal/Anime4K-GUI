@@ -131,7 +131,18 @@ namespace Upscaler {
 
         // Use Vulkan only on Windows and Linux
 #ifndef __APPLE__
-        command += "-init_hw_device vulkan ";
+        // On hybrid-GPU laptops (e.g. Intel iGPU + NVIDIA/AMD dGPU), Vulkan's default
+        // device enumeration order is not guaranteed to prefer the discrete GPU, which
+        // can silently push the whole shader pass onto a much weaker integrated GPU
+        // while only NVENC/AMF encoding correctly uses the discrete one.
+        // If GpuDetector found a discrete GPU, pin Vulkan to it by name so this can't happen.
+        const std::string& preferredGpu = Instance->GetGpuDetector().GetPreferredVulkanDeviceName();
+        if (!preferredGpu.empty()) {
+            command += std::format("-init_hw_device \"vulkan=vk:{}\" ", preferredGpu);
+        }
+        else {
+            command += "-init_hw_device vulkan ";
+        }
 #endif
 
 
